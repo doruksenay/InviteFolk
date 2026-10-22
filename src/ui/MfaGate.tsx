@@ -55,7 +55,7 @@ export function MfaGate() {
       for (const f of data.all.filter((x) => x.factor_type === 'totp' && x.status !== 'verified')) {
         await supabase.auth.mfa.unenroll({ factorId: f.id });
       }
-      const res = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: `Davet ${new Date().toISOString().slice(0, 10)}` });
+      const res = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: `Invitefolk ${new Date().toISOString().slice(0, 10)}` });
       if (res.error) throw res.error;
       if (alive) setState({ kind: 'enroll', factorId: res.data.id, svg: svgFromDataUri(res.data.totp.qr_code), secret: res.data.totp.secret });
     })().catch((e: unknown) => {

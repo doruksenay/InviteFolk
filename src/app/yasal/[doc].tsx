@@ -130,7 +130,7 @@ export default function LegalPage() {
           )}
 
           <View style={{ height: 1, backgroundColor: color.hairline }} />
-          <Text style={{ fontFamily: font.regular, fontSize: 13, color: color.faint }}>© {year} Davet</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: color.faint }}>© {year} Invitefolk</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

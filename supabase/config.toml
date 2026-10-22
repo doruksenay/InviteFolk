@@ -1,6 +1,6 @@
 # Supabase CLI yapılandırması (yerel geliştirme için).
 # project_id: supabase link --project-ref <ref> ile bağlandığında kullanılır.
-project_id = "davet"
+project_id = "invitefolk"
 
 [api]
 port = 54321

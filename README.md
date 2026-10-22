@@ -1,6 +1,8 @@
-# Davet
+# Invitefolk
 
-Davet; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, halı saha maçı ve benzeri her tür etkinlik için davetiye ve katılım (LCV) uygulamasıdır. iOS, Android ve web tek kod tabanından çalışır; arayüz Türkçe ve İngilizce'dir.
+> Events feel better together. — Plan. Invite. Celebrate.
+
+Invitefolk; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, halı saha maçı ve benzeri her tür etkinlik için davetiye ve katılım (LCV) uygulamasıdır. iOS, Android ve web tek kod tabanından çalışır; arayüz Türkçe ve İngilizce'dir.
 
 ## Neler var
 
@@ -117,7 +119,14 @@ npx eas-cli@latest build -p android --profile production
 npx eas-cli@latest submit -p android
 ```
 
-`eas.json` profilleri hazır; `submit` bölümündeki Apple/Google kimliklerini doldurun. Paket kimliği `com.davet.app`.
+`eas.json` profilleri hazır; `submit` bölümündeki Apple/Google kimliklerini doldurun. Paket kimliği `com.invitefolk.app`.
+
+## Marka
+
+- Ad: **Invitefolk**. Slogan: "Events feel better together." / "Plan. Invite. Celebrate."
+- Renkler: Deep Violet `#6C5CE7`, Coral `#FF6B6B`, Golden Yellow `#FBBF24`, Mint Green `#22C55E`, Soft Off-White `#FFF9F4` (`src/ui/tokens.ts`). Mercan, sarı ve yeşil üstünde beyaz yazı okunmadığı için yazı taşıyan zeminlerde koyu tonlar kullanılır.
+- Kaynak görseller `assets/brand/` içinde (logo, uygulama ikonu, koyu tanıtım görseli, marka kimliği). Uygulama ikonları `assets/images/` içinde bunlardan üretildi.
+- Kimlikler: paket `com.invitefolk.app`, bağlantı şeması `invitefolk://`, mağaza ürünleri `invitefolk_temel`, `invitefolk_otomatik`, `invitefolk_tam`. Alan adı örnekleri `invitefolk.app` olarak yazıldı; aldığınız alan adıyla değiştirin.
 
 ## Klasör yapısı
 
@@ -176,7 +185,7 @@ public/pdfjs/                  PDF'ten görsel üretimi (yalnızca web)
 
 - Yasal metinlerdeki `[Şirket Unvanı]`, `[Adres]`, `[KEP]`, `[e-posta]` alanlarını doldurup bir avukata kontrol ettirin.
 - Meta'da `davet_lcv` ve `davet_masa` şablonlarını TR ve EN onaylatın.
-- App Store Connect / Play Console'da `davet_temel`, `davet_otomatik`, `davet_tam` ürünlerini, RevenueCat'te webhook'u, iyzico'da üye işyerini kurun.
+- App Store Connect / Play Console'da `invitefolk_temel`, `invitefolk_otomatik`, `invitefolk_tam` ürünlerini, RevenueCat'te webhook'u, iyzico'da üye işyerini kurun.
 - Gerçek telefonlarda test: oturma planında sürükleme, bildirimler, satın alma (sandbox), PDF/görsel yükleme.
 
 Halı saha "kim ödedi" alanı yalnızca takip içindir; uygulama başkası adına para toplamaz.

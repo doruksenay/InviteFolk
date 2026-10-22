@@ -31,13 +31,13 @@ export type { EventTypeCopy };
 export const EVENT_TYPES: Record<EventTypeKey, EventTypeConfig> = {
   dugun: {
     key: 'dugun', icon: 'rings',
-    accent: '#E8664F', tint: '#FFF5F2', iconBg: '#FFE4DD', glow: 'rgba(232,102,79,0.16)', suggestedTheme: 'adacayi',
+    accent: '#FF6B6B', tint: '#FFF5F2', iconBg: '#FFE4DD', glow: 'rgba(255,107,107,0.16)', suggestedTheme: 'adacayi',
     questions: { partySize: true, menu: true, roster: false },
     tools: { seating: true, recurring: false, payments: false, companyFields: false },
   },
   nisan: {
     key: 'nisan', icon: 'ring',
-    accent: '#7E66DE', tint: '#F7F4FF', iconBg: '#EAE4FF', glow: 'rgba(126,102,222,0.16)', suggestedTheme: 'lavanta',
+    accent: '#6C5CE7', tint: '#F7F4FF', iconBg: '#EAE4FF', glow: 'rgba(108,92,231,0.16)', suggestedTheme: 'lavanta',
     questions: { partySize: true, menu: false, roster: false },
     tools: { seating: true, recurring: false, payments: false, companyFields: false },
   },

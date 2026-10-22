@@ -7,9 +7,9 @@
 import { adminClient, readBody, UUID } from '../_shared/supabase.ts';
 
 const PRODUCT_TO_PACKAGE: Record<string, 'temel' | 'otomatik' | 'tam'> = {
-  davet_temel: 'temel',
-  davet_otomatik: 'otomatik',
-  davet_tam: 'tam',
+  invitefolk_temel: 'temel',
+  invitefolk_otomatik: 'otomatik',
+  invitefolk_tam: 'tam',
 };
 const STORE: Record<string, 'app_store' | 'google_play'> = { APP_STORE: 'app_store', PLAY_STORE: 'google_play' };
 

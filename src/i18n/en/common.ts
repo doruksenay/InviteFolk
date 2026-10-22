@@ -1,7 +1,7 @@
 import type { common as TR } from '../tr/common';
 
 export const common: typeof TR = {
-  appName: 'Davet',
+  appName: 'Invitefolk',
   back: 'Back',
   cancel: 'Cancel',
   close: 'Close',

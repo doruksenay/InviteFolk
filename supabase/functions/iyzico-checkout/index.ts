@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
       country: address.country,
     },
     billingAddress: address,
-    basketItems: [{ id: `davet_${pkg}`, name: `Davet ${pkg} (1 yıl)`, category1: 'Dijital hizmet', itemType: 'VIRTUAL', price: p }],
+    basketItems: [{ id: `invitefolk_${pkg}`, name: `Invitefolk ${pkg} (1 yıl)`, category1: 'Dijital hizmet', itemType: 'VIRTUAL', price: p }],
   });
 
   if (init.status !== 'success' || !init.token || !init.paymentPageUrl?.startsWith('https://')) {

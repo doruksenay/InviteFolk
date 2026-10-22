@@ -6,7 +6,7 @@
   "build": {
     "base": {
       "env": {
-        "EXPO_PUBLIC_WEB_URL": "https://davet.app"
+        "EXPO_PUBLIC_WEB_URL": "https://invitefolk.app"
       }
     },
     "development": {

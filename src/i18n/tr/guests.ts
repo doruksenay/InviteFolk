@@ -68,7 +68,7 @@ export const guests = {
     titleAccent: 'rehberinden',
     subtitle: 'Seçtiğin kişiler yalnızca bu listeye eklenir; rehberinin geri kalanı hiçbir yere gönderilmez.',
     webOnly: 'Telefon rehberi yalnızca mobil uygulamada kullanılabilir.',
-    denied: 'Rehber izni verilmedi. Ayarlar’dan Davet için Kişiler iznini açabilirsin.',
+    denied: 'Rehber izni verilmedi. Ayarlar’dan Invitefolk için Kişiler iznini açabilirsin.',
     loading: 'Kişiler yükleniyor…',
     search: 'İsimle ara',
     noPhone: 'Telefon yok',

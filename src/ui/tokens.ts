@@ -1,30 +1,33 @@
-// Tasarım tokenları: "Yeni etkinlik" ekranında onaylanan dil.
+// Tasarım tokenları: "Yeni etkinlik" ekranında onaylanan dil, Invitefolk renkleriyle.
 // Sıcak kırık beyaz zemin, sert kenarlık yok, yumuşak gölge, tek sans + ölçülü serif.
 
+// Invitefolk marka paleti (assets/brand/invitefolk-brand-identity.png):
+// Deep Violet #6C5CE7 · Coral #FF6B6B · Golden Yellow #FBBF24 · Mint Green #22C55E · Soft Off-White #FFF9F4
+// Yazı taşıyan zeminlerde *Ink tonları kullanılır (beyaz yazı mercan/sarı/yeşil üstünde okunmaz).
 export const color = {
-  bg: '#FAF7F2',
+  bg: '#FFF9F4',
   surface: '#FFFFFF',
-  surfaceSoft: '#F6F2EB',
-  ink: '#24212B',
-  inkSoft: '#3E3B45',
+  surfaceSoft: '#F8F1EA',
+  ink: '#1F1B2E',
+  inkSoft: '#3A3548',
   muted: '#6E6A72',
   faint: '#9A968F',
   hairline: 'rgba(40,30,20,0.07)',
-  ring: 'rgba(36,33,43,0.18)',
+  ring: 'rgba(31,27,46,0.18)',
   onInk: '#FFFFFF',
 
-  lavender: '#7E66DE',
-  lavenderInk: '#5B47C2',
-  lavenderTint: '#EFEAFB',
-  coral: '#E8664F',
-  coralInk: '#A3332A',
-  coralTint: '#FFE9E4',
-  sage: '#5E8F73',
-  sageInk: '#2F5A43',
-  sageTint: '#E6F0EA',
-  gold: '#C99327',
-  goldInk: '#6B4A00',
-  goldTint: '#FFF4D6',
+  lavender: '#6C5CE7',
+  lavenderInk: '#4A3BC2',
+  lavenderTint: '#EEEBFD',
+  coral: '#FF6B6B',
+  coralInk: '#B42F2F',
+  coralTint: '#FFE8E6',
+  sage: '#22C55E',
+  sageInk: '#166534',
+  sageTint: '#E3F8EA',
+  gold: '#FBBF24',
+  goldInk: '#7A5000',
+  goldTint: '#FFF6DB',
 } as const;
 
 /** Durum renkleri. Etiketler sözlükte: t(`status.rsvp.${key}`). */

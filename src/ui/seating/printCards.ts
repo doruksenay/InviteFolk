@@ -68,14 +68,14 @@ export function buildCardsHtml(tables: CardTable[], tents: boolean, s: CardStrin
 <style>
   @page { size: A4; margin: 10mm; }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #24212B; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1F1B2E; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
   .card { height: 133mm; border: 0.4mm solid #E7E1D8; border-radius: 6mm; padding: 9mm 8mm; display: flex; flex-direction: column; align-items: center; text-align: center; break-inside: avoid; page-break-inside: avoid; background: #FFFDF9; }
   .event { font-size: 8.5pt; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8590; }
-  .kicker { margin-top: 7mm; font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 15pt; color: #7E66DE; }
+  .kicker { margin-top: 7mm; font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 15pt; color: #6C5CE7; }
   .big { font-family: Georgia, 'Times New Roman', serif; font-size: 64pt; line-height: 1; margin-top: 1mm; }
   .big.long { font-size: 30pt; line-height: 1.15; }
-  .rule { width: 16mm; height: 0.5mm; background: #E8664F; margin: 6mm 0 5mm; border-radius: 1mm; }
+  .rule { width: 16mm; height: 0.5mm; background: #FF6B6B; margin: 6mm 0 5mm; border-radius: 1mm; }
   ul { list-style: none; margin: 0; padding: 0; font-size: 10.5pt; line-height: 1.55; flex: 1; overflow: hidden; }
   li .n { color: #8A8590; font-size: 9pt; }
   li.empty { color: #A9A49D; font-style: italic; }

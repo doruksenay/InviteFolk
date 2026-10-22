@@ -118,7 +118,7 @@ export const wizard: typeof TR = {
     deadline: 'Please reply by {date}',
   },
   wa: {
-    assistant: 'Davet Assistant',
+    assistant: 'Invitefolk Assistant',
     verified: 'Verified business',
     business: 'Business account',
     location: 'Location',

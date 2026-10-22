@@ -165,7 +165,8 @@ export function StatusBadge({ status }: { status: keyof typeof statusTokens }) {
   );
 }
 
-const AVATAR_COLORS = [color.lavender, color.coral, color.sage, color.gold, '#5B47C2', '#C9573A'];
+// Beyaz harf okunabilsin diye marka renklerinin koyu tonları.
+const AVATAR_COLORS = [color.lavender, '#E0524F', '#16A34A', '#D97706', color.lavenderInk, '#C2410C'];
 
 export function Avatar({ text, index = 0, size = 40 }: { text: string; index?: number; size?: number }) {
   return (

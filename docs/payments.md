@@ -4,9 +4,9 @@ Paketler tek seferlik ödemeyle **1 yıl** geçerlidir; otomatik yenileme yoktur
 
 | Paket | Fiyat (TRY) | Ürün kimliği (mağaza) |
 |---|---|---|
-| Temel | 500 | `davet_temel` |
-| Otomatik | 750 | `davet_otomatik` |
-| Tam | 1.000 | `davet_tam` |
+| Temel | 500 | `invitefolk_temel` |
+| Otomatik | 750 | `invitefolk_otomatik` |
+| Tam | 1.000 | `invitefolk_tam` |
 
 Web fiyatları `public.plan_prices` tablosundan gelir (istemci fiyat gönderemez). Mağaza fiyatları App Store Connect ve Play Console'da ayrıca ayarlanır; uygulama mağazanın gösterdiği yerel fiyatı kullanır.
 
@@ -32,8 +32,8 @@ Web fiyatları `public.plan_prices` tablosundan gelir (istemci fiyat gönderemez
    IYZICO_API_KEY=sandbox-...
    IYZICO_SECRET_KEY=sandbox-...
    IYZICO_BASE_URL=https://sandbox-api.iyzipay.com     # canlıda https://api.iyzipay.com
-   APP_WEB_URL=https://davet.app                       # ödeme sonrası dönülecek web adresi
-   ALLOWED_ORIGINS=https://davet.app
+   APP_WEB_URL=https://invitefolk.app                       # ödeme sonrası dönülecek web adresi
+   ALLOWED_ORIGINS=https://invitefolk.app
    ```
 4. Akış:
    - Kullanıcı `/paketler` sayfasında paket seçer → `iyzico-checkout` paketi doğrular, fiyatı tablodan alır, `checkout_sessions` kaydı açar ve iyzico Checkout Form'u başlatır. Kullanıcı iyzico'nun güvenli ödeme sayfasına gider.
@@ -50,7 +50,7 @@ Web fiyatları `public.plan_prices` tablosundan gelir (istemci fiyat gönderemez
 
 ## 2. iOS ve Android: RevenueCat
 
-1. **App Store Connect** → uygulama → *Uygulama İçi Satın Almalar* → üç **Tüketilebilir (Consumable)** ürün: `davet_temel`, `davet_otomatik`, `davet_tam`. Fiyat katmanlarını 500/750/1000 ₺'ye en yakın seçin; ekran görüntüsü ve açıklama ekleyin.
+1. **App Store Connect** → uygulama → *Uygulama İçi Satın Almalar* → üç **Tüketilebilir (Consumable)** ürün: `invitefolk_temel`, `invitefolk_otomatik`, `invitefolk_tam`. Fiyat katmanlarını 500/750/1000 ₺'ye en yakın seçin; ekran görüntüsü ve açıklama ekleyin.
    - Neden tüketilebilir? Paket bir yıl sonra yeniden satın alınabilmeli; kalıcı (non-consumable) ürün ikinci kez satın alınamaz.
 2. **Play Console** → *Ürünler → Uygulama içi ürünler* → aynı üç ürün kimliği.
 3. **RevenueCat** (<https://app.revenuecat.com>):

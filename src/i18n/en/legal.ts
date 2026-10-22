@@ -16,7 +16,7 @@ export const legal: typeof TR = {
     gizlilik: {
       title: 'Privacy Policy',
       intro:
-        'Davet ("we") is a service that helps event organisers send invitations and lets guests reply. This policy explains what data we process and why, who we share it with, and your rights. Details under Turkish data protection law are in the KVKK Notice.',
+        'Invitefolk ("we") is a service that helps event organisers send invitations and lets guests reply. This policy explains what data we process and why, who we share it with, and your rights. Details under Turkish data protection law are in the KVKK Notice.',
       sections: [
         {
           id: 'roller',
@@ -94,13 +94,13 @@ export const legal: typeof TR = {
     },
     kosullar: {
       title: 'Terms of Use',
-      intro: 'By using Davet you agree to these terms. Please read them carefully.',
+      intro: 'By using Invitefolk you agree to these terms. Please read them carefully.',
       sections: [
         {
           id: 'hizmet',
           title: '1. The service',
           body: [
-            'Davet provides tools to create events, design invitations, send them via WhatsApp, email and links, collect replies and plan seating.',
+            'Invitefolk provides tools to create events, design invitations, send them via WhatsApp, email and links, collect replies and plan seating.',
             'We may change features to improve the service. We take reasonable care but do not guarantee uninterrupted or error-free operation.',
           ],
         },
@@ -163,14 +163,14 @@ export const legal: typeof TR = {
     },
     kvkk: {
       title: 'KVKK Privacy Notice',
-      intro: 'Under Article 10 of Turkey’s Personal Data Protection Law No. 6698 ("KVKK"), [Company Name] ("Davet") explains how we process your personal data.',
+      intro: 'Under Article 10 of Turkey’s Personal Data Protection Law No. 6698 ("KVKK"), [Company Name] ("Invitefolk") explains how we process your personal data.',
       sections: [
         {
           id: 'sorumlu',
           title: '1. Data controller and processor',
           body: [
             'Data controller for organiser account data: [Company Name], [Address], [Registered e-mail (KEP)], [email].',
-            'For guest data, the data controller is the organiser who sent the invitation. Davet processes that data as a data processor, on the organiser’s behalf and instructions.',
+            'For guest data, the data controller is the organiser who sent the invitation. Invitefolk processes that data as a data processor, on the organiser’s behalf and instructions.',
           ],
         },
         {

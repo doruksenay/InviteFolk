@@ -1,4 +1,4 @@
--- Davet: ilk şema
+-- Invitefolk: ilk şema
 -- Roller: 'user' (organizatör) ve 'admin' (platform yöneticisi).
 -- Davetliler giriş yapmaz; LCV sayfası kişiye özel token ile güvenlik tanımlı fonksiyonlar üzerinden çalışır.
 

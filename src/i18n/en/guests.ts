@@ -70,7 +70,7 @@ export const guests: typeof TR = {
     titleAccent: 'contacts',
     subtitle: 'Only the people you pick are added to this list; the rest of your contacts never leave your phone.',
     webOnly: 'Phone contacts are only available in the mobile app.',
-    denied: 'Contacts access wasn’t granted. You can turn it on for Davet in Settings.',
+    denied: 'Contacts access wasn’t granted. You can turn it on for Invitefolk in Settings.',
     loading: 'Loading contacts…',
     search: 'Search by name',
     noPhone: 'No phone',

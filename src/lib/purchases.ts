@@ -1,6 +1,6 @@
 // Uygulama içi satın alma (iOS / Android) — RevenueCat.
 // Ürünler App Store Connect ve Play Console'da tüketilebilir (consumable) tek seferlik ürün olarak tanımlanır:
-//   davet_temel, davet_otomatik, davet_tam
+//   invitefolk_temel, invitefolk_otomatik, invitefolk_tam
 // Paketi uygulama değil, RevenueCat'in sunucu bildirimi (revenuecat-webhook) verir; uygulama yalnızca satın almayı başlatır.
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
@@ -8,7 +8,7 @@ import Purchases, { PRODUCT_CATEGORY, type PurchasesStoreProduct } from 'react-n
 
 import type { PaidPlan } from './api-billing';
 
-export const PRODUCT_IDS: Record<PaidPlan, string> = { temel: 'davet_temel', otomatik: 'davet_otomatik', tam: 'davet_tam' };
+export const PRODUCT_IDS: Record<PaidPlan, string> = { temel: 'invitefolk_temel', otomatik: 'invitefolk_otomatik', tam: 'invitefolk_tam' };
 
 const API_KEY = Platform.OS === 'ios' ? process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY : process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY;
 

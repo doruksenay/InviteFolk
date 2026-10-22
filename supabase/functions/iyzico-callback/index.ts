@@ -2,7 +2,7 @@
 // Bu adrese gelen veriye güvenilmez: ödeme sonucu token ile iyzico'dan SUNUCU TARAFINDA sorgulanır,
 // tutar ve sepet kimliği ödeme oturumuyla karşılaştırılır, ancak ondan sonra paket verilir.
 // Aynı ödeme iki kez işlenmez (grant_purchase provider_ref = paymentId ile idempotent).
-// Ortam: IYZICO_API_KEY, IYZICO_SECRET_KEY, IYZICO_BASE_URL, APP_WEB_URL (ör. https://davet.app)
+// Ortam: IYZICO_API_KEY, IYZICO_SECRET_KEY, IYZICO_BASE_URL, APP_WEB_URL (ör. https://invitefolk.app)
 
 import { adminClient, readBody } from '../_shared/supabase.ts';
 import { CF_DETAIL, iyzicoPost } from '../iyzico-checkout/iyzico.ts';
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     p_amount: Number(session.amount_try),
     p_provider: 'iyzico',
     p_ref: String(result.paymentId),
-    p_product: `davet_${session.package}`,
+    p_product: `invitefolk_${session.package}`,
   });
   if (error) {
     // Ödeme alındı ama paket verilemedi: oturum "pending" kalır, yeniden denenebilir; kayıt sunucu günlüğünde.

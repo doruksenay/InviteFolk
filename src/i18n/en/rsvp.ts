@@ -53,5 +53,5 @@ export const rsvp: typeof TR = {
   openMap: 'Open in Maps',
   calendarNote: 'Your invitation: {link}',
   footerPrivacy: 'Your personal data',
-  footerMade: 'Made with Davet',
+  footerMade: 'Made with Invitefolk',
 };

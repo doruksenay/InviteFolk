@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-// İzin verilen web kökenleri (virgülle): ör. "https://davet.app,https://www.davet.app".
+// İzin verilen web kökenleri (virgülle): ör. "https://invitefolk.app,https://www.invitefolk.app".
 // Native uygulama Origin başlığı göndermez; tarayıcıdan gelen bilinmeyen kökenlere CORS izni verilmez.
 const ALLOWED = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
   .split(',')

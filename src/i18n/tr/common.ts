@@ -1,5 +1,5 @@
 export const common = {
-  appName: 'Davet',
+  appName: 'Invitefolk',
   back: 'Geri',
   cancel: 'Vazgeç',
   close: 'Kapat',

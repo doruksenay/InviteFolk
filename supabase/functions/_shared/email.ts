@@ -1,5 +1,5 @@
-// Davet e-postaları (Resend HTTP API) ve şablonları.
-// Ortam: RESEND_API_KEY, EMAIL_FROM ("Davet <davet@alanadi.com>"), EMAIL_REPLY_TO (isteğe bağlı), APP_WEB_URL
+// Invitefolk e-postaları (Resend HTTP API) ve şablonları.
+// Ortam: RESEND_API_KEY, EMAIL_FROM ("Invitefolk <hello@invitefolk.app>"), EMAIL_REPLY_TO (isteğe bağlı), APP_WEB_URL
 //
 // Güvenlik: e-postaya giren HER değer escapeHtml'den geçer (etkinlik başlığı, davetli adı, mekân, organizatör adı).
 // Link yalnızca APP_WEB_URL + doğrulanmış 32 haneli davet anahtarından oluşur.
@@ -47,7 +47,7 @@ const COPY = {
     table: 'Masanız',
     deadline: 'Lütfen {date} tarihine kadar cevap verin.',
     fallbackLink: 'Düğme çalışmazsa bu adresi tarayıcınıza yapıştırın:',
-    footer: 'Bu e-postayı {host} adına Davet gönderdi. Kişisel verileriniz yalnızca bu davet için, davet sahibi adına işlenir.',
+    footer: 'Bu e-postayı {host} adına Invitefolk gönderdi. Kişisel verileriniz yalnızca bu davet için, davet sahibi adına işlenir.',
     privacy: 'Aydınlatma metni',
     hostFallback: 'Davet sahibi',
   },
@@ -66,7 +66,7 @@ const COPY = {
     table: 'Your table',
     deadline: 'Please reply by {date}.',
     fallbackLink: "If the button doesn't work, paste this address into your browser:",
-    footer: 'This email was sent by Davet on behalf of {host}. Your personal data is processed only for this invitation, on behalf of the host.',
+    footer: 'This email was sent by Invitefolk on behalf of {host}. Your personal data is processed only for this invitation, on behalf of the host.',
     privacy: 'Privacy notice',
     hostFallback: 'Your host',
   },

@@ -51,5 +51,5 @@ export const rsvp = {
   openMap: 'Haritada aç',
   calendarNote: 'Davetiyeniz: {link}',
   footerPrivacy: 'Kişisel verileriniz',
-  footerMade: 'Davet ile oluşturuldu',
+  footerMade: 'Invitefolk ile oluşturuldu',
 };

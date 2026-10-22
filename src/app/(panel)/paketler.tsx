@@ -179,7 +179,7 @@ export default function PlansScreen() {
           {isCurrent ? (
             <Pill label={t('billing.yourPlan')} bg={dark ? 'rgba(255,255,255,0.16)' : color.lavenderTint} fg={dark ? '#FFFFFF' : color.lavenderInk} />
           ) : dark ? (
-            <Pill label={t('billing.popular')} bg={color.coral} fg="#FFFFFF" />
+            <Pill label={t('billing.popular')} bg={color.coralInk} fg="#FFFFFF" />
           ) : null}
         </View>
 

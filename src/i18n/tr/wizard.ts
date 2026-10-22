@@ -116,7 +116,7 @@ export const wizard = {
     deadline: 'Cevap için son gün: {date}',
   },
   wa: {
-    assistant: 'Davet Asistanı',
+    assistant: 'Invitefolk Asistanı',
     verified: 'Doğrulanmış işletme',
     business: 'İşletme hesabı',
     location: 'Konum',

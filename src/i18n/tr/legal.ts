@@ -18,7 +18,7 @@ export const legal = {
     gizlilik: {
       title: 'Gizlilik Politikası',
       intro:
-        'Davet ("biz"), etkinlik düzenleyenlerin (organizatör) davetiye göndermesine ve davetlilerin cevap vermesine yarayan bir hizmettir. Bu politika hangi verileri neden işlediğimizi, kimlerle paylaştığımızı ve haklarını açıklar. Kişisel verilerin korunmasına ilişkin ayrıntılı bilgi KVKK Aydınlatma Metni\'nde yer alır.',
+        'Invitefolk ("biz"), etkinlik düzenleyenlerin (organizatör) davetiye göndermesine ve davetlilerin cevap vermesine yarayan bir hizmettir. Bu politika hangi verileri neden işlediğimizi, kimlerle paylaştığımızı ve haklarını açıklar. Kişisel verilerin korunmasına ilişkin ayrıntılı bilgi KVKK Aydınlatma Metni\'nde yer alır.',
       sections: [
         {
           id: 'roller',
@@ -99,13 +99,13 @@ export const legal = {
     } as LegalDoc,
     kosullar: {
       title: 'Kullanım Koşulları',
-      intro: 'Davet\'i kullanarak bu koşulları kabul etmiş olursun. Lütfen dikkatlice oku.',
+      intro: 'Invitefolk\'u kullanarak bu koşulları kabul etmiş olursun. Lütfen dikkatlice oku.',
       sections: [
         {
           id: 'hizmet',
           title: '1. Hizmet',
           body: [
-            'Davet; etkinlik oluşturma, davetiye hazırlama, WhatsApp, e-posta ve bağlantı ile davet gönderme, katılım cevaplarını toplama ve oturma planı hazırlama araçları sunar.',
+            'Invitefolk; etkinlik oluşturma, davetiye hazırlama, WhatsApp, e-posta ve bağlantı ile davet gönderme, katılım cevaplarını toplama ve oturma planı hazırlama araçları sunar.',
             'Hizmeti geliştirmek için özellikleri değiştirebiliriz. Kesintisiz ve hatasız çalışma garantisi vermeyiz; makul özeni gösteririz.',
           ],
         },
@@ -169,14 +169,14 @@ export const legal = {
     kvkk: {
       title: 'KVKK Aydınlatma Metni',
       intro:
-        '6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") md. 10 uyarınca, [Şirket Unvanı] ("Davet") olarak kişisel verilerinizi nasıl işlediğimizi açıklarız.',
+        '6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") md. 10 uyarınca, [Şirket Unvanı] ("Invitefolk") olarak kişisel verilerinizi nasıl işlediğimizi açıklarız.',
       sections: [
         {
           id: 'sorumlu',
           title: '1. Veri sorumlusu ve veri işleyen',
           body: [
             'Organizatör hesap verileri bakımından veri sorumlusu: [Şirket Unvanı], [Adres], [KEP adresi], [e-posta].',
-            'Davetli verileri bakımından veri sorumlusu, davetiyeyi gönderen organizatördür. Davet bu verileri organizatör adına ve talimatı doğrultusunda veri işleyen sıfatıyla işler.',
+            'Davetli verileri bakımından veri sorumlusu, davetiyeyi gönderen organizatördür. Invitefolk bu verileri organizatör adına ve talimatı doğrultusunda veri işleyen sıfatıyla işler.',
           ],
         },
         {

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, View } from 'react-native';
 
 import { useI18n } from '@/i18n';
 import { supabase } from '@/lib/supabase';
+import logoFull from '../../assets/images/logo-full.png';
 import { Body, Button, Caption, Display, DisplayItalic, Field, Notice, Surface } from '@/ui/primitives';
 import { RichText } from '@/ui/RichText';
 import { Screen } from '@/ui/Screen';
@@ -47,6 +48,7 @@ export default function SignIn() {
   return (
     <Screen maxWidth={520} contentStyle={{ flexGrow: 1, justifyContent: 'center', paddingVertical: 40 }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ gap: 28 }}>
+        <Image source={logoFull} accessibilityLabel="Invitefolk" resizeMode="contain" style={{ width: 200, height: 164, alignSelf: 'flex-start', marginBottom: -6 }} />
         <View style={{ gap: 10 }}>
           <Display size={52}>
             {t('auth.headline')}

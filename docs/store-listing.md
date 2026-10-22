@@ -6,14 +6,14 @@ Karakter sınırları App Store'a göre verilmiştir (Google Play kısa açıkla
 
 | Alan | Türkçe | English |
 |---|---|---|
-| Uygulama adı (30) | Davet: Davetiye ve LCV | Davet: Invitations & RSVP |
+| Uygulama adı (30) | Invitefolk: Davetiye ve LCV | Invitefolk: Invitations & RSVP |
 | Alt başlık (30) | WhatsApp ile davet, oturma planı | WhatsApp invites, seating plans |
 | Google Play kısa açıklama (80) | Davetiyeni hazırla, WhatsApp'tan gönder, cevapları ve oturma planını tek yerden yönet. | Design your invitation, send it on WhatsApp, track replies and plan seating in one place. |
 | Kategori | Yaşam Tarzı (ikincil: Verimlilik) | Lifestyle (secondary: Productivity) |
 | Yaş derecelendirmesi | 4+ / Herkes | 4+ / Everyone |
-| Bundle / Paket kimliği | `com.davet.app` | |
-| Destek URL'si | https://davet.app/yasal/kosullar (iletişim bölümü) | |
-| Gizlilik politikası URL'si | https://davet.app/yasal/gizlilik | |
+| Bundle / Paket kimliği | `com.invitefolk.app` | |
+| Destek URL'si | https://invitefolk.app/yasal/kosullar (iletişim bölümü) | |
+| Gizlilik politikası URL'si | https://invitefolk.app/yasal/gizlilik | |
 
 ## Tanıtım metni (170)
 
@@ -25,7 +25,7 @@ Karakter sınırları App Store'a göre verilmiştir (Google Play kısa açıkla
 
 ### Türkçe
 
-Davet; düğün, nişan, kına, doğum günü, yemek daveti, kurumsal etkinlik ve halı saha maçı gibi her tür buluşma için davetiye ve katılım (LCV) uygulamasıdır.
+Invitefolk; düğün, nişan, kına, doğum günü, yemek daveti, kurumsal etkinlik ve halı saha maçı gibi her tür buluşma için davetiye ve katılım (LCV) uygulamasıdır.
 
 **Davetiyeni hazırla**
 - Etkinlik türüne göre hazırlanan şık temalar ya da kendi tasarımını yükleme
@@ -57,7 +57,7 @@ Davetlilerinin bilgileri yalnızca sana görünür. Şifre yok: e-postana gelen 
 
 ### English
 
-Davet is an invitation and RSVP app for every kind of gathering: weddings, engagements, henna nights, birthdays, dinner parties, corporate events and weekly football.
+Invitefolk is an invitation and RSVP app for every kind of gathering: weddings, engagements, henna nights, birthdays, dinner parties, corporate events and weekly football.
 
 **Design your invitation**
 - Elegant themes for each event type, or upload your own design
@@ -96,9 +96,9 @@ Start free. Bigger events have one-time plans, no subscription.
 
 | Ürün kimliği | Ad | Açıklama |
 |---|---|---|
-| `davet_temel` | Temel paket (1 yıl) | 10 etkinlik, etkinlik başına 150 davetli, otomatik WhatsApp ve hatırlatma |
-| `davet_otomatik` | Otomatik paket (1 yıl) | 10 etkinlik, etkinlik başına 400 davetli, günde 800 WhatsApp mesajı |
-| `davet_tam` | Tam paket (1 yıl) | 20 etkinlik, etkinlik başına 1.000 davetli, günde 2.000 WhatsApp mesajı |
+| `invitefolk_temel` | Temel paket (1 yıl) | 10 etkinlik, etkinlik başına 150 davetli, otomatik WhatsApp ve hatırlatma |
+| `invitefolk_otomatik` | Otomatik paket (1 yıl) | 10 etkinlik, etkinlik başına 400 davetli, günde 800 WhatsApp mesajı |
+| `invitefolk_tam` | Tam paket (1 yıl) | 20 etkinlik, etkinlik başına 1.000 davetli, günde 2.000 WhatsApp mesajı |
 
 Bu sınırlar `public.plan_limits` tablosuyla aynı olmalı. Tabloyu değiştirirseniz bu metinleri de güncelleyin.
 

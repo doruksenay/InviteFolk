@@ -52,7 +52,7 @@ export type IconName =
 
 type Props = { name: IconName; size?: number; color?: string; strokeWidth?: number };
 
-export function Icon({ name, size = 22, color = '#24212B', strokeWidth = 1.7 }: Props) {
+export function Icon({ name, size = 22, color = '#1F1B2E', strokeWidth = 1.7 }: Props) {
   const p = { stroke: color, strokeWidth, fill: 'none', strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">

@@ -16,7 +16,7 @@ const clip = (s: unknown, n: number) => String(s ?? '').slice(0, n);
 export function pushText(row: QueueRow, lang: Lang): { title: string; body: string } | null {
   const p = row.payload ?? {};
   const guest = clip(p.guest, 60) || (lang === 'en' ? 'A guest' : 'Bir davetli');
-  const title = clip(p.title, 80) || 'Davet';
+  const title = clip(p.title, 80) || 'Invitefolk';
   const n = Number(p.party_size ?? 0);
   if (row.kind === 'rsvp') {
     const st = String(p.status ?? '');

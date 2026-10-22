@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
-import { Text, useWindowDimensions, View } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
+import { Image, Text, useWindowDimensions, View } from 'react-native';
+
+import markImage from '../../assets/images/logo-mark.png';
 
 import { useI18n } from '@/i18n';
 import { useSession } from '@/lib/session';
@@ -8,14 +9,24 @@ import { useSession } from '@/lib/session';
 import { Button, IconButton } from './primitives';
 import { color, font } from './tokens';
 
+/** Invitefolk işareti: konuşma balonunda bir arada insanlar. */
 export function BrandMark({ size = 30 }: { size?: number }) {
+  return <Image source={markImage} style={{ width: size, height: size }} resizeMode="contain" accessibilityIgnoresInvertColors />;
+}
+
+const FOLK = ['#6C5CE7', '#FF6B6B', '#FBBF24', '#22C55E'];
+
+/** Yazı logosu: "Invite" mürekkep, "folk" harf harf marka renkleri (assets/brand/invitefolk-brand-identity.png). */
+export function Wordmark({ size = 20 }: { size?: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 30 30">
-      <Circle cx={10} cy={10} r={7} fill="#A08CEB" />
-      <Circle cx={21} cy={9} r={4.5} fill="#F2846F" />
-      <Circle cx={10} cy={21} r={4.5} fill="#E2B04A" />
-      <Circle cx={21} cy={21} r={5.5} fill="#9CC3AB" />
-    </Svg>
+    <Text accessibilityRole="header" accessibilityLabel="Invitefolk" style={{ fontFamily: font.bold, fontSize: size, letterSpacing: -0.4, color: color.ink }}>
+      Invite
+      {'folk'.split('').map((ch, i) => (
+        <Text key={i} style={{ color: FOLK[i] }}>
+          {ch}
+        </Text>
+      ))}
+    </Text>
   );
 }
 
@@ -27,8 +38,8 @@ export function BrandBar({ area }: { area: 'panel' | 'admin' }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <BrandMark />
-        <Text style={{ fontFamily: font.bold, fontSize: 18, color: color.ink }}>{t('common.appName')}</Text>
+        <BrandMark size={34} />
+        <Wordmark size={19} />
         {area === 'admin' && (
           <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: color.ink }}>
             <Text style={{ fontFamily: font.bold, fontSize: 11, color: '#FFFFFF', letterSpacing: 0.8 }}>{t('home.brand.adminBadge')}</Text>

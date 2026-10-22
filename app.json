@@ -1,23 +1,23 @@
 {
   "expo": {
-    "name": "Davet",
-    "slug": "davet",
+    "name": "Invitefolk",
+    "slug": "invitefolk",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "davet",
+    "scheme": "invitefolk",
     "userInterfaceStyle": "light",
     "ios": {
-      "bundleIdentifier": "com.davet.app",
+      "bundleIdentifier": "com.invitefolk.app",
       "supportsTablet": true,
       "config": {
         "usesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.davet.app",
+      "package": "com.invitefolk.app",
       "adaptiveIcon": {
-        "backgroundColor": "#FAF7F2",
+        "backgroundColor": "#6C5CE7",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -28,18 +28,18 @@
     "web": {
       "output": "single",
       "favicon": "./assets/images/favicon.png",
-      "name": "Davet",
-      "themeColor": "#FAF7F2",
-      "backgroundColor": "#FAF7F2"
+      "name": "Invitefolk",
+      "themeColor": "#FFF9F4",
+      "backgroundColor": "#FFF9F4"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FAF7F2",
+          "backgroundColor": "#FFF9F4",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 120
+          "imageWidth": 220
         }
       ],
       "expo-sqlite",
@@ -63,7 +63,7 @@
       [
         "expo-notifications",
         {
-          "color": "#7E66DE"
+          "color": "#6C5CE7"
         }
       ]
     ],
@@ -71,6 +71,6 @@
       "typedRoutes": false,
       "reactCompiler": true
     },
-    "description": "Düğünden halı saha maçına her etkinlik için davetiye, WhatsApp ile davet, canlı LCV takibi ve oturma planı. / Invitations, WhatsApp invites, live RSVPs and seating plans for any event."
+    "description": "Invitations, WhatsApp invites, live RSVPs and seating plans for any event: weddings, birthdays, dinners, five-a-side. / Düğünden halı saha maçına her etkinlik için davetiye, WhatsApp ile davet, canlı LCV ve oturma planı."
   }
 }

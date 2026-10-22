@@ -26,7 +26,7 @@ export function buildIcs(ev: CalEvent) {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Davet//Davetiye//TR',
+    'PRODID:-//Invitefolk//Invitations//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
