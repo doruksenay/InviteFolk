@@ -251,3 +251,37 @@ const styles = StyleSheet.create({
     boxShadow: `inset 0 0 0 1px ${color.hairline}`,
   },
 });
+
+// ---------------------------------------------------------------------------
+// Anahtar (platformlar arası aynı görünür)
+// ---------------------------------------------------------------------------
+export function Toggle({ value, onChange, label, disabled }: { value: boolean; onChange: (v: boolean) => void; label: string; disabled?: boolean }) {
+  return (
+    <Pressable
+      accessibilityRole="switch"
+      accessibilityLabel={label}
+      accessibilityState={{ checked: value, disabled: !!disabled }}
+      disabled={disabled}
+      onPress={() => {
+        tapFeedback();
+        onChange(!value);
+      }}
+      hitSlop={8}
+      style={{ width: 48, height: 28, borderRadius: 14, padding: 3, backgroundColor: value ? color.lavender : '#E3DED6', alignItems: value ? 'flex-end' : 'flex-start', opacity: disabled ? 0.5 : 1 }}>
+      <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#FFFFFF', boxShadow: '0px 1px 3px rgba(36,33,43,0.25)' }} />
+    </Pressable>
+  );
+}
+
+/** Etiket + açıklama + anahtar satırı. */
+export function ToggleRow({ label, hint, value, onChange, disabled }: { label: string; hint?: string; value: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 6 }}>
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text style={{ fontFamily: font.medium, fontSize: 15, color: color.ink }}>{label}</Text>
+        {hint ? <Caption>{hint}</Caption> : null}
+      </View>
+      <Toggle value={value} onChange={onChange} label={label} disabled={disabled} />
+    </View>
+  );
+}

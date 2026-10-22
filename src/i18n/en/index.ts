@@ -14,5 +14,11 @@ import { rsvp } from './rsvp';
 import { admin } from './admin';
 import { layout } from './layout';
 import { settings } from './settings';
+import { guests } from './guests';
+import { send } from './send';
+import { design } from './design';
+import { billing } from './billing';
+import { legal } from './legal';
+import { notifications } from './notifications';
 
-export const en: typeof tr = { common, status, themes, errors, eventTypes, hall, auth, home, wizard, event, seating, rsvp, admin, layout, settings };
+export const en: typeof tr = { common, status, themes, errors, eventTypes, hall, auth, home, wizard, event, seating, rsvp, admin, layout, settings, guests, send, design, billing, legal, notifications };

@@ -34,6 +34,8 @@ function RootNavigator() {
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
       {/* Davetlinin LCV sayfası: herkese açık, kişiye özel token ile */}
       <Stack.Screen name="r/[token]" />
+      {/* Yasal metinler: giriş gerektirmez (mağaza incelemesi, davetliler ve ziyaretçiler için) */}
+      <Stack.Screen name="yasal/[doc]" />
 
       <Stack.Protected guard={!session}>
         <Stack.Screen name="giris" />

@@ -8,6 +8,7 @@ import type {
   Profile,
   PublicInvitation,
   RsvpStatus,
+  MyPlan,
   SeatingItem,
   Side,
 } from '@/core/types';
@@ -15,6 +16,8 @@ import type {
 import { currentLang, dict, type Lang, makeT } from '@/i18n';
 
 import { supabase } from './supabase';
+
+export { supabase };
 
 type DbError = { message: string; details?: string | null; code?: string | null; hint?: string | null };
 
@@ -40,7 +43,8 @@ export function friendlyError(err: DbError | Error | unknown): Error {
   return new Error(t('errors.generic'));
 }
 
-function must<T>(res: { data: T | null; error: DbError | null }): T {
+/** Supabase yanıtını açar; hatayı kullanıcının dilinde fırlatır. Diğer api-* modülleri de kullanır. */
+export function must<T>(res: { data: T | null; error: DbError | null }): T {
   if (res.error) throw friendlyError(res.error);
   return res.data as T;
 }
@@ -79,7 +83,7 @@ export async function getEvent(id: string): Promise<{ event: EventRow; summary: 
   const event = must(await supabase.from('events').select('*').eq('id', id).single()) as EventRow;
   const summary = (await supabase.from('event_summaries').select('*').eq('event_id', id).maybeSingle()).data as EventSummary | null;
   const invitations = must(
-    await supabase.from('invitations').select('*, contacts!inner(name, phone, side, max_party)').eq('event_id', id).order('created_at', { ascending: true }),
+    await supabase.from('invitations').select('*, contacts!inner(name, phone, email, side, group_label, max_party)').eq('event_id', id).order('created_at', { ascending: true }),
   ) as InvitationWithContact[];
   return { event, summary, invitations };
 }
@@ -121,7 +125,7 @@ export async function getSeating(eventId: string): Promise<{ event: EventRow; it
   const [event, items, invitations] = await Promise.all([
     supabase.from('events').select('*').eq('id', eventId).single(),
     supabase.from('seating_tables').select(SEATING_COLS).eq('event_id', eventId).order('created_at', { ascending: true }),
-    supabase.from('invitations').select('*, contacts!inner(name, phone, side, max_party)').eq('event_id', eventId).order('created_at', { ascending: true }),
+    supabase.from('invitations').select('*, contacts!inner(name, phone, email, side, group_label, max_party)').eq('event_id', eventId).order('created_at', { ascending: true }),
   ]);
   return { event: must(event) as EventRow, items: must(items) as SeatingItem[], invitations: must(invitations) as InvitationWithContact[] };
 }
@@ -153,10 +157,28 @@ export async function getPublicInvitation(token: string): Promise<PublicInvitati
   return must(await supabase.rpc('get_invitation', { p_token: token })) as PublicInvitation | null;
 }
 
-export async function respondInvitation(token: string, status: 'yes' | 'no' | 'maybe', partySize?: number, menu?: string | null, note?: string | null) {
+export async function respondInvitation(
+  token: string,
+  status: 'yes' | 'no' | 'maybe',
+  partySize?: number,
+  menu?: string | null,
+  note?: string | null,
+  answers?: Record<string, string> | null,
+) {
   return must(
-    await supabase.rpc('respond_invitation', { p_token: token, p_status: status, p_party_size: partySize ?? null, p_menu: menu ?? null, p_note: note ?? null }),
+    await supabase.rpc('respond_invitation', {
+      p_token: token,
+      p_status: status,
+      p_party_size: partySize ?? null,
+      p_menu: menu ?? null,
+      p_note: note ?? null,
+      p_answers: answers ?? null,
+    }),
   ) as PublicInvitation;
+}
+
+export async function getMyPlan(): Promise<MyPlan> {
+  return must(await supabase.rpc('my_plan')) as MyPlan;
 }
 
 // ---------------------------------------------------------------------------
