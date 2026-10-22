@@ -371,7 +371,8 @@ export default function NewEvent() {
           {error && <Notice tone="error" text={error} />}
           {wide && summaryBar}
         </View>
-        <View style={{ width: wide ? 460 : '100%' }}>{preview}</View>
+        {/* Telefonda davetli ekleme/gönderim adımlarında önizleme gizlenir; iş öne çıksın. */}
+        {(wide || step < 2) && <View style={{ width: wide ? 460 : '100%' }}>{preview}</View>}
         {!wide && <View style={{ width: '100%' }}>{summaryBar}</View>}
       </View>
     </Screen>
