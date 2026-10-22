@@ -116,8 +116,9 @@ src/app/             Ekranlar (Expo Router)
   giris.tsx          E-posta kodu ile giriş
   (panel)/           Kullanıcı paneli
   (admin)/admin/     Yönetim paneli
+  (panel)/etkinlik/[id]/oturma.tsx   Oturma planı
   r/[token].tsx      Davetlinin cevap sayfası (herkese açık)
-src/core/            Etkinlik türleri, temalar, biçimlendirme, tipler
+src/core/            Etkinlik türleri, temalar, oturma geometrisi ve yerleştirme, biçimlendirme, tipler
 src/lib/             Supabase istemcisi, oturum, API çağrıları
 src/ui/              Tasarım dili: renkler, bileşenler, davetiye kartı
 src/ui/seating/      Salon tuvali, sürüklenebilir masa, paneller, hızlı kurulum
