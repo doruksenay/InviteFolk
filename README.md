@@ -1,56 +1,132 @@
-# Welcome to your Expo app 👋
+# Davet
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Davet; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, halı saha maçı ve benzeri her tür etkinlik için bir davetiye ve katılım (LCV) uygulamasıdır. Davetiyeler WhatsApp ile gönderilir, davetlinin cevabı listeye kendiliğinden düşer.
 
-## Get started
+- **Kullanıcı paneli** (`/`, `/yeni`, `/etkinlik/[id]`): etkinlik oluşturma sihirbazı, davetli listesi, WhatsApp ile gönderim ve hatırlatma, elle durum düzenleme.
+- **Yönetim paneli** (`/admin`): yalnızca `role = 'admin'` olan hesaplara açılır. Platform istatistikleri, etkinlik türleri, son kullanıcılar ve son etkinlikler burada görünür.
+- **Davetli sayfası** (`/r/[token]`): giriş ve uygulama indirme gerektirmez. Davetli katılıp katılmayacağını, kaç kişi geleceğini, menü tercihini ve notunu buradan bildirir.
 
-1. Install dependencies
+## Teknoloji
 
-   ```bash
-   npm install
-   ```
+| Katman | Seçim | Maliyet |
+|---|---|---|
+| Uygulama | Expo SDK 58 + Expo Router: iOS, Android ve web tek kod tabanından | Ücretsiz |
+| Veritabanı ve kimlik | Supabase (Postgres + RLS, e-posta kodu ile giriş, Edge Functions) | Free plan, büyüyünce Pro $25/ay |
+| WhatsApp | Meta WhatsApp Cloud API (resmi). Ücretsiz pakette `wa.me` linkleri | Utility şablon mesaj başına ücret |
+| Web | Cloudflare Pages (davetli sayfası ve web paneli) | Ücretsiz |
+| Mağaza derlemeleri | EAS Build ve EAS Submit | Free plan ayda 30 derleme |
 
-2. Start the app
+Mağaza hesapları: Apple Developer yıllık $99, Google Play tek seferlik $25.
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Kurulum
 
 ```bash
-npm run reset-project
+npm install
+cp .env.example .env.local   # değerleri doldurun
+npx expo start               # i: iOS simülatör, a: Android, w: web
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+Supabase ayarları yapılmamışsa uygulama, eksik değişkenleri gösteren bir ekranla açılır.
 
-### Other setup steps
+### 1. Supabase projesi
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+1. [supabase.com](https://supabase.com) üzerinde bir proje açın. URL'yi ve publishable key'i `.env.local` dosyasına yazın.
+2. Şemayı yükleyin:
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref PROJE_REF
+   npx supabase db push
+   ```
+   `supabase/migrations/20261022000000_init.sql` şunları kurar:
+   - tablolar ve RLS politikaları;
+   - davetli sayfasının kullandığı `get_invitation` ve `respond_invitation` fonksiyonları;
+   - `event_summaries` görünümü ve `admin_stats` fonksiyonu.
+3. **Authentication → Email**: giriş 6 haneli kodla yapılır. E-posta şablonunda `{{ .Token }}` kullanın. Canlıya çıkmadan önce kendi SMTP sağlayıcınızı bağlayın (ör. Resend), çünkü Supabase'in yerleşik SMTP'si saatlik limitlidir.
+4. Kendinizi admin yapın. Önce uygulamaya bir kez giriş yapın, sonra SQL Editor'da şunu çalıştırın:
+   ```sql
+   update profiles set role = 'admin'
+   where id = (select id from auth.users where email = 'siz@ornek.com');
+   ```
+   Kullanıcılar kendi `role` ve `plan` alanlarını değiştiremez; bu alanlar sütun düzeyindeki yetkiyle kilitlidir.
 
-## Learn more
+### 2. WhatsApp Cloud API
 
-To learn more about developing your project with Expo, look at the following resources:
+1. Meta for Developers'da bir **Business** uygulaması açın ve WhatsApp ürününü ekleyin. Kendi numaranızı Cloud API'ye kaydedin.
+2. WhatsApp Manager'da **Utility** kategorisinde, adı `davet_lcv` ve dili Türkçe olan bir şablon oluşturun:
+   - Gövde: `Merhaba {{1}}, {{2}} için sizi aramızda görmek isteriz. {{3}}`
+     - `{{1}}` davetli adı, `{{2}}` etkinlik adı, `{{3}}` tarih ve yer.
+   - İki **hızlı yanıt** düğmesi: `Katılacağım` ve `Katılamayacağım`.
+3. Sırları girin ve fonksiyonları yayınlayın:
+   ```bash
+   npx supabase secrets set --env-file supabase/.env
+   npx supabase functions deploy send-invitations
+   npx supabase functions deploy whatsapp-webhook --no-verify-jwt
+   ```
+4. Meta uygulamasında **WhatsApp → Configuration → Webhook** bölümünü doldurun:
+   - Callback URL: `https://PROJE_REF.supabase.co/functions/v1/whatsapp-webhook`
+   - Verify token: `WHATSAPP_VERIFY_TOKEN` değeriniz
+   - Abone olunacak alan: `messages`
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Akış şöyle işler:
+- Uygulama `send-invitations` fonksiyonunu çağırır ve şablon her davetliye kendi token'ıyla gider.
+- Davetli bir düğmeye bastığında webhook imzayı doğrular (`X-Hub-Signature-256`) ve cevabı `respond_invitation` ile kaydeder.
+- "Katılacağım" cevabından sonra davetliye "kaç kişi?" listesi gönderilir.
+- Teslim ve okundu durumları listede görünür.
 
-## Join the community
+> Gayriresmî WhatsApp kütüphaneleri (whatsapp-web.js, Baileys vb.) kullanılmaz. Bu kütüphaneler numaranın kapatılmasına yol açar.
 
-Join our community of developers creating universal apps.
+### 3. Web (davetli sayfası)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npx expo export -p web       # çıktı: dist/
+```
+
+`dist/` klasörünü Cloudflare Pages'e yükleyin. Uygulama tek sayfa olduğu için `/r/...` gibi bütün yolların `index.html`'e düşmesi gerekir; bunun için `dist/_redirects` dosyasına `/* /index.html 200` satırını ekleyin. `EXPO_PUBLIC_WEB_URL` bu alan adını göstermelidir.
+
+### 4. App Store ve Google Play
+
+```bash
+npx eas-cli@latest login
+npx eas-cli@latest build:configure
+npx eas-cli@latest build -p ios --profile production
+npx eas-cli@latest submit -p ios
+npx eas-cli@latest build -p android --profile production
+npx eas-cli@latest submit -p android
+```
+
+`EXPO_PUBLIC_*` değişkenlerini EAS ortam değişkeni olarak da tanımlayın: `npx eas-cli@latest env:create`. Paket kimliği `com.davet.app`'tir ve `app.json` içinden değiştirilebilir.
+
+## Klasör yapısı
+
+```
+src/app/             Ekranlar (Expo Router)
+  _layout.tsx        Oturum korumaları: giriş / kullanıcı paneli / admin
+  giris.tsx          E-posta kodu ile giriş
+  (panel)/           Kullanıcı paneli
+  (admin)/admin/     Yönetim paneli
+  r/[token].tsx      Davetlinin cevap sayfası (herkese açık)
+src/core/            Etkinlik türleri, temalar, biçimlendirme, tipler
+src/lib/             Supabase istemcisi, oturum, API çağrıları
+src/ui/              Tasarım dili: renkler, bileşenler, davetiye kartı
+supabase/migrations/ Şema + RLS
+supabase/functions/  send-invitations, whatsapp-webhook
+```
+
+Her etkinlik türü `src/core/event-types.ts` içinde bir ayar kaydıdır: cevap etiketleri, sorulan sorular ve hangi araçların açık olduğu. Yeni bir tür eklemek için yeni ekran yazmak gerekmez.
+
+## Güvenlik notları
+
+- Anon rolün hiçbir tabloya doğrudan erişimi yoktur. Davetliler yalnızca token ile çalışan iki fonksiyonu çağırabilir. Kişi sayısı, davetliye tanımlanan üst sınırla kesilir.
+- Her kullanıcı yalnızca kendi etkinliklerini, kişilerini ve davetlerini görür. Admin hepsini okuyabilir.
+- `service_role` anahtarı yalnızca Edge Functions içinde kullanılır.
+- Halı saha "kim ödedi" alanı yalnızca takip içindir. Uygulama başkası adına para toplamaz.
+
+## Yol haritası
+
+1. Oturma planı: masa ekleme (kapasite seçimi), sürükle-bırak, sahne ve dans pisti nesneleri, davetliyi masaya atama
+2. Kendi PDF ya da görsel davetiyesini yükleme ve isim alanını kişiye özel yazma
+3. Excel/CSV ile toplu davetli aktarma ve rehberden seçme
+4. Paketler: ücretsiz / 500 / 750 / 1.000 TL. Uygulama içi satın alma için RevenueCat, web için iyzico
+5. E-posta ile davet
+6. Halı saha için haftalık otomatik davet, yedek listesi ve ödeme takibi
+7. Yönetim panelinde kullanıcı yönetimi (plan değiştirme, askıya alma)

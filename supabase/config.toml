@@ -1,0 +1,23 @@
+# Supabase CLI yapılandırması (yerel geliştirme için).
+# project_id: supabase link --project-ref <ref> ile bağlandığında kullanılır.
+project_id = "davet"
+
+[api]
+port = 54321
+schemas = ["public"]
+
+[db]
+port = 54322
+major_version = 17
+
+[auth]
+site_url = "http://localhost:8081"
+additional_redirect_urls = ["davet://"]
+
+[auth.email]
+enable_signup = true
+# Uygulama, e-postaya gelen 6 haneli kodla giriş yapar (derin bağlantı gerektirmez).
+otp_length = 6
+
+[functions.whatsapp-webhook]
+verify_jwt = false

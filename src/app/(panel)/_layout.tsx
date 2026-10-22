@@ -1,0 +1,7 @@
+import { Stack } from 'expo-router';
+
+import { color } from '@/ui/tokens';
+
+export default function PanelLayout() {
+  return <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }} />;
+}
