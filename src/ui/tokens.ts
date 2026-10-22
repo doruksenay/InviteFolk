@@ -27,12 +27,13 @@ export const color = {
   goldTint: '#FFF4D6',
 } as const;
 
+/** Durum renkleri. Etiketler sözlükte: t(`status.rsvp.${key}`). */
 export const status = {
-  yes: { bg: color.sageTint, ink: color.sageInk, dot: color.sage, label: 'Geliyor' },
-  pending: { bg: color.goldTint, ink: color.goldInk, dot: color.gold, label: 'Bekliyor' },
-  no: { bg: color.coralTint, ink: color.coralInk, dot: color.coral, label: 'Gelmiyor' },
-  maybe: { bg: color.lavenderTint, ink: color.lavenderInk, dot: color.lavender, label: 'Belki' },
-  waitlist: { bg: color.lavenderTint, ink: color.lavenderInk, dot: color.lavender, label: 'Yedek' },
+  yes: { bg: color.sageTint, ink: color.sageInk, dot: color.sage },
+  pending: { bg: color.goldTint, ink: color.goldInk, dot: color.gold },
+  no: { bg: color.coralTint, ink: color.coralInk, dot: color.coral },
+  maybe: { bg: color.lavenderTint, ink: color.lavenderInk, dot: color.lavender },
+  waitlist: { bg: color.lavenderTint, ink: color.lavenderInk, dot: color.lavender },
 } as const;
 
 export const radius = { sm: 12, md: 16, lg: 22, xl: 28, pill: 999 } as const;

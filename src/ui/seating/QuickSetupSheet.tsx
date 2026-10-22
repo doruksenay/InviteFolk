@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from 'react-native';
 
 import { buildQuickLayout, type QuickSetup } from '@/core/seating';
+import { useI18n } from '@/i18n';
 import { Button, Caption, Display, DisplayItalic, Label } from '@/ui/primitives';
 import { color, font, radius } from '@/ui/tokens';
 
@@ -24,6 +25,7 @@ export function QuickSetupSheet(props: Props) {
 }
 
 function Sheet({ busy, defaultPeople, hasItems, isWedding, onClose, onSubmit }: Props) {
+  const { t } = useI18n();
   const { width } = useWindowDimensions();
   const [people, setPeople] = useState(String(defaultPeople));
   const [capacity, setCapacity] = useState(10);
@@ -36,7 +38,7 @@ function Sheet({ busy, defaultPeople, hasItems, isWedding, onClose, onSubmit }: 
 
   const n = Math.max(0, Math.min(3000, parseInt(people.replace(/\D/g, ''), 10) || 0));
   const setup: QuickSetup = { people: n, capacity, shape, stage, dance, headTable, entrance };
-  const tableCount = n ? buildQuickLayout(setup).filter((i) => i.kind === 'table' && i.capacity === capacity).length : 0;
+  const tableCount = n ? buildQuickLayout(setup, t).filter((i) => i.kind === 'table' && i.capacity === capacity).length : 0;
 
   const toggle = (label: string, value: boolean, set: (v: boolean) => void) => (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 6 }}>
@@ -47,7 +49,7 @@ function Sheet({ busy, defaultPeople, hasItems, isWedding, onClose, onSubmit }: 
 
   return (
     <Modal transparent animationType="fade" visible onRequestClose={onClose}>
-      <Pressable accessibilityLabel="Kapat" onPress={onClose} style={{ flex: 1, backgroundColor: 'rgba(36,33,43,0.35)', alignItems: 'center', justifyContent: width >= 640 ? 'center' : 'flex-end' }}>
+      <Pressable accessibilityLabel={t('common.close')} onPress={onClose} style={{ flex: 1, backgroundColor: 'rgba(36,33,43,0.35)', alignItems: 'center', justifyContent: width >= 640 ? 'center' : 'flex-end' }}>
         <Pressable
           onPress={() => {}}
           style={{
@@ -64,55 +66,55 @@ function Sheet({ busy, defaultPeople, hasItems, isWedding, onClose, onSubmit }: 
           <ScrollView contentContainerStyle={{ padding: 28, gap: 20 }} keyboardShouldPersistTaps="handled">
             <View style={{ gap: 6 }}>
               <Display size={38}>
-                Salonu <DisplayItalic style={{ color: color.lavender }}>kur</DisplayItalic>
+                {t('seating.quick.title')} <DisplayItalic style={{ color: color.lavender }}>{t('seating.quick.titleAccent')}</DisplayItalic>
               </Display>
-              <Caption>Masaları, sahneyi ve dans pistini düzenli bir yerleşimle dizeriz. Sonra her şeyi sürükleyip değiştirebilirsin.</Caption>
+              <Caption>{t('seating.quick.intro')}</Caption>
             </View>
 
             <View style={{ gap: 8 }}>
-              <Label>Kaç kişi oturacak?</Label>
+              <Label>{t('seating.quick.people')}</Label>
               <TextInput
                 value={people}
                 onChangeText={setPeople}
                 keyboardType="number-pad"
-                accessibilityLabel="Kişi sayısı"
+                accessibilityLabel={t('seating.quick.peopleA11y')}
                 style={{ height: 64, borderRadius: radius.lg, backgroundColor: color.surfaceSoft, paddingHorizontal: 20, fontFamily: font.serif, fontSize: 36, color: color.ink }}
               />
-              <Caption>Gelecek ve cevap bekleyen davetlilerden hesaplandı; istersen değiştir.</Caption>
+              <Caption>{t('seating.quick.peopleHint')}</Caption>
             </View>
 
             <View style={{ gap: 10 }}>
-              <Label>Masa büyüklüğü</Label>
+              <Label>{t('seating.quick.tableSize')}</Label>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                 {[6, 8, 10, 12].map((c) => (
-                  <Chip key={c} small label={`${c} kişilik`} active={capacity === c} onPress={() => setCapacity(c)} />
+                  <Chip key={c} small label={t('seating.quick.capacity', { count: c })} active={capacity === c} onPress={() => setCapacity(c)} />
                 ))}
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Chip small label="Yuvarlak masa" active={shape === 'round'} onPress={() => setShape('round')} />
-                <Chip small label="Uzun masa" active={shape === 'rect'} onPress={() => setShape('rect')} />
+                <Chip small label={t('seating.quick.roundTable')} active={shape === 'round'} onPress={() => setShape('round')} />
+                <Chip small label={t('seating.quick.longTable')} active={shape === 'rect'} onPress={() => setShape('rect')} />
               </View>
             </View>
 
             <View>
-              {toggle('Sahne', stage, setStage)}
-              {toggle('Dans pisti', dance, setDance)}
-              {isWedding && toggle('Gelin & damat masası', headTable, setHeadTable)}
-              {toggle('Giriş', entrance, setEntrance)}
-              {hasItems && toggle('Mevcut düzeni sil, baştan kur', replace, setReplace)}
+              {toggle(t('seating.quick.stage'), stage, setStage)}
+              {toggle(t('seating.quick.dance'), dance, setDance)}
+              {isWedding && toggle(t('seating.quick.headTable'), headTable, setHeadTable)}
+              {toggle(t('seating.quick.entrance'), entrance, setEntrance)}
+              {hasItems && toggle(t('seating.quick.replace'), replace, setReplace)}
             </View>
 
             <View style={{ backgroundColor: color.lavenderTint, borderRadius: radius.lg, padding: 16, flexDirection: 'row', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
               <Text style={{ fontFamily: font.serif, fontSize: 34, lineHeight: 38, color: color.lavenderInk }}>{tableCount}</Text>
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: color.lavenderInk }}>
-                masa · {tableCount * capacity} sandalye
+                {t('seating.quick.summary', { count: tableCount, chairs: tableCount * capacity })}
               </Text>
-              {hasItems && replace && <Caption color={color.lavenderInk}>Mevcut masa atamaları da sıfırlanır.</Caption>}
+              {hasItems && replace && <Caption color={color.lavenderInk}>{t('seating.quick.resetWarning')}</Caption>}
             </View>
 
             <View style={{ flexDirection: 'row', gap: 10, justifyContent: 'flex-end' }}>
-              <Button label="Vazgeç" variant="ghost" onPress={onClose} />
-              <Button label="Salonu kur" variant="accent" iconRight="arrowRight" loading={busy} disabled={!n} onPress={() => onSubmit(setup, hasItems && replace)} />
+              <Button label={t('common.cancel')} variant="ghost" onPress={onClose} />
+              <Button label={t('seating.quick.submit')} variant="accent" iconRight="arrowRight" loading={busy} disabled={!n} onPress={() => onSubmit(setup, hasItems && replace)} />
             </View>
           </ScrollView>
         </Pressable>

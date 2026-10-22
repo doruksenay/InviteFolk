@@ -1,12 +1,15 @@
 import { Text, useWindowDimensions, View } from 'react-native';
 
+import { useI18n } from '@/i18n';
+
 import { color, font } from './tokens';
 
 export function Stepper({ steps, current }: { steps: string[]; current: number }) {
   // Dar ekranda yalnızca etkin adımın adı yazılır, diğerleri numara olarak kalır.
   const compact = useWindowDimensions().width < 640;
+  const { t } = useI18n();
   return (
-    <View accessibilityRole="progressbar" accessibilityLabel={`Adım ${current + 1} / ${steps.length}: ${steps[current]}`} style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+    <View accessibilityRole="progressbar" accessibilityLabel={t('wizard.stepA11y', { n: current + 1, total: steps.length, name: steps[current] })} style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
       {steps.map((s, i) => {
         const done = i < current;
         const active = i === current;

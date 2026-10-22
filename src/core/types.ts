@@ -14,6 +14,7 @@ export type Profile = {
   phone: string | null;
   role: Role;
   plan: Plan;
+  locale: 'tr' | 'en';
   created_at: string;
 };
 

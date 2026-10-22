@@ -1,22 +1,54 @@
-const dateFmt = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long', timeZone: 'Europe/Istanbul' });
-const timeFmt = new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' });
-const shortFmt = new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: 'short', timeZone: 'Europe/Istanbul' });
+// Tarih ve sayı biçimleri. `locale` BCP 47 etiketidir: 'tr-TR' ya da 'en-GB' (useI18n().locale).
+const TZ = 'Europe/Istanbul';
+const cache = new Map<string, Intl.DateTimeFormat>();
+function fmt(locale: string, opts: Intl.DateTimeFormatOptions) {
+  const k = locale + JSON.stringify(opts);
+  let f = cache.get(k);
+  if (!f) {
+    f = new Intl.DateTimeFormat(locale, { timeZone: TZ, ...opts });
+    cache.set(k, f);
+  }
+  return f;
+}
 
-/** "12 Haziran 2027 Cumartesi · 19:00" */
-export function formatWhen(iso: string | null | undefined): string | null {
+/** "12 Haziran 2027 Cumartesi · 19:00" / "Saturday 12 June 2027 · 19:00" */
+export function formatWhen(iso: string | null | undefined, locale = 'tr-TR'): string | null {
   if (!iso) return null;
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
-  return `${dateFmt.format(d)} · ${timeFmt.format(d)}`;
+  const date = fmt(locale, { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' }).format(d);
+  const time = fmt(locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d);
+  return `${date} · ${time}`;
+}
+
+/** "1 Mayıs" / "1 May" */
+export function formatDayMonth(iso: string | null | undefined, locale = 'tr-TR'): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return fmt(locale, { day: 'numeric', month: 'long' }).format(d);
+}
+
+/** "20 Eki 2026" */
+export function formatShortDate(iso: string | null | undefined, locale = 'tr-TR'): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? '' : fmt(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(d);
 }
 
 /** { day: "12", mon: "HAZ" } */
-export function dateBadge(iso: string | null | undefined): { day: string; mon: string } | null {
+export function dateBadge(iso: string | null | undefined, locale = 'tr-TR'): { day: string; mon: string } | null {
   if (!iso) return null;
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
-  const [day, mon] = shortFmt.format(d).split(' ');
-  return { day, mon: (mon ?? '').replace('.', '').toLocaleUpperCase('tr-TR') };
+  const parts = fmt(locale, { day: '2-digit', month: 'short' }).formatToParts(d);
+  const day = parts.find((p) => p.type === 'day')?.value ?? '';
+  const mon = (parts.find((p) => p.type === 'month')?.value ?? '').replace('.', '').toLocaleUpperCase(locale);
+  return { day, mon };
+}
+
+export function formatNumber(n: number, locale = 'tr-TR') {
+  return n.toLocaleString(locale);
 }
 
 export function daysUntil(iso: string | null | undefined): number | null {
@@ -56,6 +88,6 @@ export function initials(name: string): string {
     .join('');
 }
 
-export function formatTry(n: number): string {
-  return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
+export function formatTry(n: number, locale = 'tr-TR'): string {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
 }

@@ -16,6 +16,8 @@ import {
   type ViewStyle,
 } from 'react-native';
 
+import { useI18n } from '@/i18n';
+
 import { Icon, type IconName } from './Icon';
 import { color, font, radius, shadow, space, status as statusTokens } from './tokens';
 
@@ -153,11 +155,12 @@ export function Pill({ label, bg, fg, style }: { label: string; bg: string; fg: 
 }
 
 export function StatusBadge({ status }: { status: keyof typeof statusTokens }) {
+  const { t } = useI18n();
   const s = statusTokens[status];
   return (
     <View style={[styles.pill, { backgroundColor: s.bg, flexDirection: 'row', alignItems: 'center', gap: 6 }]}>
       <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: s.dot }} />
-      <Text style={[styles.pillText, { color: s.ink }]}>{s.label}</Text>
+      <Text style={[styles.pillText, { color: s.ink }]}>{t(`status.rsvp.${status}`)}</Text>
     </View>
   );
 }

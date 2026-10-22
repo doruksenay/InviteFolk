@@ -5,29 +5,43 @@ import type { Profile } from '@/core/types';
 
 import { supabase } from './supabase';
 
+export type Aal = 'aal1' | 'aal2';
+
 type SessionState = {
   session: Session | null;
   profile: Profile | null;
+  /** Rolü admin olan hesap (arayüz yönlendirmesi için). Yetkiyi veritabanı ayrıca MFA ile doğrular. */
   isAdmin: boolean;
+  /** Bu oturumun doğrulama seviyesi: aal2 = iki adımlı doğrulama yapıldı. */
+  aal: Aal;
   loading: boolean;
   refreshProfile: () => Promise<void>;
+  refreshAal: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 const Ctx = createContext<SessionState | null>(null);
 
+async function readAal(): Promise<Aal> {
+  const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  return data?.currentLevel === 'aal2' ? 'aal2' : 'aal1';
+}
+
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [aal, setAal] = useState<Aal>('aal1');
   const [loading, setLoading] = useState(true);
 
   const loadProfile = useCallback(async (s: Session | null) => {
     if (!s) {
       setProfile(null);
+      setAal('aal1');
       return;
     }
-    const { data } = await supabase.from('profiles').select('*').eq('id', s.user.id).maybeSingle();
+    const [{ data }, level] = await Promise.all([supabase.from('profiles').select('*').eq('id', s.user.id).maybeSingle(), readAal()]);
     setProfile((data as Profile) ?? null);
+    setAal(level);
   }, []);
 
   useEffect(() => {
@@ -40,7 +54,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
-      // Supabase istemcisini auth olayı içinde beklemek kilitlenmeye yol açabilir; profil yüklemesini sonraya bırak.
+      // Supabase istemcisini auth olayı içinde beklemek kilitlenmeye yol açabilir; yüklemeyi sonraya bırak.
       setTimeout(() => loadProfile(s), 0);
     });
     return () => {
@@ -52,12 +66,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const value: SessionState = {
     session,
     profile,
-    // Rol sadece arayüzü yönlendirir; asıl yetki veritabanındaki RLS ve is_admin() ile zorlanır.
     isAdmin: profile?.role === 'admin',
+    aal,
     loading,
     refreshProfile: () => loadProfile(session),
+    refreshAal: async () => setAal(await readAal()),
     signOut: async () => {
-      await supabase.auth.signOut();
+      // Yalnızca bu cihazdaki oturum kapanır; sunucuda yenileme anahtarı da iptal edilir.
+      await supabase.auth.signOut({ scope: 'local' });
     },
   };
 

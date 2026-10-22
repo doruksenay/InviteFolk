@@ -3,10 +3,11 @@ import { type ReactNode, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { getEventType } from '@/core/event-types';
-import { formatWhen } from '@/core/format';
+import { eventCopy, getEventType } from '@/core/event-types';
+import { formatDayMonth, formatWhen } from '@/core/format';
 import { getTheme, type InvitationTheme } from '@/core/themes';
 import type { PublicInvitation } from '@/core/types';
+import { eventLang, LANG_NAMES, LANGS, type Lang, LOCALE_TAG, makeT, type TFn, useI18n } from '@/i18n';
 import { getPublicInvitation, respondInvitation, useQuery } from '@/lib/api';
 import { InvitationCard } from '@/ui/InvitationCard';
 import { tapFeedback } from '@/ui/primitives';
@@ -28,11 +29,14 @@ export default function GuestRsvp() {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // Davetli sayfası organizatörün arayüz dilini değil, etkinliğin dilini izler; davetli değiştirebilir.
+  const [langPick, setLangPick] = useState<Lang | null>(null);
+  const device = useI18n();
 
   if (loading && !data) {
     return (
       <View style={[styles.center, { backgroundColor: '#F6F1E8' }]}>
-        <ActivityIndicator color="#24212B" />
+        <ActivityIndicator color="#24212B" accessibilityLabel={device.t('rsvp.loading')} />
       </View>
     );
   }
@@ -40,19 +44,22 @@ export default function GuestRsvp() {
   if (error || !data) {
     return (
       <View style={[styles.center, { backgroundColor: '#F6F1E8', padding: 28 }]}>
-        <Text style={[styles.h1, { color: '#24212B', fontSize: 40, textAlign: 'center' }]}>Davet bulunamadı</Text>
-        <Text style={[styles.p, { color: '#5F5D70', textAlign: 'center', marginTop: 10 }]}>
-          Bu bağlantı geçersiz ya da etkinlik sona ermiş olabilir. Davet edeninle iletişime geçebilirsin.
-        </Text>
+        <Text style={[styles.h1, { color: '#24212B', fontSize: 40, textAlign: 'center' }]}>{device.t('rsvp.notFoundTitle')}</Text>
+        <Text style={[styles.p, { color: '#5F5D70', textAlign: 'center', marginTop: 10 }]}>{device.t('rsvp.notFoundBody')}</Text>
       </View>
     );
   }
 
   const inv: PublicInvitation = data;
+  const lang: Lang = langPick ?? eventLang(inv.event.settings);
+  const t = makeT(lang);
+  const locale = LOCALE_TAG[lang];
   const cfg = getEventType(inv.event.type);
+  const copyText = eventCopy(inv.event.type, lang);
   const theme = getTheme(inv.event.theme);
   const partyValue = party ?? Math.min(inv.party_size || inv.max_party, inv.max_party);
-  const menuOptions = (inv.event.settings?.menu as string[] | undefined) ?? cfg.questions.menu ?? null;
+  const storedMenu = inv.event.settings?.menu;
+  const menuOptions = Array.isArray(storedMenu) && storedMenu.length ? (storedMenu as string[]) : cfg.questions.menu ? copyText.menu : null;
 
   const submit = async (status: 'yes' | 'no') => {
     setBusy(true);
@@ -62,7 +69,7 @@ export default function GuestRsvp() {
       setData(updated);
       setStep('done');
     } catch {
-      setErr('Cevabın gönderilemedi. Bağlantını kontrol edip tekrar dene.');
+      setErr(t('rsvp.sendFailed'));
     } finally {
       setBusy(false);
     }
@@ -79,32 +86,34 @@ export default function GuestRsvp() {
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.dark ? theme.bg : '#F6F1E8' }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', padding: 20, paddingBottom: 48 }}>
         <View style={{ width: '100%', maxWidth: 420, gap: 20 }}>
+          <LangToggle theme={theme} lang={lang} onChange={setLangPick} t={t} />
           {step === 'invite' && (
             <>
               <InvitationCard
                 theme={theme}
+                lang={lang}
                 artHeight={240}
                 copy={{
-                  greet: `Sayın ${inv.guest_name}`,
-                  kicker: cfg.sample.kicker,
+                  greet: t('rsvp.greet', { name: inv.guest_name }),
+                  kicker: copyText.sample.kicker,
                   title: inv.event.title,
-                  line: inv.event.host_names ? `${inv.event.host_names} sizi aralarında görmekten mutluluk duyar.` : cfg.sample.line,
-                  when: formatWhen(inv.event.starts_at) ?? 'Tarih yakında bildirilecek',
-                  where: [inv.event.venue_name, inv.event.venue_address].filter(Boolean).join(', ') || 'Yer yakında bildirilecek',
-                  deadline: inv.event.rsvp_deadline ? new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date(inv.event.rsvp_deadline)) : null,
-                  yes: cfg.rsvp.yes,
-                  no: cfg.rsvp.no,
+                  line: inv.event.host_names ? t('rsvp.hostLine', { hosts: inv.event.host_names }) : copyText.sample.line,
+                  when: formatWhen(inv.event.starts_at, locale) ?? t('rsvp.dateSoon'),
+                  where: [inv.event.venue_name, inv.event.venue_address].filter(Boolean).join(', ') || t('rsvp.placeSoon'),
+                  deadline: formatDayMonth(inv.event.rsvp_deadline, locale),
+                  yes: copyText.rsvp.yes,
+                  no: copyText.rsvp.no,
                 }}
                 actions={
                   <View style={{ gap: 10, paddingTop: 8 }}>
-                    {inv.table_label && <TableTicket theme={theme} label={inv.table_label} />}
+                    {inv.table_label && <TableTicket theme={theme} label={inv.table_label} t={t} />}
                     {inv.status !== 'pending' && (
                       <Text style={[styles.small, { color: theme.soft, textAlign: 'center' }]}>
-                        Daha önce “{inv.status === 'yes' ? cfg.rsvp.yes : cfg.rsvp.no}” dediniz. İsterseniz değiştirebilirsiniz.
+                        {t('rsvp.previously', { answer: inv.status === 'yes' ? copyText.rsvp.yes : copyText.rsvp.no })}
                       </Text>
                     )}
-                    <PillButton theme={theme} filled label={cfg.rsvp.yes} onPress={yes} />
-                    <PillButton theme={theme} label={cfg.rsvp.no} onPress={() => setStep('no')} />
+                    <PillButton theme={theme} filled label={copyText.rsvp.yes} onPress={yes} />
+                    <PillButton theme={theme} label={copyText.rsvp.no} onPress={() => setStep('no')} />
                   </View>
                 }
               />
@@ -113,21 +122,21 @@ export default function GuestRsvp() {
           )}
 
           {step === 'details' && (
-            <Sheet theme={theme} title="Ne güzel." subtitle="Birkaç küçük bilgi; yerinizi ona göre hazırlayacağız." onBack={() => setStep('invite')}>
+            <Sheet theme={theme} title={t('rsvp.detailsTitle')} subtitle={t('rsvp.detailsSubtitle')} backLabel={t('rsvp.backToInvite')} onBack={() => setStep('invite')}>
               {cfg.questions.partySize && inv.max_party > 1 && (
                 <View style={[styles.box, { backgroundColor: theme.dark ? 'rgba(255,255,255,0.06)' : '#FFFFFF' }]}>
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.label, { color: theme.ink }]}>Kaç kişi geliyorsunuz?</Text>
-                    <Text style={[styles.small, { color: theme.soft }]}>en fazla {inv.max_party} kişi</Text>
+                    <Text style={[styles.label, { color: theme.ink }]}>{t('rsvp.partyQuestion')}</Text>
+                    <Text style={[styles.small, { color: theme.soft }]}>{t('rsvp.partyMax', { count: inv.max_party })}</Text>
                   </View>
-                  <Round theme={theme} label="−" a11y="Azalt" onPress={() => setParty(Math.max(1, partyValue - 1))} />
+                  <Round theme={theme} label="−" a11y={t('rsvp.decrease')} onPress={() => setParty(Math.max(1, partyValue - 1))} />
                   <Text style={[styles.h1, { fontSize: 36, minWidth: 34, textAlign: 'center', color: theme.ink }]}>{partyValue}</Text>
-                  <Round theme={theme} label="+" a11y="Artır" filled onPress={() => setParty(Math.min(inv.max_party, partyValue + 1))} />
+                  <Round theme={theme} label="+" a11y={t('rsvp.increase')} filled onPress={() => setParty(Math.min(inv.max_party, partyValue + 1))} />
                 </View>
               )}
               {menuOptions && (
                 <View style={{ gap: 10 }}>
-                  <Text style={[styles.label, { color: theme.ink }]}>Menü tercihiniz</Text>
+                  <Text style={[styles.label, { color: theme.ink }]}>{t('rsvp.menuQuestion')}</Text>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                     {menuOptions.map((m) => (
                       <Pressable
@@ -142,17 +151,17 @@ export default function GuestRsvp() {
                   </View>
                 </View>
               )}
-              <NoteField theme={theme} value={note} onChange={setNote} placeholder="Mutluluklar dileriz, o gece görüşürüz" />
+              <NoteField theme={theme} value={note} onChange={setNote} placeholder={t('rsvp.yesNotePlaceholder')} t={t} />
               {err && <Text style={[styles.small, { color: '#A3332A' }]}>{err}</Text>}
-              <PillButton theme={theme} filled label={busy ? 'Gönderiliyor…' : 'Cevabımı gönder'} onPress={() => submit('yes')} />
+              <PillButton theme={theme} filled label={busy ? t('rsvp.sending') : t('rsvp.sendAnswer')} onPress={() => submit('yes')} />
             </Sheet>
           )}
 
           {step === 'no' && (
-            <Sheet theme={theme} title="Sizi özleyeceğiz." subtitle="Cevabınız davet edene iletilecek. İsterseniz bir not ekleyin." onBack={() => setStep('invite')}>
-              <NoteField theme={theme} value={note} onChange={setNote} placeholder="Gelemiyoruz ama kalbimiz sizinle" />
+            <Sheet theme={theme} title={t('rsvp.noTitle')} subtitle={t('rsvp.noSubtitle')} backLabel={t('rsvp.backToInvite')} onBack={() => setStep('invite')}>
+              <NoteField theme={theme} value={note} onChange={setNote} placeholder={t('rsvp.noNotePlaceholder')} t={t} />
               {err && <Text style={[styles.small, { color: '#A3332A' }]}>{err}</Text>}
-              <PillButton theme={theme} filled label={busy ? 'Gönderiliyor…' : 'Gönder'} onPress={() => submit('no')} />
+              <PillButton theme={theme} filled label={busy ? t('rsvp.sending') : t('rsvp.send')} onPress={() => submit('no')} />
             </Sheet>
           )}
 
@@ -162,15 +171,15 @@ export default function GuestRsvp() {
                 <View style={{ position: 'absolute', right: -10, top: 0, width: 160, height: 160, borderRadius: 80, backgroundColor: theme.shapeA }} />
                 <View style={{ position: 'absolute', right: 130, top: 80, width: 60, height: 60, borderRadius: 30, backgroundColor: theme.shapeB }} />
               </View>
-              <Text style={[styles.small, { color: theme.soft, letterSpacing: 1.2 }]}>CEVABINIZ ALINDI</Text>
-              <Text style={[styles.h1, { color: theme.ink }]}>{inv.status === 'yes' ? 'Görüşmek üzere.' : 'Teşekkürler.'}</Text>
+              <Text style={[styles.small, { color: theme.soft, letterSpacing: 1.2 }]}>{t('rsvp.doneKicker')}</Text>
+              <Text style={[styles.h1, { color: theme.ink }]}>{inv.status === 'yes' ? t('rsvp.doneYesTitle') : t('rsvp.doneNoTitle')}</Text>
               <Text style={[styles.serifBody, { color: theme.soft }]}>
                 {inv.status === 'yes'
-                  ? `${inv.party_size ?? 1} kişi olarak kaydettik. Etkinlikten önce size hatırlatacağız.`
-                  : 'Notunuz iletildi. Fikriniz değişirse bu sayfadan güncelleyebilirsiniz.'}
+                  ? t('rsvp.doneYesBody', { count: inv.party_size ?? 1 })
+                  : t('rsvp.doneNoBody')}
               </Text>
-              {inv.table_label && <TableTicket theme={theme} label={inv.table_label} />}
-              <PillButton theme={theme} label="Cevabımı değiştir" onPress={() => setStep('invite')} />
+              {inv.table_label && <TableTicket theme={theme} label={inv.table_label} t={t} />}
+              <PillButton theme={theme} label={t('rsvp.change')} onPress={() => setStep('invite')} />
             </View>
           )}
         </View>
@@ -180,10 +189,10 @@ export default function GuestRsvp() {
 }
 
 /** Organizatör masayı atadıysa davetliye gösterilen küçük "yer kartı". */
-function TableTicket({ theme, label }: { theme: InvitationTheme; label: string }) {
+function TableTicket({ theme, label, t }: { theme: InvitationTheme; label: string; t: TFn }) {
   return (
     <View
-      accessibilityLabel={`Masanız: ${label}`}
+      accessibilityLabel={t('rsvp.tableA11y', { label })}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -198,17 +207,31 @@ function TableTicket({ theme, label }: { theme: InvitationTheme; label: string }
         <View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: theme.dark ? theme.bg : '#FFFFFF' }} />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={[styles.small, { color: theme.soft, letterSpacing: 1.4 }]}>MASANIZ</Text>
+        <Text style={[styles.small, { color: theme.soft, letterSpacing: 1.4 }]}>{t('rsvp.tableKicker')}</Text>
         <Text style={[styles.h1, { fontSize: 30, lineHeight: 34, color: theme.ink }]}>{label}</Text>
       </View>
     </View>
   );
 }
 
-function Sheet({ theme, title, subtitle, onBack, children }: { theme: InvitationTheme; title: string; subtitle: string; onBack: () => void; children: ReactNode }) {
+function Sheet({
+  theme,
+  title,
+  subtitle,
+  backLabel,
+  onBack,
+  children,
+}: {
+  theme: InvitationTheme;
+  title: string;
+  subtitle: string;
+  backLabel: string;
+  onBack: () => void;
+  children: ReactNode;
+}) {
   return (
     <View style={{ gap: 20, paddingTop: 8 }}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Davetiyeye dön" onPress={onBack} style={[styles.back, { boxShadow: `inset 0 0 0 1px ${theme.dark ? 'rgba(255,255,255,0.2)' : 'rgba(120,100,80,0.25)'}` }]}>
+      <Pressable accessibilityRole="button" accessibilityLabel={backLabel} onPress={onBack} style={[styles.back, { boxShadow: `inset 0 0 0 1px ${theme.dark ? 'rgba(255,255,255,0.2)' : 'rgba(120,100,80,0.25)'}` }]}>
         <Text style={{ fontFamily: font.semibold, fontSize: 18, color: theme.ink }}>‹</Text>
       </Pressable>
       <View style={{ gap: 6 }}>
@@ -216,6 +239,36 @@ function Sheet({ theme, title, subtitle, onBack, children }: { theme: Invitation
         <Text style={[styles.p, { color: theme.soft }]}>{subtitle}</Text>
       </View>
       {children}
+    </View>
+  );
+}
+
+/** Sayfanın üstünde küçük "TR · EN" seçici; davetiye temasının renkleriyle. */
+function LangToggle({ theme, lang, onChange, t }: { theme: InvitationTheme; lang: Lang; onChange: (l: Lang) => void; t: TFn }) {
+  return (
+    <View accessibilityRole="radiogroup" accessibilityLabel={t('rsvp.langLabel')} style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-end', gap: 2 }}>
+      {LANGS.map((l, i) => {
+        const on = l === lang;
+        return (
+          <View key={l} style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {i > 0 && <Text style={[styles.small, { color: theme.soft, opacity: 0.6, marginHorizontal: 2 }]}>·</Text>}
+            <Pressable
+              accessibilityRole="radio"
+              accessibilityState={{ checked: on }}
+              accessibilityLabel={t('rsvp.switchTo', { name: LANG_NAMES[l] })}
+              onPress={() => {
+                tapFeedback();
+                onChange(l);
+              }}
+              hitSlop={8}
+              style={{ paddingHorizontal: 6, paddingVertical: 4 }}>
+              <Text style={{ fontFamily: on ? font.bold : font.medium, fontSize: 12, letterSpacing: 1.6, color: on ? theme.ink : theme.soft, opacity: on ? 1 : 0.7 }}>
+                {l.toUpperCase()}
+              </Text>
+            </Pressable>
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -247,13 +300,14 @@ function Round({ theme, label, a11y, onPress, filled }: { theme: InvitationTheme
   );
 }
 
-function NoteField({ theme, value, onChange, placeholder }: { theme: InvitationTheme; value: string; onChange: (v: string) => void; placeholder: string }) {
+function NoteField({ theme, value, onChange, placeholder, t }: { theme: InvitationTheme; value: string; onChange: (v: string) => void; placeholder: string; t: TFn }) {
   return (
     <View style={{ gap: 8 }}>
       <Text style={[styles.label, { color: theme.ink }]}>
-        Bir not bırakın <Text style={{ fontFamily: font.regular, color: theme.soft }}>(isteğe bağlı)</Text>
+        {t('rsvp.noteLabel')} <Text style={{ fontFamily: font.regular, color: theme.soft }}>{t('rsvp.optional')}</Text>
       </Text>
       <TextInput
+        accessibilityLabel={t('rsvp.noteLabel')}
         multiline
         value={value}
         onChangeText={onChange}

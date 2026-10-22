@@ -2,9 +2,10 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, type PressableStateCallbackType, Switch, Text, useWindowDimensions, View } from 'react-native';
 
-import { EVENT_TYPE_ORDER, EVENT_TYPES, type EventTypeKey } from '@/core/event-types';
-import { formatWhen } from '@/core/format';
+import { EVENT_TYPE_ORDER, EVENT_TYPES, eventCopy, type EventTypeKey } from '@/core/event-types';
+import { formatDayMonth, formatWhen } from '@/core/format';
 import { THEME_ORDER, THEMES, type ThemeKey } from '@/core/themes';
+import { type Lang, LANG_NAMES, LANGS, LOCALE_TAG, useI18n } from '@/i18n';
 import { createEvent } from '@/lib/api';
 import { Icon } from '@/ui/Icon';
 import { InvitationCard } from '@/ui/InvitationCard';
@@ -15,8 +16,6 @@ import { color, font, shadow, WIDE_BREAKPOINT } from '@/ui/tokens';
 import { WhatsAppPreview } from '@/ui/WhatsAppPreview';
 
 type PressState = PressableStateCallbackType & { hovered?: boolean };
-
-const STEPS = ['Tür ve tema', 'Bilgiler', 'Davetliler', 'Gönderim'];
 
 /** "2027-06-12" + "19:00" -> Türkiye saatiyle ISO (UTC+3) */
 function toIso(date: string, time: string): string | null {
@@ -29,12 +28,16 @@ function toIso(date: string, time: string): string | null {
 export default function NewEvent() {
   const { width } = useWindowDimensions();
   const wide = width >= WIDE_BREAKPOINT;
+  const { t, lang: uiLang } = useI18n();
+  const STEPS = [t('wizard.steps.type'), t('wizard.steps.details'), t('wizard.steps.guests'), t('wizard.steps.send')];
 
   const [step, setStep] = useState(0);
   const [type, setType] = useState<EventTypeKey>('dugun');
   const [theme, setTheme] = useState<ThemeKey>(EVENT_TYPES.dugun.suggestedTheme);
   const [themeTouched, setThemeTouched] = useState(false);
   const [view, setView] = useState<'page' | 'wa'>('page');
+  // Davetiyenin dili: davetlinin göreceği metinler ve tarih biçimi buna göre.
+  const [eventLang, setEventLang] = useState<Lang>(uiLang);
 
   const [title, setTitle] = useState('');
   const [hosts, setHosts] = useState('');
@@ -50,22 +53,26 @@ export default function NewEvent() {
   const [error, setError] = useState<string | null>(null);
 
   const cfg = EVENT_TYPES[type];
+  const ec = eventCopy(type, eventLang); // davetliye görünen metinler
+  const uiCopy = eventCopy(type, uiLang); // organizatöre görünen tür adı ve özellikler
   const th = THEMES[theme];
   const startsAt = toIso(date, time);
+  const eventLocale = LOCALE_TAG[eventLang];
+  const deadlineText = /^\d{4}-\d{2}-\d{2}$/.test(deadline.trim()) ? formatDayMonth(deadline.trim(), eventLocale) : deadline.trim();
 
   const copy = useMemo(
     () => ({
-      greet: cfg.sample.greet,
-      kicker: cfg.sample.kicker,
-      title: title.trim() ? title.trim() : cfg.sample.title,
-      line: cfg.sample.line,
-      when: formatWhen(startsAt) ?? cfg.sample.when,
-      where: venue.trim() || cfg.sample.where,
-      deadline: deadline.trim() || cfg.sample.deadline,
-      yes: cfg.rsvp.yes,
-      no: cfg.rsvp.no,
+      greet: ec.sample.greet,
+      kicker: ec.sample.kicker,
+      title: title.trim() ? title.trim() : ec.sample.title,
+      line: ec.sample.line,
+      when: formatWhen(startsAt, eventLocale) ?? ec.sample.when,
+      where: venue.trim() || ec.sample.where,
+      deadline: deadlineText || ec.sample.deadline,
+      yes: ec.rsvp.yes,
+      no: ec.rsvp.no,
     }),
-    [cfg, title, startsAt, venue, deadline],
+    [ec, title, startsAt, eventLocale, venue, deadlineText],
   );
 
   const pickType = (k: EventTypeKey) => {
@@ -77,19 +84,19 @@ export default function NewEvent() {
   const save = async () => {
     setError(null);
     if (!title.trim()) {
-      setError('Etkinliğe bir başlık ver; davetiyede büyük yazı olarak görünecek.');
+      setError(t('wizard.errors.title'));
       return;
     }
     if (date && !startsAt) {
-      setError('Tarihi YYYY-AA-GG biçiminde yaz, örneğin 2027-06-12.');
+      setError(t('wizard.errors.date'));
       return;
     }
     setSaving(true);
     try {
-      const settings: Record<string, unknown> = {};
+      const settings: Record<string, unknown> = { lang: eventLang };
       if (cfg.questions.roster) settings.roster_size = Math.max(2, Number(rosterSize) || 14);
       if (cfg.tools.recurring) settings.recurring = weekly ? 'weekly' : null;
-      if (cfg.questions.menu) settings.menu = cfg.questions.menu;
+      if (cfg.questions.menu && ec.menu) settings.menu = ec.menu;
       const ev = await createEvent({
         type,
         theme,
@@ -103,7 +110,7 @@ export default function NewEvent() {
       });
       router.replace({ pathname: '/etkinlik/[id]', params: { id: ev.id } });
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Etkinlik kaydedilemedi.');
+      setError(e instanceof Error ? e.message : t('wizard.errors.save'));
     } finally {
       setSaving(false);
     }
@@ -115,7 +122,7 @@ export default function NewEvent() {
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color.sage }} />
-          <Label>Canlı önizleme</Label>
+          <Label>{t('wizard.preview')}</Label>
         </View>
         <View accessibilityRole="tablist" style={{ flexDirection: 'row', padding: 4, borderRadius: 999, backgroundColor: '#F1ECE4' }}>
           {(['page', 'wa'] as const).map((v) => (
@@ -125,21 +132,31 @@ export default function NewEvent() {
               accessibilityState={{ selected: view === v }}
               onPress={() => setView(v)}
               style={{ height: 34, paddingHorizontal: 14, borderRadius: 999, justifyContent: 'center', backgroundColor: view === v ? '#FFFFFF' : 'transparent', boxShadow: view === v ? '0px 1px 3px rgba(40,30,20,0.12)' : 'none' }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: view === v ? color.ink : color.muted }}>{v === 'page' ? 'Davetiye' : 'WhatsApp'}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: view === v ? color.ink : color.muted }}>{v === 'page' ? t('wizard.tabInvitation') : t('wizard.tabWhatsApp')}</Text>
             </Pressable>
           ))}
         </View>
       </View>
       <View style={{ paddingVertical: 24, paddingHorizontal: 16, borderRadius: 26, backgroundColor: th.dark ? '#3A3757' : th.shapeC }}>
         {view === 'page' ? (
-          <InvitationCard theme={th} copy={copy} />
+          <InvitationCard theme={th} copy={copy} lang={eventLang} />
         ) : (
-          <WhatsAppPreview theme={th} title={copy.title} text={cfg.sample.wa} when={copy.when} yes={cfg.rsvp.yes} no={cfg.rsvp.no} ask={cfg.rsvp.askParty} host={cfg.sample.host} />
+          <WhatsAppPreview
+            theme={th}
+            title={copy.title}
+            text={ec.sample.wa}
+            when={copy.when}
+            yes={ec.rsvp.yes}
+            no={ec.rsvp.no}
+            ask={ec.rsvp.askParty}
+            host={ec.sample.host}
+            lang={eventLang}
+          />
         )}
       </View>
       <View style={{ gap: 14, paddingHorizontal: 4 }}>
-        <Label>Bu türle hazır gelenler</Label>
-        {cfg.features.map((f) => (
+        <Label>{t('wizard.includes')}</Label>
+        {uiCopy.features.map((f) => (
           <View key={f.title} style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}>
             <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: cfg.iconBg, alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="check" size={14} color={cfg.accent} strokeWidth={3} />
@@ -151,7 +168,7 @@ export default function NewEvent() {
           </View>
         ))}
         <Caption style={{ paddingTop: 12, borderTopWidth: 1, borderTopColor: color.hairline }}>
-          Davetliler uygulama indirmeden, tek dokunuşla cevap verir. Liste kendiliğinden güncellenir.
+          {t('wizard.guestsNote')}
         </Caption>
       </View>
     </Surface>
@@ -162,17 +179,18 @@ export default function NewEvent() {
   const stepOne = (
     <View style={{ gap: 40 }}>
       <View style={{ gap: 16 }}>
-        <Title>Etkinlik türü</Title>
+        <Title>{t('wizard.eventType')}</Title>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
           {EVENT_TYPE_ORDER.map((k) => {
             const c = EVENT_TYPES[k];
+            const cc = eventCopy(k, uiLang);
             const on = k === type;
             return (
               <Pressable
                 key={k}
                 accessibilityRole="radio"
                 accessibilityState={{ checked: on }}
-                accessibilityLabel={`${c.name}. ${c.description}`}
+                accessibilityLabel={`${cc.name}. ${cc.description}`}
                 onPress={() => pickType(k)}
                 style={(s: PressState) => [
                   {
@@ -192,8 +210,8 @@ export default function NewEvent() {
                   <Icon name={c.icon} size={24} color={c.accent} />
                 </View>
                 <View style={{ flex: 1, gap: 4 }}>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 16, color: color.ink }}>{c.name}</Text>
-                  <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 21, color: color.muted }}>{c.description}</Text>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 16, color: color.ink }}>{cc.name}</Text>
+                  <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 21, color: color.muted }}>{cc.description}</Text>
                 </View>
                 <View style={{ width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? c.accent : 'transparent', boxShadow: on ? 'none' : `inset 0 0 0 1.5px ${color.ring}` }}>
                   {on && <Icon name="check" size={12} color="#FFFFFF" strokeWidth={3.5} />}
@@ -206,19 +224,20 @@ export default function NewEvent() {
 
       <View style={{ gap: 16 }}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-          <Title>Davetiye teması</Title>
-          <Caption>Renkler ve yazılar sonradan değişebilir</Caption>
+          <Title>{t('wizard.theme')}</Title>
+          <Caption>{t('wizard.themeHint')}</Caption>
         </View>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
           {THEME_ORDER.map((k) => {
-            const t = THEMES[k];
+            const tm = THEMES[k];
+            const themeName = t(`themes.${k}`);
             const on = k === theme;
             return (
               <Pressable
                 key={k}
                 accessibilityRole="radio"
                 accessibilityState={{ checked: on }}
-                accessibilityLabel={`${t.name} teması`}
+                accessibilityLabel={t('wizard.themeA11y', { name: themeName })}
                 onPress={() => {
                   tapFeedback();
                   setTheme(k);
@@ -231,12 +250,12 @@ export default function NewEvent() {
                     height: 130,
                     borderRadius: 18,
                     overflow: 'hidden',
-                    backgroundColor: t.bg,
+                    backgroundColor: tm.bg,
                     boxShadow: on ? `0 0 0 2px ${color.bg}, 0 0 0 4px ${color.ink}, 0px 12px 26px rgba(40,30,20,0.14)` : shadow.card,
                   }}>
-                  <View style={{ position: 'absolute', left: -22, top: -22, width: 80, height: 80, borderRadius: 40, backgroundColor: t.shapeA }} />
-                  <View style={{ position: 'absolute', right: 12, top: 30, width: 36, height: 60, borderTopLeftRadius: 18, borderTopRightRadius: 18, backgroundColor: t.shapeB }} />
-                  <Text style={{ position: 'absolute', left: 12, bottom: 12, fontFamily: font.serif, fontSize: 20, color: t.ink }}>A & M</Text>
+                  <View style={{ position: 'absolute', left: -22, top: -22, width: 80, height: 80, borderRadius: 40, backgroundColor: tm.shapeA }} />
+                  <View style={{ position: 'absolute', right: 12, top: 30, width: 36, height: 60, borderTopLeftRadius: 18, borderTopRightRadius: 18, backgroundColor: tm.shapeB }} />
+                  <Text style={{ position: 'absolute', left: 12, bottom: 12, fontFamily: font.serif, fontSize: 20, color: tm.ink }}>A & M</Text>
                   {on && (
                     <View style={{ position: 'absolute', right: 8, top: 8, width: 22, height: 22, borderRadius: 11, backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center' }}>
                       <Icon name="check" size={11} color="#FFFFFF" strokeWidth={3.5} />
@@ -244,8 +263,8 @@ export default function NewEvent() {
                   )}
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 4 }}>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: color.ink }}>{t.name}</Text>
-                  {k === cfg.suggestedTheme && !on && <Pill label="Önerilen" bg={color.lavenderTint} fg={color.lavenderInk} style={{ paddingHorizontal: 7, paddingVertical: 2 }} />}
+                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: color.ink }}>{themeName}</Text>
+                  {k === cfg.suggestedTheme && !on && <Pill label={t('wizard.suggested')} bg={color.lavenderTint} fg={color.lavenderInk} style={{ paddingHorizontal: 7, paddingVertical: 2 }} />}
                 </View>
               </Pressable>
             );
@@ -259,23 +278,61 @@ export default function NewEvent() {
   const half = wide || width >= 640 ? '48.5%' : '100%';
   const stepTwo = (
     <Surface style={{ gap: 18 }}>
-      <Field label="Davetiye başlığı" placeholder={cfg.sample.title.replace('\n', ' ')} value={title} onChangeText={setTitle} hint="Davetiyede büyük yazı olarak görünür. Satır atlamak için Enter'a bas." multiline={false} />
-      <Field label="Davet edenler" placeholder="Yılmaz ve Kaya aileleri" value={hosts} onChangeText={setHosts} />
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
-        <Field style={{ width: half }} label="Tarih" placeholder="2027-06-12" value={date} onChangeText={setDate} keyboardType="numbers-and-punctuation" hint="YYYY-AA-GG" />
-        <Field style={{ width: half }} label="Saat" placeholder="19:00" value={time} onChangeText={setTime} keyboardType="numbers-and-punctuation" />
+      <View style={{ gap: 8 }}>
+        <Label>{t('wizard.language')}</Label>
+        <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+          {LANGS.map((l) => {
+            const on = l === eventLang;
+            return (
+              <Pressable
+                key={l}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: on }}
+                onPress={() => {
+                  tapFeedback();
+                  setEventLang(l);
+                }}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                  height: 40,
+                  paddingHorizontal: 16,
+                  borderRadius: 999,
+                  backgroundColor: on ? color.ink : color.surfaceSoft,
+                }}>
+                <Icon name="globe" size={15} color={on ? '#FFFFFF' : color.inkSoft} strokeWidth={2} />
+                <Text style={{ fontFamily: font.semibold, fontSize: 14, color: on ? '#FFFFFF' : color.ink }}>{LANG_NAMES[l]}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Caption>{t('wizard.languageHint')}</Caption>
       </View>
-      <Field label="Mekân" placeholder="Kalamış Davet Salonu" value={venue} onChangeText={setVenue} />
-      <Field label="Adres" placeholder="Fenerbahçe Mah., Kadıköy / İstanbul" value={address} onChangeText={setAddress} />
-      <Field label="Cevap için son gün" placeholder="2027-05-01" value={deadline} onChangeText={setDeadline} keyboardType="numbers-and-punctuation" hint="Cevap vermeyenlere bu tarihten önce hatırlatma gider." />
-      {cfg.questions.roster && <Field label="Kadro kaç kişi?" value={rosterSize} onChangeText={setRosterSize} keyboardType="number-pad" hint="Kadro dolunca gelen cevaplar yedek listesine girer." />}
+      <Field label={t('wizard.fields.title')} placeholder={ec.sample.title.replace('\n', ' ')} value={title} onChangeText={setTitle} hint={t('wizard.fields.titleHint')} multiline={false} />
+      <Field label={t('wizard.fields.hosts')} placeholder={t('wizard.fields.hostsPlaceholder')} value={hosts} onChangeText={setHosts} />
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
+        <Field style={{ width: half }} label={t('wizard.fields.date')} placeholder="2027-06-12" value={date} onChangeText={setDate} keyboardType="numbers-and-punctuation" hint={t('wizard.fields.dateHint')} />
+        <Field style={{ width: half }} label={t('wizard.fields.time')} placeholder="19:00" value={time} onChangeText={setTime} keyboardType="numbers-and-punctuation" />
+      </View>
+      <Field label={t('wizard.fields.venue')} placeholder={t('wizard.fields.venuePlaceholder')} value={venue} onChangeText={setVenue} />
+      <Field label={t('wizard.fields.address')} placeholder={t('wizard.fields.addressPlaceholder')} value={address} onChangeText={setAddress} />
+      <Field
+        label={t('wizard.fields.deadline')}
+        placeholder="2027-05-01"
+        value={deadline}
+        onChangeText={setDeadline}
+        keyboardType="numbers-and-punctuation"
+        hint={t('wizard.fields.deadlineHint')}
+      />
+      {cfg.questions.roster && <Field label={t('wizard.fields.roster')} value={rosterSize} onChangeText={setRosterSize} keyboardType="number-pad" hint={t('wizard.fields.rosterHint')} />}
       {cfg.tools.recurring && (
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <View style={{ flex: 1 }}>
-            <Label>Her hafta tekrarla</Label>
-            <Caption>Davet her hafta aynı gün kendiliğinden gönderilir.</Caption>
+            <Label>{t('wizard.fields.weekly')}</Label>
+            <Caption>{t('wizard.fields.weeklyHint')}</Caption>
           </View>
-          <Switch value={weekly} onValueChange={setWeekly} trackColor={{ true: cfg.accent, false: '#DDD6CC' }} />
+          <Switch accessibilityLabel={t('wizard.fields.weekly')} value={weekly} onValueChange={setWeekly} trackColor={{ true: cfg.accent, false: '#DDD6CC' }} />
         </View>
       )}
     </Surface>
@@ -288,20 +345,20 @@ export default function NewEvent() {
         <View style={{ position: 'absolute', right: -10, bottom: -10, width: 34, height: 34, borderRadius: 17, backgroundColor: th.shapeA }} />
       </View>
       <View style={{ flex: 1, minWidth: 160 }}>
-        <Caption>Seçimin</Caption>
+        <Caption>{t('wizard.yourChoice')}</Caption>
         <Text style={{ fontFamily: font.semibold, fontSize: 16, color: color.ink }}>
-          {cfg.name} · {th.name} teması
+          {t('wizard.choiceLine', { type: uiCopy.name, theme: t(`themes.${theme}`) })}
         </Text>
       </View>
-      {step === 1 && <Button label="Geri" variant="ghost" onPress={() => setStep(0)} />}
-      <Button label={step === 0 ? 'Devam et' : 'Etkinliği oluştur'} size="lg" iconRight="arrowRight" loading={saving} onPress={step === 0 ? () => setStep(1) : save} />
+      {step === 1 && <Button label={t('common.back')} variant="ghost" onPress={() => setStep(0)} />}
+      <Button label={step === 0 ? t('common.continue') : t('wizard.create')} size="lg" iconRight="arrowRight" loading={saving} onPress={step === 0 ? () => setStep(1) : save} />
     </View>
   );
 
   return (
     <Screen>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-        <IconButton icon="arrowLeft" label="Etkinliklerime dön" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+        <IconButton icon="arrowLeft" label={t('wizard.backToEvents')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
         <Stepper steps={STEPS} current={step} />
         <View style={{ width: 42 }} />
       </View>
@@ -309,20 +366,20 @@ export default function NewEvent() {
       <View style={{ flexDirection: wide ? 'row' : 'column', gap: wide ? 56 : 28, alignItems: 'flex-start' }}>
         <View style={{ flex: wide ? 1 : undefined, width: wide ? undefined : '100%', gap: 32 }}>
           <View style={{ gap: 12 }}>
-            <Pill label={`ADIM ${step + 1} / 4`} bg={color.lavenderTint} fg={color.lavenderInk} />
+            <Pill label={t('wizard.stepPill', { n: step + 1, total: STEPS.length })} bg={color.lavenderTint} fg={color.lavenderInk} />
             {step === 0 ? (
               <Display size={wide ? 64 : 46}>
-                Ne <DisplayItalic style={{ color: color.lavender }}>kutluyoruz?</DisplayItalic>
+                {t('wizard.step1Title')}
+                <DisplayItalic style={{ color: color.lavender }}>{t('wizard.step1Accent')}</DisplayItalic>
               </Display>
             ) : (
               <Display size={wide ? 64 : 46}>
-                Biraz <DisplayItalic style={{ color: color.lavender }}>ayrıntı.</DisplayItalic>
+                {t('wizard.step2Title')}
+                <DisplayItalic style={{ color: color.lavender }}>{t('wizard.step2Accent')}</DisplayItalic>
               </Display>
             )}
             <Body style={{ maxWidth: 540, fontSize: 17, lineHeight: 27 }}>
-              {step === 0
-                ? 'Türü seç; davetiye, cevap seçenekleri ve araçlar ona göre hazırlansın. Her şeyi sonra değiştirebilirsin.'
-                : 'Yazdıkça sağdaki davetiye güncellenir. Boş bıraktıklarını sonra tamamlayabilirsin.'}
+              {step === 0 ? t('wizard.step1Body') : t('wizard.step2Body')}
             </Body>
           </View>
           {step === 0 ? stepOne : stepTwo}

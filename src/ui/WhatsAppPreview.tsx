@@ -2,11 +2,33 @@ import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import type { InvitationTheme } from '@/core/themes';
+import { type Lang, makeT } from '@/i18n';
 
 import { color, font } from './tokens';
 
-/** Davetin WhatsApp'ta nasıl göründüğünü ve butona basınca gelen takip sorusunu gösterir. */
-export function WhatsAppPreview({ theme, title, text, when, yes, no, ask, host }: { theme: InvitationTheme; title: string; text: string; when: string; yes: string; no: string; ask: string; host: string }) {
+/** Davetin WhatsApp'ta nasıl göründüğünü ve butona basınca gelen takip sorusunu gösterir. `lang` davetiyenin dilidir. */
+export function WhatsAppPreview({
+  theme,
+  title,
+  text,
+  when,
+  yes,
+  no,
+  ask,
+  host,
+  lang = 'tr',
+}: {
+  theme: InvitationTheme;
+  title: string;
+  text: string;
+  when: string;
+  yes: string;
+  no: string;
+  ask: string;
+  host: string;
+  lang?: Lang;
+}) {
+  const t = makeT(lang);
   return (
     <View style={styles.wrap}>
       <View style={styles.header}>
@@ -15,13 +37,13 @@ export function WhatsAppPreview({ theme, title, text, when, yes, no, ask, host }
         </View>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Text style={styles.name}>Davet Asistanı</Text>
-            <Svg width={14} height={14} viewBox="0 0 24 24" accessibilityLabel="Doğrulanmış işletme">
+            <Text style={styles.name}>{t('wizard.wa.assistant')}</Text>
+            <Svg width={14} height={14} viewBox="0 0 24 24" accessibilityLabel={t('wizard.wa.verified')}>
               <Circle cx={12} cy={12} r={10} fill="#25A55F" />
               <Path d="M7.5 12.5l3 3 6-7" fill="none" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
             </Svg>
           </View>
-          <Text style={styles.sub}>İşletme hesabı</Text>
+          <Text style={styles.sub}>{t('wizard.wa.business')}</Text>
         </View>
       </View>
       <View style={styles.chat}>
@@ -36,7 +58,7 @@ export function WhatsAppPreview({ theme, title, text, when, yes, no, ask, host }
             <Text style={[styles.msg, { color: color.muted }]}>{when}</Text>
             <Text style={styles.time}>10:42</Text>
           </View>
-          {[yes, no, 'Konum'].map((b) => (
+          {[yes, no, t('wizard.wa.location')].map((b) => (
             <Text key={b} style={styles.action}>
               {b}
             </Text>

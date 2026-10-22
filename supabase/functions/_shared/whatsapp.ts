@@ -2,6 +2,8 @@
 // Gerekli ortam değişkenleri: WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID
 // İsteğe bağlı: WHATSAPP_GRAPH_VERSION (varsayılan v23.0)
 
+import { type Lang, text } from './messages.ts';
+
 const GRAPH_VERSION = Deno.env.get('WHATSAPP_GRAPH_VERSION') ?? 'v23.0';
 
 function endpoint() {
@@ -75,11 +77,12 @@ export function sendInviteTemplate(args: {
   });
 }
 
-/** Davetli butona bastıktan sonra açılan 24 saatlik pencerede kişi sayısı sorusu (liste mesajı). */
-export function sendPartySizeQuestion(to: string, token: string, maxParty: number) {
+/** Davetli butona bastıktan sonra açılan 24 saatlik pencerede kişi sayısı sorusu (liste mesajı), etkinlik dilinde. */
+export function sendPartySizeQuestion(to: string, token: string, maxParty: number, lang: Lang) {
+  const tx = text(lang);
   const rows = Array.from({ length: Math.min(maxParty, 10) }, (_, i) => ({
     id: `party:${i + 1}:${token}`,
-    title: `${i + 1} kişi`,
+    title: tx.partyRow(i + 1),
   }));
   return post({
     messaging_product: 'whatsapp',
@@ -87,8 +90,8 @@ export function sendPartySizeQuestion(to: string, token: string, maxParty: numbe
     type: 'interactive',
     interactive: {
       type: 'list',
-      body: { text: 'Ne güzel! Kaç kişi geleceksiniz?' },
-      action: { button: 'Kişi sayısı', sections: [{ title: 'Kişi sayısı', rows }] },
+      body: { text: tx.askParty },
+      action: { button: tx.partyButton, sections: [{ title: tx.partyButton, rows }] },
     },
   });
 }

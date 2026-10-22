@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 
+import { useI18n } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import { Body, Button, Caption, Display, DisplayItalic, Field, Notice, Surface } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
@@ -8,6 +9,7 @@ import { color } from '@/ui/tokens';
 
 /** E-postaya gelen 6 haneli kodla giriş: derin bağlantı gerektirmez, iOS/Android/web'de aynı çalışır. */
 export default function SignIn() {
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'email' | 'code'>('email');
@@ -17,27 +19,27 @@ export default function SignIn() {
   const sendCode = async () => {
     const e = email.trim().toLowerCase();
     if (!/^\S+@\S+\.\S+$/.test(e)) {
-      setError('Geçerli bir e-posta adresi yaz.');
+      setError(t('auth.invalidEmail'));
       return;
     }
     setBusy(true);
     setError(null);
     const { error: err } = await supabase.auth.signInWithOtp({ email: e, options: { shouldCreateUser: true } });
     setBusy(false);
-    if (err) setError('Kod gönderilemedi. Biraz sonra tekrar dene.');
+    if (err) setError(t('auth.sendFailed'));
     else setStep('code');
   };
 
   const verify = async () => {
     if (code.trim().length < 6) {
-      setError('E-postadaki 6 haneli kodu yaz.');
+      setError(t('auth.codeTooShort'));
       return;
     }
     setBusy(true);
     setError(null);
     const { error: err } = await supabase.auth.verifyOtp({ email: email.trim().toLowerCase(), token: code.trim(), type: 'email' });
     setBusy(false);
-    if (err) setError('Kod doğrulanamadı. Kodu kontrol et ya da yenisini iste.');
+    if (err) setError(t('auth.verifyFailed'));
     // Başarılı olursa oturum değişir ve korumalı rotalar paneli açar.
   };
 
@@ -46,50 +48,51 @@ export default function SignIn() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ gap: 28 }}>
         <View style={{ gap: 10 }}>
           <Display size={52}>
-            Her davet, <DisplayItalic style={{ color: color.lavender }}>bir dokunuşla.</DisplayItalic>
+            {t('auth.headline')}
+            <DisplayItalic style={{ color: color.lavender }}>{t('auth.headlineAccent')}</DisplayItalic>
           </Display>
-          <Body>Düğünden halı saha maçına kadar davetlerini gönder, cevapları tek yerden takip et.</Body>
+          <Body>{t('auth.intro')}</Body>
         </View>
 
         <Surface style={{ gap: 16 }}>
           {step === 'email' ? (
             <>
               <Field
-                label="E-posta"
-                placeholder="ayse@ornek.com"
+                label={t('auth.email')}
+                placeholder={t('auth.emailPlaceholder')}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"
                 value={email}
-                onChangeText={(t) => {
-                  setEmail(t);
+                onChangeText={(v) => {
+                  setEmail(v);
                   setError(null);
                 }}
                 onSubmitEditing={sendCode}
               />
               {error && <Notice tone="error" text={error} />}
-              <Button label="Giriş kodu gönder" size="lg" iconRight="arrowRight" loading={busy} onPress={sendCode} />
-              <Caption>Hesabın yoksa ilk girişte otomatik oluşturulur.</Caption>
+              <Button label={t('auth.sendCode')} size="lg" iconRight="arrowRight" loading={busy} onPress={sendCode} />
+              <Caption>{t('auth.newAccountHint')}</Caption>
             </>
           ) : (
             <>
-              <Notice tone="info" text={`${email} adresine 6 haneli bir kod gönderdik.`} />
+              <Notice tone="info" text={t('auth.codeSent', { email })} />
               <Field
-                label="Giriş kodu"
+                label={t('auth.code')}
                 placeholder="123456"
                 keyboardType="number-pad"
                 autoComplete="one-time-code"
                 maxLength={6}
                 value={code}
-                onChangeText={(t) => {
-                  setCode(t.replace(/\D/g, ''));
+                onChangeText={(v) => {
+                  setCode(v.replace(/\D/g, ''));
                   setError(null);
                 }}
                 onSubmitEditing={verify}
               />
               {error && <Notice tone="error" text={error} />}
-              <Button label="Giriş yap" size="lg" loading={busy} onPress={verify} />
-              <Button label="E-postayı değiştir" variant="ghost" onPress={() => setStep('email')} />
+              <Button label={t('auth.signIn')} size="lg" loading={busy} onPress={verify} />
+              <Button label={t('auth.changeEmail')} variant="ghost" onPress={() => setStep('email')} />
             </>
           )}
         </Surface>

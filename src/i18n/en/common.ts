@@ -1,0 +1,26 @@
+import type { common as TR } from '../tr/common';
+
+export const common: typeof TR = {
+  appName: 'Davet',
+  back: 'Back',
+  cancel: 'Cancel',
+  close: 'Close',
+  save: 'Save',
+  delete: 'Delete',
+  retry: 'Try again',
+  continue: 'Continue',
+  copy: 'Copy',
+  copied: 'Copied',
+  loading: 'Loading…',
+  sending: 'Sending…',
+  signOut: 'Sign out',
+  settings: 'Settings',
+  language: 'Language',
+  people: { one: '{count} person', other: '{count} people' },
+  households: { one: '{count} household', other: '{count} households' },
+  tapAgainToConfirm: 'Are you sure? Tap again to confirm',
+  userPanel: 'My events',
+  adminPanel: 'Admin panel',
+  adminBadge: 'Admin',
+  unnamed: 'Unnamed',
+};

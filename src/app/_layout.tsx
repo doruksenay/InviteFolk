@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { I18nProvider, useI18n } from '@/i18n';
 import { SessionProvider, useSession } from '@/lib/session';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Body, Display, Surface } from '@/ui/primitives';
@@ -52,16 +53,15 @@ function RootNavigator() {
 }
 
 function ConfigMissing() {
+  const { t } = useI18n();
   useEffect(() => {
     SplashScreen.hideAsync();
   }, []);
   return (
     <View style={{ flex: 1, backgroundColor: color.bg, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <Surface style={{ maxWidth: 460, gap: 12 }}>
-        <Display size={34}>Kurulum gerekli</Display>
-        <Body>
-          .env dosyasına EXPO_PUBLIC_SUPABASE_URL ve EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY değerlerini ekleyip uygulamayı yeniden başlat. Ayrıntılar README dosyasında.
-        </Body>
+        <Display size={34}>{t('layout.configTitle')}</Display>
+        <Body>{t('layout.configBody')}</Body>
       </Surface>
     </View>
   );
@@ -81,14 +81,16 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
-      {isSupabaseConfigured ? (
-        <SessionProvider>
-          <RootNavigator />
-        </SessionProvider>
-      ) : (
-        <ConfigMissing />
-      )}
+      <I18nProvider>
+        <StatusBar style="dark" />
+        {isSupabaseConfigured ? (
+          <SessionProvider>
+            <RootNavigator />
+          </SessionProvider>
+        ) : (
+          <ConfigMissing />
+        )}
+      </I18nProvider>
     </SafeAreaProvider>
   );
 }

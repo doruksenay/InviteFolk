@@ -1,9 +1,10 @@
 import { Pressable, type PressableStateCallbackType, StyleSheet, Text, View } from 'react-native';
 
-import { getEventType } from '@/core/event-types';
+import { eventCopy, getEventType } from '@/core/event-types';
 import { dateBadge, formatWhen } from '@/core/format';
 import { getTheme } from '@/core/themes';
 import type { EventRow, EventSummary } from '@/core/types';
+import { useI18n } from '@/i18n';
 
 import { Icon } from './Icon';
 import { color, font, shadow } from './tokens';
@@ -11,9 +12,11 @@ import { color, font, shadow } from './tokens';
 type PressState = PressableStateCallbackType & { hovered?: boolean };
 
 export function EventCard({ event, summary, onPress, width }: { event: EventRow; summary: EventSummary | null; onPress: () => void; width: number | `${number}%` }) {
-  const t = getEventType(event.type);
+  const { t, lang, locale } = useI18n();
+  const cfg = getEventType(event.type);
+  const typeName = eventCopy(event.type, lang).name;
   const theme = getTheme(event.theme);
-  const badge = dateBadge(event.starts_at);
+  const badge = dateBadge(event.starts_at, locale);
   const total = summary?.households ?? 0;
   const yes = summary?.yes_households ?? 0;
   const no = summary?.no_households ?? 0;
@@ -23,7 +26,7 @@ export function EventCard({ event, summary, onPress, width }: { event: EventRow;
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${event.title}, ${t.name}`}
+      accessibilityLabel={`${event.title}, ${typeName}`}
       onPress={onPress}
       style={(s: PressState) => [styles.card, { width }, s.hovered && { transform: [{ translateY: -3 }], boxShadow: shadow.raised }, s.pressed && { transform: [{ scale: 0.99 }] }]}>
       <View style={[styles.art, { backgroundColor: theme.bg }]}>
@@ -40,12 +43,12 @@ export function EventCard({ event, summary, onPress, width }: { event: EventRow;
           </View>
         )}
         <View style={[styles.type, { backgroundColor: '#FFFFFF' }]}>
-          <Icon name={t.icon} size={14} color={t.accent} strokeWidth={2} />
-          <Text style={[styles.typeText, { color: color.ink }]}>{t.name}</Text>
+          <Icon name={cfg.icon} size={14} color={cfg.accent} strokeWidth={2} />
+          <Text style={[styles.typeText, { color: color.ink }]}>{typeName}</Text>
         </View>
         {event.status === 'draft' && (
           <View style={styles.draft}>
-            <Text style={styles.draftText}>Taslak</Text>
+            <Text style={styles.draftText}>{t('status.event.draft')}</Text>
           </View>
         )}
       </View>
@@ -54,15 +57,17 @@ export function EventCard({ event, summary, onPress, width }: { event: EventRow;
           {event.title}
         </Text>
         <Text style={styles.meta} numberOfLines={1}>
-          {[formatWhen(event.starts_at), event.venue_name].filter(Boolean).join(' · ') || 'Tarih ve yer henüz eklenmedi'}
+          {[formatWhen(event.starts_at, locale), event.venue_name].filter(Boolean).join(' · ') || t('home.card.noDetails')}
         </Text>
-        <View style={styles.bar} accessibilityLabel={`${total} haneden ${yes} geliyor, ${no} gelmiyor, ${pending} bekliyor`}>
+        <View style={styles.bar} accessibilityLabel={t('home.card.barLabel', { total, yes, no, pending })}>
           <View style={{ width: pct(yes), backgroundColor: color.sage }} />
           <View style={{ width: pct(no), backgroundColor: color.coral }} />
           <View style={{ width: pct(pending), backgroundColor: '#EAD9A8' }} />
         </View>
         <Text style={styles.summary}>
-          {total === 0 ? 'Henüz davetli eklenmedi' : `${summary?.attending_people ?? 0} kişi geliyor · ${pending} hane bekliyor`}
+          {total === 0
+            ? t('home.card.noGuests')
+            : `${t('home.card.attending', { count: summary?.attending_people ?? 0 })} · ${t('home.card.pending', { count: pending })}`}
         </Text>
       </View>
     </Pressable>

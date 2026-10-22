@@ -1,0 +1,25 @@
+import type { admin as TR } from '../tr/admin';
+
+export const admin: typeof TR = {
+  titleA: 'Platform',
+  titleB: 'overview',
+  subtitle: 'Users, events and WhatsApp delivery health at a glance.',
+  statsError: "Couldn't load statistics. Make sure your account has the admin role.",
+  users: 'Users',
+  usersSub: '+{count} in the last 7 days',
+  events: 'Events',
+  eventsSub: '{count} active',
+  responseRate: 'Response rate',
+  responseRateSub: '{responses} / {invitations} invitations',
+  whatsapp: 'WhatsApp',
+  whatsappSub: '{rate}% not delivered',
+  revenue: 'Revenue',
+  revenueSub: 'paid packages',
+  eventTypes: 'Event types',
+  recentUsers: 'Recent users',
+  noUsers: 'No users yet.',
+  adminBadge: 'Admin',
+  recentEvents: 'Recent events',
+  noEvents: 'No events yet.',
+  eventLine: '{type} · {households} households · {people} attending',
+};

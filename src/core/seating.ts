@@ -1,5 +1,7 @@
 // Oturma planı: salon geometrisi, koltuk sayımı, hızlı kurulum ve otomatik yerleştirme.
 // Tüm koordinatlar "salon birimi" cinsindendir (ekran pikselinden bağımsız); x, y öğenin merkezidir.
+import type { TFn } from '@/i18n';
+
 import type { InvitationWithContact, SeatingItem, SeatingKind, Side } from './types';
 
 export const HALL_W = 1400;
@@ -9,25 +11,28 @@ export const GRID = 10;
 const CHAIR = 22; // sandalye çapı
 const CHAIR_GAP = 14; // masa kenarı ile sandalye merkezi arası (yarıçapa eklenir)
 
-export type ObjectSpec = { kind: Exclude<SeatingKind, 'table'>; name: string; w: number; h: number; round?: boolean };
+export type ObjectSpec = { kind: Exclude<SeatingKind, 'table'>; w: number; h: number; round?: boolean };
 
 /** Salona eklenebilen masa dışı nesneler. */
 export const OBJECTS: ObjectSpec[] = [
-  { kind: 'stage', name: 'Sahne', w: 380, h: 120 },
-  { kind: 'dance', name: 'Dans pisti', w: 260, h: 200 },
-  { kind: 'bar', name: 'Bar', w: 220, h: 64 },
-  { kind: 'dj', name: 'DJ', w: 110, h: 70 },
-  { kind: 'cake', name: 'Pasta', w: 76, h: 76, round: true },
-  { kind: 'photo', name: 'Fotoğraf köşesi', w: 140, h: 90 },
-  { kind: 'entrance', name: 'Giriş', w: 160, h: 26 },
+  { kind: 'stage', w: 380, h: 120 },
+  { kind: 'dance', w: 260, h: 200 },
+  { kind: 'bar', w: 220, h: 64 },
+  { kind: 'dj', w: 110, h: 70 },
+  { kind: 'cake', w: 76, h: 76, round: true },
+  { kind: 'photo', w: 140, h: 90 },
+  { kind: 'entrance', w: 160, h: 26 },
 ];
 
 export const objectSpec = (kind: SeatingKind) => OBJECTS.find((o) => o.kind === kind);
 
+export const objectName = (kind: Exclude<SeatingKind, 'table'>, t: TFn) => t(`hall.objects.${kind}`);
+
 export const TABLE_CAPACITIES = [4, 6, 8, 10, 12, 14];
 
-/** Hızlı kurulumun koyduğu gelin-damat masası; otomatik yerleştirme buraya kimseyi oturtmaz. */
-export const HEAD_TABLE_LABEL = 'Gelin & Damat';
+/** Hızlı kurulumun koyduğu gelin-damat masası (her iki dilde); otomatik yerleştirme buraya kimseyi oturtmaz. */
+export const HEAD_TABLE_LABELS = ['Gelin & Damat', 'Bride & Groom'];
+export const isHeadTable = (label: string) => HEAD_TABLE_LABELS.includes(label.trim());
 
 // ---------------------------------------------------------------------------
 // Geometri
@@ -97,14 +102,18 @@ export function clampToHall(item: SeatingItem, x: number, y: number, hallH: numb
   };
 }
 
-export function nextTableLabel(items: Pick<SeatingItem, 'kind' | 'label'>[]) {
+export function nextTableNumber(items: Pick<SeatingItem, 'kind' | 'label'>[]) {
   let max = 0;
   for (const it of items) {
     if (it.kind !== 'table') continue;
     const m = /(\d+)\s*$/.exec(it.label);
     if (m) max = Math.max(max, Number(m[1]));
   }
-  return `Masa ${max + 1}`;
+  return max + 1;
+}
+
+export function nextTableLabel(items: Pick<SeatingItem, 'kind' | 'label'>[], t: TFn) {
+  return t('hall.tableLabel', { n: nextTableNumber(items) });
 }
 
 /** Yeni öğe için salonda boş bir yer arar (üstten aşağı, soldan sağa). */
@@ -166,27 +175,27 @@ export type QuickSetup = {
 
 export type NewSeatingItem = Omit<SeatingItem, 'id' | 'event_id'>;
 
-const obj = (kind: Exclude<SeatingKind, 'table'>, x: number, y: number): NewSeatingItem => {
+const obj = (kind: Exclude<SeatingKind, 'table'>, x: number, y: number, t: TFn): NewSeatingItem => {
   const s = objectSpec(kind)!;
-  return { kind, label: s.name, shape: s.round ? 'round' : 'rect', capacity: 0, x, y, rotation: 0, width: s.w, height: s.h };
+  return { kind, label: objectName(kind, t), shape: s.round ? 'round' : 'rect', capacity: 0, x, y, rotation: 0, width: s.w, height: s.h };
 };
 
 /** "300 kişi, 10'luk masa" gibi bir girdiden komple salon düzeni üretir. */
-export function buildQuickLayout(q: QuickSetup): NewSeatingItem[] {
+export function buildQuickLayout(q: QuickSetup, t: TFn): NewSeatingItem[] {
   const out: NewSeatingItem[] = [];
   const cx = HALL_W / 2;
   let y = 40;
 
   if (q.stage) {
-    out.push(obj('stage', cx, y + 60));
+    out.push(obj('stage', cx, y + 60, t));
     y += 120 + 30;
   }
   if (q.headTable) {
-    out.push({ kind: 'table', label: HEAD_TABLE_LABEL, shape: 'rect', capacity: 2, x: cx, y: y + 58, rotation: 0, width: 0, height: 0 });
+    out.push({ kind: 'table', label: t('hall.headTable'), shape: 'rect', capacity: 2, x: cx, y: y + 58, rotation: 0, width: 0, height: 0 });
     y += 116 + 20;
   }
   if (q.dance) {
-    out.push(obj('dance', cx, y + 100));
+    out.push(obj('dance', cx, y + 100, t));
     y += 200 + 40;
   }
 
@@ -205,7 +214,7 @@ export function buildQuickLayout(q: QuickSetup): NewSeatingItem[] {
     const x = cx - rowW / 2 + cellW / 2 + c * cellW;
     out.push({
       kind: 'table',
-      label: `Masa ${i + 1}`,
+      label: t('hall.tableLabel', { n: i + 1 }),
       shape: q.shape,
       capacity: q.capacity,
       x: Math.round(x / GRID) * GRID,
@@ -217,7 +226,7 @@ export function buildQuickLayout(q: QuickSetup): NewSeatingItem[] {
   }
   y += rows * cellH + 20;
 
-  if (q.entrance) out.push(obj('entrance', cx, Math.round((y + 20) / GRID) * GRID));
+  if (q.entrance) out.push(obj('entrance', cx, Math.round((y + 20) / GRID) * GRID, t));
   return out;
 }
 
@@ -232,7 +241,7 @@ const SIDE_ORDER: (Side | null)[] = ['gelin', 'damat', 'ortak', null];
  * damat tarafı sağından, ortaklar ortadan doldurulur. Bir hane bölünmez.
  */
 export function autoAssign(items: SeatingItem[], invitations: InvitationWithContact[]) {
-  const tables = items.filter((t) => t.kind === 'table' && t.label !== HEAD_TABLE_LABEL);
+  const tables = items.filter((it) => it.kind === 'table' && !isHeadTable(it.label));
   const loads = tableLoads(items, invitations);
   const sides = new Map<string, Map<string, number>>();
   for (const t of tables) sides.set(t.id, new Map());
@@ -280,21 +289,21 @@ export function autoAssign(items: SeatingItem[], invitations: InvitationWithCont
 // ---------------------------------------------------------------------------
 // Salon için paylaşılabilir liste
 // ---------------------------------------------------------------------------
-export function seatingText(title: string, items: SeatingItem[], invitations: InvitationWithContact[]) {
+export function seatingText(title: string, items: SeatingItem[], invitations: InvitationWithContact[], t: TFn) {
   const loads = tableLoads(items, invitations);
   const tables = items
-    .filter((t) => t.kind === 'table')
-    .sort((a, b) => a.label.localeCompare(b.label, 'tr', { numeric: true }));
-  const lines = [`${title} — oturma planı`, ''];
-  for (const t of tables) {
-    const l = loads.get(t.id)!;
-    lines.push(`${t.label} (${l.used}/${t.capacity})`);
-    for (const g of l.guests) lines.push(`  • ${g.contacts.name}${seatsFor(g) > 1 ? ` (${seatsFor(g)} kişi)` : ''}`);
+    .filter((it) => it.kind === 'table')
+    .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
+  const lines = [t('hall.listTitle', { title }), ''];
+  for (const table of tables) {
+    const l = loads.get(table.id)!;
+    lines.push(`${table.label} (${l.used}/${table.capacity})`);
+    for (const g of l.guests) lines.push(`  • ${g.contacts.name}${seatsFor(g) > 1 ? ` ${t('hall.partyOf', { count: seatsFor(g) })}` : ''}`);
     lines.push('');
   }
   const left = invitations.filter((i) => !i.table_id && seatsFor(i) > 0);
   if (left.length) {
-    lines.push('Masası belirlenmeyenler');
+    lines.push(t('hall.unassigned'));
     for (const g of left) lines.push(`  • ${g.contacts.name} (${seatsFor(g)})`);
   }
   return lines.join('\n').trim();

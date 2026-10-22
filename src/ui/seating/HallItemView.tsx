@@ -3,6 +3,7 @@ import { PanResponder, Platform, Text, View, type ViewStyle } from 'react-native
 
 import { bodySize, CHAIR_SIZE, chairPositions, footprint, seatsFor, type TableLoad } from '@/core/seating';
 import type { SeatingItem, Side } from '@/core/types';
+import { useI18n } from '@/i18n';
 import { color, font } from '@/ui/tokens';
 
 export const SIDE_COLOR: Record<Side | 'none', string> = {
@@ -53,6 +54,7 @@ function shortLabel(label: string) {
  * Sürükleme sırasında yalnızca bu bileşen yeniden çizilir, bırakınca konum üst bileşene bildirilir.
  */
 export const HallItemView = memo(function HallItemView({ item, scale, load, selected, editable, highlight, onPress, onMove, onDragState }: Props) {
+  const { t } = useI18n();
   const [drag, setDrag] = useState<{ dx: number; dy: number } | null>(null);
   const latest = useRef({ item, scale, editable, onPress, onMove, onDragState });
   useEffect(() => {
@@ -123,7 +125,7 @@ export const HallItemView = memo(function HallItemView({ item, scale, load, sele
     <View
       {...responder.panHandlers}
       accessibilityRole="button"
-      accessibilityLabel={isTable && load ? `${item.label}, ${load.used} / ${item.capacity} kişi` : item.label}
+      accessibilityLabel={isTable && load ? t('seating.hall.tableA11y', { label: item.label, used: load.used, capacity: item.capacity }) : item.label}
       style={{
         position: 'absolute',
         left,

@@ -26,7 +26,10 @@ export type IconName =
   | 'wand'
   | 'eye'
   | 'layout'
-  | 'table';
+  | 'table'
+  | 'settings'
+  | 'globe'
+  | 'lock';
 
 type Props = { name: IconName; size?: number; color?: string; strokeWidth?: number };
 
@@ -169,6 +172,27 @@ export function Icon({ name, size = 22, color = '#24212B', strokeWidth = 1.7 }: 
                 <Circle cx={12} cy={20.5} r={1.5} {...p} />
                 <Circle cx={3.5} cy={12} r={1.5} {...p} />
                 <Circle cx={20.5} cy={12} r={1.5} {...p} />
+              </>
+            );
+          case 'settings':
+            return (
+              <>
+                <Circle cx={12} cy={12} r={3} {...p} />
+                <Path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" {...p} />
+              </>
+            );
+          case 'globe':
+            return (
+              <>
+                <Circle cx={12} cy={12} r={9} {...p} />
+                <Path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z" {...p} />
+              </>
+            );
+          case 'lock':
+            return (
+              <>
+                <Rect x={4} y={10} width={16} height={11} rx={2.5} {...p} />
+                <Path d="M8 10V7a4 4 0 0 1 8 0v3" {...p} />
               </>
             );
           case 'mail':

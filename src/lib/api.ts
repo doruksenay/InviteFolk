@@ -12,10 +12,36 @@ import type {
   Side,
 } from '@/core/types';
 
+import { currentLang, dict, type Lang, makeT } from '@/i18n';
+
 import { supabase } from './supabase';
 
-function must<T>(res: { data: T | null; error: { message: string } | null }): T {
-  if (res.error) throw new Error(res.error.message);
+type DbError = { message: string; details?: string | null; code?: string | null; hint?: string | null };
+
+/**
+ * Veritabanı/API hatasını kullanıcının dilinde, iç ayrıntı sızdırmayan bir mesaja çevirir.
+ * Ham hata yalnızca geliştirme sırasında konsola yazılır.
+ */
+export function friendlyError(err: DbError | Error | unknown): Error {
+  const t = makeT(currentLang());
+  const e = (err ?? {}) as DbError;
+  const msg = String(e.message ?? '');
+  if (__DEV__) console.warn('[api]', err);
+  if (msg.includes('quota_exceeded')) {
+    const what = (e.details ?? '') as keyof ReturnType<typeof dict>['errors']['quotaWhat'];
+    const label = dict(currentLang()).errors.quotaWhat[what] ?? '';
+    return new Error(t('errors.quota', { what: label }));
+  }
+  if (msg.includes('rate_limited')) return new Error(t('errors.rateLimited'));
+  if (msg.includes('forbidden') || e.code === '42501' || e.code === 'PGRST301') return new Error(t('errors.forbidden'));
+  if (msg.includes('not_found') || e.code === 'P0002') return new Error(t('errors.notFound'));
+  if (e.code === '23514' || e.code === '22023' || e.code === '22P02') return new Error(t('errors.invalidInput'));
+  if (/fetch|network|Failed to fetch|Network request failed/i.test(msg)) return new Error(t('errors.network'));
+  return new Error(t('errors.generic'));
+}
+
+function must<T>(res: { data: T | null; error: DbError | null }): T {
+  if (res.error) throw friendlyError(res.error);
   return res.data as T;
 }
 
@@ -45,7 +71,7 @@ export type NewEventInput = {
 
 export async function createEvent(input: NewEventInput): Promise<EventRow> {
   const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) throw new Error('Oturum bulunamadı');
+  if (!auth.user) throw new Error(makeT(currentLang())('errors.noSession'));
   return must(await supabase.from('events').insert({ ...input, owner_id: auth.user.id }).select('*').single()) as EventRow;
 }
 
@@ -60,7 +86,7 @@ export async function getEvent(id: string): Promise<{ event: EventRow; summary: 
 
 export async function addGuest(eventId: string, guest: { name: string; phone: string | null; side: Side | null; max_party: number }) {
   const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) throw new Error('Oturum bulunamadı');
+  if (!auth.user) throw new Error(makeT(currentLang())('errors.noSession'));
   const contact = must(await supabase.from('contacts').insert({ ...guest, owner_id: auth.user.id }).select('id').single()) as { id: string };
   must(await supabase.from('invitations').insert({ event_id: eventId, contact_id: contact.id }).select('id').single());
 }
@@ -76,8 +102,14 @@ export async function removeInvitation(id: string) {
 
 export async function sendInvitations(eventId: string, kind: 'invite' | 'reminder' = 'invite') {
   const { data, error } = await supabase.functions.invoke('send-invitations', { body: { event_id: eventId, kind } });
-  if (error) throw new Error(error.message);
-  return data as { sent: number; failed: number; skipped: number };
+  if (error) {
+    // Fonksiyon hata gövdesini { error, detail } olarak döner; kotayı anlaşılır mesaja çevir.
+    const ctx = (error as { context?: Response }).context;
+    const payload = ctx && typeof ctx.json === 'function' ? await ctx.json().catch(() => null) : null;
+    if (payload?.error === 'quota_exceeded') throw friendlyError({ message: 'quota_exceeded', details: payload.detail ?? 'whatsapp' });
+    throw friendlyError(payload?.error ? { message: String(payload.error) } : error);
+  }
+  return data as { sent: number; failed: number; skipped: number; quota_left?: number };
 }
 
 // ---------------------------------------------------------------------------
@@ -134,15 +166,32 @@ export async function adminStats(): Promise<AdminStats> {
   return must(await supabase.rpc('admin_stats')) as AdminStats;
 }
 
-export async function adminRecentUsers(limit = 20): Promise<Profile[]> {
-  return must(await supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(limit)) as Profile[];
+/** Admin son kullanıcılar: yalnızca ad, rol, paket ve tarih (telefon/e-posta veritabanından hiç gelmez). */
+export type AdminUser = Pick<Profile, 'id' | 'full_name' | 'role' | 'plan' | 'created_at'>;
+export async function adminRecentUsers(limit = 20): Promise<AdminUser[]> {
+  return must(await supabase.rpc('admin_recent_users', { p_limit: limit })) as AdminUser[];
 }
 
-export async function adminRecentEvents(limit = 20): Promise<EventWithSummary[]> {
-  const events = must(await supabase.from('events').select('*').order('created_at', { ascending: false }).limit(limit)) as EventRow[];
-  const ids = events.map((e) => e.id);
-  const summaries = ids.length ? (must(await supabase.from('event_summaries').select('*').in('event_id', ids)) as EventSummary[]) : [];
-  return events.map((e) => ({ ...e, summary: summaries.find((s) => s.event_id === e.id) ?? null }));
+/** Admin son etkinlikler: yalnızca başlık, tür, durum ve sayılar (davetli kişisel verisi yok). */
+export type AdminEvent = Pick<EventRow, 'id' | 'title' | 'type' | 'status' | 'created_at'> & {
+  summary: Pick<EventSummary, 'households' | 'attending_people'> | null;
+};
+export async function adminRecentEvents(limit = 20): Promise<AdminEvent[]> {
+  const rows = must(await supabase.rpc('admin_recent_events', { p_limit: limit })) as (Omit<AdminEvent, 'summary'> & { households: number; attending_people: number })[];
+  return rows.map(({ households, attending_people, ...e }) => ({ ...e, summary: { households: Number(households), attending_people: Number(attending_people) } }));
+}
+
+// ---------------------------------------------------------------------------
+// Hesap
+// ---------------------------------------------------------------------------
+export async function setProfileLocale(userId: string, locale: Lang) {
+  must(await supabase.from('profiles').update({ locale }).eq('id', userId).select('id'));
+}
+
+/** Hesabı ve tüm verisini kalıcı olarak siler (veritabanında zincirleme), ardından oturumu kapatır. */
+export async function deleteMyAccount() {
+  must(await supabase.rpc('delete_my_account'));
+  await supabase.auth.signOut({ scope: 'local' });
 }
 
 // ---------------------------------------------------------------------------

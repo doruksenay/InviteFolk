@@ -1,0 +1,13 @@
+import type { errors as TR } from '../tr/errors';
+
+export const errors: typeof TR = {
+  generic: 'Something went wrong. Please try again.',
+  network: 'Could not connect. Check your internet connection and try again.',
+  noSession: 'Your session has ended. Please sign in again.',
+  forbidden: "You don't have permission to do that.",
+  quota: "You've reached your plan's limit: {what}. Upgrade to add more.",
+  rateLimited: "You're going a little fast. Wait a moment and try again.",
+  invalidInput: 'Some of the information you entered is not valid.',
+  quotaWhat: { events: 'number of events', guests: 'number of guests', contacts: 'number of contacts', hall: 'number of hall items', whatsapp: 'daily WhatsApp messages' },
+  notFound: "We couldn't find what you were looking for.",
+};

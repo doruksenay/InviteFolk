@@ -3,6 +3,7 @@ import Svg, { Circle, Defs, Pattern, Rect } from 'react-native-svg';
 
 import { HALL_W, type TableLoad } from '@/core/seating';
 import type { SeatingItem } from '@/core/types';
+import { useI18n } from '@/i18n';
 import { color } from '@/ui/tokens';
 
 import { type Highlight, HallItemView } from './HallItemView';
@@ -24,6 +25,7 @@ type Props = {
 
 /** Salon tuvali: noktalı zemin (düzenleme) ya da sıcak parke tonu (önizleme) üzerinde öğeler. */
 export function Hall({ items, loads, hallH, scale, selectedId, editable, preview, highlightFor, onPressItem, onMoveItem, onBackgroundPress, onDragState }: Props) {
+  const { t } = useI18n();
   const w = HALL_W * scale;
   const h = hallH * scale;
   const step = 40 * scale;
@@ -37,7 +39,7 @@ export function Hall({ items, loads, hallH, scale, selectedId, editable, preview
         backgroundColor: preview ? '#F4EEE4' : '#FFFFFF',
         boxShadow: preview ? 'inset 0 0 0 1px rgba(120,90,50,0.10)' : `inset 0 0 0 1px ${color.hairline}`,
       }}>
-      <Pressable accessibilityLabel="Seçimi kaldır" onPress={onBackgroundPress} style={{ position: 'absolute', left: 0, top: 0, width: w, height: h }}>
+      <Pressable accessibilityLabel={t('seating.hall.clearSelection')} onPress={onBackgroundPress} style={{ position: 'absolute', left: 0, top: 0, width: w, height: h }}>
         <Svg width={w} height={h}>
           <Defs>
             <Pattern id="dots" x={0} y={0} width={step} height={step} patternUnits="userSpaceOnUse">

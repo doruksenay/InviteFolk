@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
 import type { InvitationTheme } from '@/core/themes';
+import { type Lang, LOCALE_TAG, makeT } from '@/i18n';
 
 import { Icon } from './Icon';
 import { font } from './tokens';
@@ -21,8 +22,24 @@ export type InvitationCopy = {
 /**
  * Davetlinin gördüğü editoryal davetiye kartı.
  * Organizatör önizlemesinde butonlar görsel; LCV sayfasında `actions` ile gerçek butonlar verilir.
+ * `lang` davetiyenin dilidir (arayüz dili değil): büyük harf ve "son gün" satırı ona göre yazılır.
  */
-export function InvitationCard({ theme, copy, actions, style, artHeight = 196 }: { theme: InvitationTheme; copy: InvitationCopy; actions?: ReactNode; style?: ViewStyle; artHeight?: number }) {
+export function InvitationCard({
+  theme,
+  copy,
+  actions,
+  style,
+  artHeight = 196,
+  lang = 'tr',
+}: {
+  theme: InvitationTheme;
+  copy: InvitationCopy;
+  actions?: ReactNode;
+  style?: ViewStyle;
+  artHeight?: number;
+  lang?: Lang;
+}) {
+  const t = makeT(lang);
   return (
     <View style={[styles.card, { backgroundColor: theme.bg }, style]}>
       <View style={{ height: artHeight, overflow: 'hidden' }}>
@@ -36,7 +53,7 @@ export function InvitationCard({ theme, copy, actions, style, artHeight = 196 }:
         </View>
       </View>
       <View style={styles.body}>
-        <Text style={[styles.kicker, { color: theme.key_ }]}>{copy.kicker.toLocaleUpperCase('tr-TR')}</Text>
+        <Text style={[styles.kicker, { color: theme.key_ }]}>{copy.kicker.toLocaleUpperCase(LOCALE_TAG[lang])}</Text>
         <Text style={[styles.title, { color: theme.ink }]}>{copy.title}</Text>
         <Text style={[styles.line, { color: theme.soft }]}>{copy.line}</Text>
         <View style={{ gap: 8, paddingTop: 4 }}>
@@ -59,7 +76,7 @@ export function InvitationCard({ theme, copy, actions, style, artHeight = 196 }:
             </View>
           </View>
         )}
-        {copy.deadline ? <Text style={[styles.foot, { color: theme.soft }]}>Cevap için son gün: {copy.deadline}</Text> : null}
+        {copy.deadline ? <Text style={[styles.foot, { color: theme.soft }]}>{t('wizard.card.deadline', { date: copy.deadline })}</Text> : null}
       </View>
     </View>
   );

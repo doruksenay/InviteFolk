@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useWindowDimensions, View } from 'react-native';
 
+import { useI18n } from '@/i18n';
 import { listMyEvents, useQuery } from '@/lib/api';
 import { useSession } from '@/lib/session';
 import { BrandBar } from '@/ui/BrandBar';
@@ -11,6 +12,7 @@ import { color } from '@/ui/tokens';
 
 export default function MyEvents() {
   const { profile } = useSession();
+  const { t } = useI18n();
   const { width } = useWindowDimensions();
   const { data, loading, error, reload } = useQuery(listMyEvents, []);
 
@@ -29,18 +31,23 @@ export default function MyEvents() {
       <View style={{ flexDirection: width >= 720 ? 'row' : 'column', alignItems: width >= 720 ? 'flex-end' : 'flex-start', justifyContent: 'space-between', gap: 16 }}>
         <View style={{ gap: 8, flexShrink: 1 }}>
           <Display size={width >= 720 ? 56 : 44}>
-            Merhaba{firstName ? ', ' : ''}
+            {t('home.hello')}
+            {firstName ? ', ' : ''}
             <DisplayItalic style={{ color: color.lavender }}>{firstName ?? ''}</DisplayItalic>
           </Display>
-          <Body>{data && data.length ? `${data.length} etkinliğin var${pending ? `, ${pending} hane cevap bekliyor` : ''}.` : 'İlk davetini birkaç dakikada hazırla.'}</Body>
+          <Body>
+            {data && data.length
+              ? `${t('home.summary', { count: data.length })}${pending ? t('home.summaryPending', { count: pending }) : ''}.`
+              : t('home.firstInvite')}
+          </Body>
         </View>
-        <Button label="Yeni etkinlik" variant="accent" size="lg" icon="plus" onPress={() => router.push('/yeni')} />
+        <Button label={t('home.newEvent')} variant="accent" size="lg" icon="plus" onPress={() => router.push('/yeni')} />
       </View>
 
       {error && (
         <View style={{ gap: 12 }}>
-          <Notice tone="error" text="Etkinlikler yüklenemedi. Bağlantını kontrol edip tekrar dene." />
-          <Button label="Tekrar dene" variant="secondary" onPress={reload} style={{ alignSelf: 'flex-start' }} />
+          <Notice tone="error" text={t('home.loadFailed')} />
+          <Button label={t('common.retry')} variant="secondary" onPress={reload} style={{ alignSelf: 'flex-start' }} />
         </View>
       )}
 
@@ -57,9 +64,9 @@ export default function MyEvents() {
         </View>
       ) : data && data.length === 0 ? (
         <EmptyState
-          title="İlk davetini hazırla"
-          body="Düğün, doğum günü ya da perşembe maçı. Türü seç, listeni yükle, gerisini biz takip edelim."
-          action={<Button label="Yeni etkinlik" variant="accent" icon="plus" onPress={() => router.push('/yeni')} />}
+          title={t('home.emptyTitle')}
+          body={t('home.emptyBody')}
+          action={<Button label={t('home.newEvent')} variant="accent" icon="plus" onPress={() => router.push('/yeni')} />}
         />
       ) : (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap }}>

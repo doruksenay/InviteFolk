@@ -1,0 +1,17 @@
+export const auth = {
+  headline: 'Her davet, ',
+  headlineAccent: 'bir dokunuşla.',
+  intro: 'Düğünden halı saha maçına kadar davetlerini gönder, cevapları tek yerden takip et.',
+  email: 'E-posta',
+  emailPlaceholder: 'ayse@ornek.com',
+  invalidEmail: 'Geçerli bir e-posta adresi yaz.',
+  sendCode: 'Giriş kodu gönder',
+  sendFailed: 'Kod gönderilemedi. Biraz sonra tekrar dene.',
+  newAccountHint: 'Hesabın yoksa ilk girişte otomatik oluşturulur.',
+  codeSent: '{email} adresine 6 haneli bir kod gönderdik.',
+  code: 'Giriş kodu',
+  codeTooShort: 'E-postadaki 6 haneli kodu yaz.',
+  verifyFailed: 'Kod doğrulanamadı. Kodu kontrol et ya da yenisini iste.',
+  signIn: 'Giriş yap',
+  changeEmail: 'E-postayı değiştir',
+};
