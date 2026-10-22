@@ -42,6 +42,11 @@ Deno.serve(async (req) => {
   ]);
   if (!price || !profile) return json(req, { error: 'server_error' }, 500);
   if (profile.suspended_at) return json(req, { error: 'forbidden' }, 403);
+  // Geçerli bir üst paket varken daha düşük paket satılmaz (süre/iade istismarını da engeller).
+  const { data: plans } = await db.from('plan_prices').select('plan, rank');
+  const { data: eff } = await asUser.rpc('my_plan');
+  const rankOf = (p: string) => plans?.find((x) => x.plan === p)?.rank ?? 0;
+  if (eff && rankOf(String((eff as { plan?: string }).plan ?? 'free')) > rankOf(pkg)) return json(req, { error: 'invalid_input' }, 409);
   const amount = Number(price.amount_try);
 
   // Kısa sürede çok fazla ödeme oturumu açılmasın (kötüye kullanım freni).

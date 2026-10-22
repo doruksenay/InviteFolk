@@ -52,7 +52,10 @@ Deno.serve(async (req) => {
   const design = ev.settings?.design as { path?: unknown; width?: unknown; height?: unknown; overlay?: unknown } | undefined;
   const path = typeof design?.path === 'string' ? design.path : null;
   const prefix = `${ev.owner_id}/${ev.id}/`;
-  if (!path || !path.startsWith(prefix) || path.includes('..') || path.length > 200) return notFound(req);
+  // Yol beyaz listeyle doğrulanır (kodlanmış "%2e%2e" gibi kaçışlar dahil hiçbir şey geçemez);
+  // veritabanı da aynı biçimi yazarken zorlar (20261026000000_hardening.sql).
+  const SAFE = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[0-9a-f]{8,64}\\.(png|jpe?g|webp)$`);
+  if (!path || path.length > 200 || !SAFE.test(path)) return notFound(req);
 
   const signed = await db.storage.from('designs').createSignedUrl(path, SIGNED_SECONDS);
   if (signed.error || !signed.data?.signedUrl) {

@@ -142,7 +142,7 @@ public/pdfjs/                  PDF'ten görsel üretimi (yalnızca web)
 
 ## Güvenlik
 
-İlke: uygulama ya da web sitesi tamamen ele geçirilse bile saldırganın elinde yalnızca herkese açık anahtar ve en fazla kendi oturumu olur; asıl koruma veritabanındadır. 93 saldırı ve işlev senaryosu gerçek Postgres üzerinde test edildi.
+İlke: uygulama ya da web sitesi tamamen ele geçirilse bile saldırganın elinde yalnızca herkese açık anahtar ve en fazla kendi oturumu olur; asıl koruma veritabanındadır. 113 saldırı ve işlev senaryosu gerçek Postgres üzerinde test edildi; ayrıca bağımsız bir güvenlik incelemesinin bulduğu 5 açık kapatıldı ve tekrar test edildi. Son cevap günü bilerek yalnızca bilgi amaçlıdır: geç cevaplar da kabul edilir.
 
 **Veritabanı**
 - Satır düzeyi güvenlik: herkes yalnızca kendi etkinlik, kişi, masa, davet, tasarım dosyası ve bildirim anahtarını görür.

@@ -61,7 +61,9 @@ export async function parseSendRequest(req: Request): Promise<SendRequest | Send
     return { status: 500, error: 'server_error' };
   }
 
-  const { data: profile } = await asUser.from('profiles').select('full_name').eq('id', auth.user.id).maybeSingle();
+  const { data: profile } = await asUser.from('profiles').select('full_name, suspended_at').eq('id', auth.user.id).maybeSingle();
+  // Askıya alınmış hesap mesaj gönderemez (veritabanı da kotayı 0 döndürür).
+  if (!profile || profile.suspended_at) return { status: 403, error: 'forbidden' };
 
   const targets: DeliveryTarget[] = (rows ?? []).map((r) => {
     // deno-lint-ignore no-explicit-any
