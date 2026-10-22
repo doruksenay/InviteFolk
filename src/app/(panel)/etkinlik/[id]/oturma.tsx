@@ -32,7 +32,9 @@ import { Screen } from '@/ui/Screen';
 import { Hall } from '@/ui/seating/Hall';
 import type { Highlight } from '@/ui/seating/HallItemView';
 import { Chip, GuestPool, type ItemPatch, ObjectInspector, ObjectMenu, SideLegend, TableInspector } from '@/ui/seating/Panels';
+import { buildCardsHtml, type CardTable, printHtml } from '@/ui/seating/printCards';
 import { QuickSetupSheet } from '@/ui/seating/QuickSetupSheet';
+import { NotifyTablesSheet, PrintCardsSheet } from '@/ui/seating/TableSheets';
 import { color, font, radius, WIDE_BREAKPOINT } from '@/ui/tokens';
 
 type NoticeState = { tone: 'success' | 'info' | 'warning' | 'error'; text: string } | null;
@@ -57,6 +59,9 @@ export default function SeatingScreen() {
   const [dragging, setDragging] = useState(false);
   const [notice, setNotice] = useState<NoticeState>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [printOpen, setPrintOpen] = useState(false);
+  const [printing, setPrinting] = useState(false);
 
   const items = useMemo(() => q.data?.items ?? [], [q.data]);
   // Silinmiş/bilinmeyen bir masaya işaret eden davet masasız sayılır (veritabanı zaten null'lar; bu yalnızca savunma).
@@ -241,6 +246,33 @@ export default function SeatingScreen() {
     });
   }
 
+  // Gelen ve masası belli olan haneler ("masanız" mesajı bunlara gider).
+  const seatedComing = invitations.filter((i) => i.status === 'yes' && i.table_id);
+
+  async function printCards(tents: boolean) {
+    const tbs: CardTable[] = items
+      .filter((it) => it.kind === 'table')
+      .map((it) => ({
+        label: it.label,
+        guests: (loads.get(it.id)?.guests ?? []).map((g) => ({ name: g.contacts.name, count: seatsFor(g) })),
+      }));
+    if (!tbs.length) return;
+    setPrinting(true);
+    const title = q.data?.event.title ?? t('seating.fallbackTitle');
+    const html = buildCardsHtml(tbs, tents, {
+      docTitle: t('seating.print.docTitle', { title }),
+      eventTitle: title,
+      dateLine: [formatWhen(q.data?.event.starts_at, locale), q.data?.event.venue_name].filter(Boolean).join(' · ') || null,
+      tableHeading: t('seating.print.tableHeading'),
+      emptyTable: t('seating.print.emptyTable'),
+      guestsLabel: (count) => t('seating.print.guests', { count }),
+    });
+    const outcome = await printHtml(html);
+    setPrinting(false);
+    if (outcome === 'ok') setPrintOpen(false);
+    else setNotice({ tone: 'error', text: outcome === 'popup_blocked' ? t('seating.print.popupBlocked') : t('seating.print.failed') });
+  }
+
   async function copyList() {
     await Clipboard.setStringAsync(seatingText(q.data?.event.title ?? t('seating.fallbackTitle'), items, invitations, t));
     setNotice({ tone: 'success', text: t('seating.notices.listCopied') });
@@ -317,7 +349,8 @@ export default function SeatingScreen() {
             setMenu(null);
           }}
         />
-        <Button label={t('seating.copyList')} icon="copy" variant="secondary" onPress={copyList} disabled={!tables.length} />
+        <Button label={t('seating.notify.button')} icon="bell" variant="secondary" onPress={() => setNotifyOpen(true)} disabled={!tables.length} />
+        <Button label={t('seating.print.button')} icon="print" variant="secondary" onPress={() => setPrintOpen(true)} disabled={!tables.length} />
       </View>
     </View>
   );
@@ -525,6 +558,17 @@ export default function SeatingScreen() {
         onClose={() => setQuickOpen(false)}
         onSubmit={quickSetup}
       />
+      <NotifyTablesSheet
+        open={notifyOpen}
+        onClose={() => setNotifyOpen(false)}
+        eventId={id}
+        total={seatedComing.length}
+        withPhone={seatedComing.filter((i) => !!i.contacts.phone).length}
+        withEmail={seatedComing.filter((i) => !!i.contacts.email).length}
+        onCopy={copyList}
+        onResult={setNotice}
+      />
+      <PrintCardsSheet open={printOpen} onClose={() => setPrintOpen(false)} busy={printing} disabled={!tables.length} onPrint={printCards} />
     </Screen>
   );
 }

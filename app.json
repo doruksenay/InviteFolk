@@ -8,7 +8,6 @@
     "scheme": "davet",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.davet.app",
       "supportsTablet": true,
       "config": {
@@ -40,16 +39,38 @@
         {
           "backgroundColor": "#FAF7F2",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 120
         }
       ],
       "expo-sqlite",
       "expo-localization",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-sharing",
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Davetli listesine telefon rehberinden kişi eklemek için rehberine erişmek istiyoruz. / We use your contacts only to add guests you choose."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Kendi davetiye tasarımını yüklemek için fotoğraflarına erişmek istiyoruz. / We use your photos only to upload your invitation design.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#7E66DE"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false,
       "reactCompiler": true
-    }
+    },
+    "description": "Düğünden halı saha maçına her etkinlik için davetiye, WhatsApp ile davet, canlı LCV takibi ve oturma planı. / Invitations, WhatsApp invites, live RSVPs and seating plans for any event."
   }
 }

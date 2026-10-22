@@ -6,6 +6,7 @@ export const errors = {
   quota: 'Paketinin sınırına ulaştın: {what}. Daha fazlası için paketini yükselt.',
   rateLimited: 'Çok hızlı gidiyorsun. Biraz bekleyip tekrar dene.',
   invalidInput: 'Girdiğin bilgilerden biri geçersiz.',
+  duplicate: 'Bu telefon numarası rehberinde zaten kayıtlı.',
   quotaWhat: { events: 'etkinlik sayısı', guests: 'davetli sayısı', contacts: 'kişi sayısı', hall: 'salon öğesi sayısı', whatsapp: 'günlük WhatsApp mesajı' },
   notFound: 'Aradığın kayıt bulunamadı.',
 };

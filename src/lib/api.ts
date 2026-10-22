@@ -38,6 +38,7 @@ export function friendlyError(err: DbError | Error | unknown): Error {
   if (msg.includes('rate_limited')) return new Error(t('errors.rateLimited'));
   if (msg.includes('forbidden') || e.code === '42501' || e.code === 'PGRST301') return new Error(t('errors.forbidden'));
   if (msg.includes('not_found') || e.code === 'P0002') return new Error(t('errors.notFound'));
+  if (e.code === '23505') return new Error(t('errors.duplicate'));
   if (e.code === '23514' || e.code === '22023' || e.code === '22P02') return new Error(t('errors.invalidInput'));
   if (/fetch|network|Failed to fetch|Network request failed/i.test(msg)) return new Error(t('errors.network'));
   return new Error(t('errors.generic'));

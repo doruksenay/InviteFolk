@@ -17,8 +17,8 @@ export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'dogum' | 'yemek' |
     rsvp: RSVP,
     menu: ['Et', 'Balık', 'Vejetaryen', 'Çocuk menüsü'],
     features: [
-      { title: 'Oturma planı', detail: 'Masaları kur, davetlileri sürükleyip yerleştir.' },
-      { title: 'Kına ve düğün tek listede', detail: 'Listeyi bir kez yükle, iki etkinliğe davet et.' },
+      { title: 'Oturma planı', detail: 'Masaları kur, davetlileri tek dokunuşla yerleştir.' },
+      { title: 'Kına ve düğün aynı rehberden', detail: 'Listeyi bir kez yükle, kınaya da tek dokunuşla davet et.' },
       { title: 'Menü tercihi', detail: 'Et, balık ve vejetaryen sayıları hazır gelir.' },
     ],
     sample: { greet: 'Sayın Ahmet Yılmaz ve ailesi', kicker: 'Evleniyoruz', title: 'Ayşe\n& Mehmet', line: 'Hayatımızın en güzel gününde sizi de aramızda görmek istiyoruz.', when: '12 Haziran 2027, Cumartesi · 19.00', where: 'Kalamış Davet Salonu, Kadıköy', deadline: '1 Mayıs', host: 'A', wa: 'Ayşe ve Mehmet sizi düğünlerine davet ediyor.' },
@@ -41,9 +41,9 @@ export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'dogum' | 'yemek' |
     rsvp: RSVP,
     menu: null,
     features: [
-      { title: 'Düğünle ortak liste', detail: 'Aynı davetlilere ikinci etkinlik tek dokunuşla.' },
-      { title: 'Kadın ya da karma davet', detail: 'Kimlerin davetli olduğunu filtreyle seç.' },
-      { title: 'Otomatik hatırlatma', detail: 'Gece yaklaşınca konum ve saat gider.' },
+      { title: 'Düğün rehberinden ekle', detail: 'Aynı davetlileri ikinci etkinliğe tek dokunuşla çağır.' },
+      { title: 'Kendi davetiye tasarımın', detail: 'Görselini yükle, her davetlinin adı üstüne yazılsın.' },
+      { title: 'Otomatik hatırlatma', detail: 'Cevap vermeyenlere kendiliğinden hatırlatır.' },
     ],
     sample: { greet: 'Sayın Ahmet Yılmaz ve ailesi', kicker: 'Kına gecesi', title: "Ayşe'nin\nkınası", line: 'Kınamızı yakarken sevdiklerimiz yanımızda olsun istiyoruz.', when: '11 Haziran 2027, Cuma · 20.00', where: '[Mekân adı], Üsküdar', deadline: '25 Mayıs', host: 'A', wa: 'Ayşe sizi kına gecesine davet ediyor.' },
   },
@@ -66,7 +66,7 @@ export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'dogum' | 'yemek' |
     menu: ['Et', 'Balık', 'Vejetaryen'],
     features: [
       { title: 'Menü tercihi', detail: 'Et, balık ya da vejetaryen seçimi.' },
-      { title: 'Kişi sınırı', detail: 'Masa kaç kişilikse o kadar davet.' },
+      { title: 'Kişi sınırı', detail: 'Her haneye en fazla kaç kişi gelebileceğini belirle.' },
       { title: 'Alerji notu', detail: 'Davetliler özel isteklerini yazar.' },
     ],
     sample: { greet: 'Sayın [Davetli adı]', kicker: 'Akşam yemeği', title: 'Cumartesi\nbize gelin', line: 'Sofrayı kuruyoruz, gerisini sohbete bırakıyoruz.', when: '13 Mart 2027, Cumartesi · 20.00', where: "Ece ve Can'ın evi, Cihangir", deadline: '6 Mart', host: 'E', wa: 'Ece ve Can sizi akşam yemeğine davet ediyor.' },
@@ -77,8 +77,8 @@ export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'dogum' | 'yemek' |
     rsvp: RSVP,
     menu: null,
     features: [
-      { title: 'Şirket ve unvan alanı', detail: 'Katılımcı bilgileri tek listede.' },
-      { title: 'Yaka kartı için QR', detail: 'Girişte okut, katılımı anında gör.' },
+      { title: 'Grup etiketleri', detail: 'Şirket ya da ekip adıyla listeni düzenle.' },
+      { title: 'Özel sorular', detail: 'Katılımcılara istediğin bilgiyi sor.' },
       { title: 'Toplu e-posta', detail: 'WhatsApp yanında kurumsal e-posta da gider.' },
     ],
     sample: { greet: 'Sayın [Davetli adı]', kicker: 'Davetlisiniz', title: 'Bayi\ntoplantısı 2027', line: 'Yeni dönemin planlarını birlikte konuşalım.', when: '4 Nisan 2027, Pazar · 10.00', where: '[Otel adı], Şişli', deadline: '25 Mart', host: 'Ş', wa: '[Şirket adı] sizi bayi toplantısına davet ediyor.' },
@@ -90,7 +90,7 @@ export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'dogum' | 'yemek' |
     menu: null,
     features: [
       { title: 'Kadro ve yedek listesi', detail: 'Kadro dolunca yedekler sıraya girer.' },
-      { title: 'Her hafta otomatik', detail: 'Davet her hafta kendiliğinden gider.' },
+      { title: 'Her hafta otomatik', detail: 'Maç bitince yeni hafta açılır, davet kendiliğinden gider.' },
       { title: 'Kim ödedi', detail: 'Saha ücretini kişi kişi takip et.' },
     ],
     sample: { greet: 'Selam [Davetli adı],', kicker: 'Perşembe maçı', title: 'Halı saha\n21.00', line: 'Kadroda yerin hazır, eksik kalmayalım.', when: 'Her perşembe · 21.00–22.00', where: '[Saha adı], Ataşehir', deadline: 'Çarşamba 18.00', host: 'B', wa: 'Burak seni perşembe maçına çağırıyor.' },

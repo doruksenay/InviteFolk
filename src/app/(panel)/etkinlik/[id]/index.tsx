@@ -4,17 +4,23 @@ import { useMemo, useState } from 'react';
 import { Linking, Pressable, Text, useWindowDimensions, View } from 'react-native';
 
 import { eventCopy, getEventType } from '@/core/event-types';
-import { daysUntil, formatNumber, formatWhen, initials, normalizePhone, rsvpUrl, waMeLink } from '@/core/format';
+import { daysUntil, formatNumber, formatTry, formatWhen, initials, rsvpUrl, waMeLink } from '@/core/format';
 import { getTheme } from '@/core/themes';
-import type { InvitationWithContact, RsvpStatus, Side } from '@/core/types';
-import { eventLang, LANG_NAMES, LOCALE_TAG, makeT, type TKey, useI18n } from '@/i18n';
-import { addGuest, getEvent, removeInvitation, sendInvitations, setInvitationStatus, useQuery } from '@/lib/api';
-import { Icon } from '@/ui/Icon';
-import { Avatar, Body, Button, Caption, Display, Field, IconButton, Label, Notice, Pill, Skeleton, StatusBadge, Surface, Title } from '@/ui/primitives';
+import type { EventSettings, InvitationWithContact, RsvpStatus } from '@/core/types';
+import { eventLang, LANG_NAMES, type TKey, useI18n } from '@/i18n';
+import { getEvent, useQuery } from '@/lib/api';
+import { setPaid, setStatus, updateEvent } from '@/lib/api-guests';
+import { GuestAdder } from '@/ui/guests/GuestAdder';
+import { GuestEditSheet } from '@/ui/guests/GuestEditSheet';
+import { Icon, type IconName } from '@/ui/Icon';
+import { Avatar, Body, Button, Caption, Display, IconButton, Notice, Pill, Skeleton, StatusBadge, Surface, Title } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
+import { guestMessage, SendPanel } from '@/ui/send/SendPanel';
+import { Sheet } from '@/ui/Sheet';
 import { color, font, radius, shadow, status as statusTokens } from '@/ui/tokens';
 
 type Filter = 'all' | RsvpStatus | 'failed';
+type Feedback = { tone: 'success' | 'error' | 'info'; text: string } | null;
 
 export default function EventDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -24,22 +30,16 @@ export default function EventDetail() {
   const { data, loading, error, reload } = useQuery(() => getEvent(id), [id]);
 
   const [filter, setFilter] = useState<Filter>('all');
-  const [feedback, setFeedback] = useState<{ tone: 'success' | 'error' | 'info'; text: string } | null>(null);
-  const [sending, setSending] = useState(false);
-
-  // Davetli ekleme formu
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [side, setSide] = useState<Side | null>(null);
-  const [maxParty, setMaxParty] = useState('2');
-  const [adding, setAdding] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Feedback>(null);
+  const [sendOpen, setSendOpen] = useState(false);
+  const [editing, setEditing] = useState<InvitationWithContact | null>(null);
 
   const invitations = useMemo(() => data?.invitations ?? [], [data]);
-  const filtered = useMemo(
-    () => invitations.filter((i) => filter === 'all' || (filter === 'failed' ? i.delivery === 'failed' : i.status === filter)),
-    [invitations, filter],
-  );
+  const filtered = useMemo(() => {
+    const list = invitations.filter((i) => filter === 'all' || (filter === 'failed' ? i.delivery === 'failed' : i.status === filter));
+    if (filter === 'waitlist') return [...list].sort((a, b) => (a.responded_at ?? a.created_at).localeCompare(b.responded_at ?? b.created_at));
+    return list;
+  }, [invitations, filter]);
 
   if (loading && !data) {
     return (
@@ -61,87 +61,80 @@ export default function EventDetail() {
   }
 
   const { event, summary } = data;
+  const settings = (event.settings ?? {}) as EventSettings;
   const cfg = getEventType(event.type);
   const theme = getTheme(event.theme);
-  // Davetliye giden her şey etkinliğin dilinde.
   const evLang = eventLang(event.settings);
-  const et = makeT(evLang);
   const typeName = eventCopy(event.type, lang).name;
   const days = daysUntil(event.starts_at);
+  const archived = event.status === 'archived';
+  const roster = typeof settings.roster_size === 'number' ? settings.roster_size : null;
+  const fee = typeof settings.fee === 'number' && settings.fee > 0 ? settings.fee : null;
+  const questions = settings.questions ?? [];
+
   const counts = {
     all: invitations.length,
     yes: invitations.filter((i) => i.status === 'yes').length,
     pending: invitations.filter((i) => i.status === 'pending').length,
     no: invitations.filter((i) => i.status === 'no').length,
+    waitlist: invitations.filter((i) => i.status === 'waitlist').length,
     failed: invitations.filter((i) => i.delivery === 'failed').length,
+    paid: invitations.filter((i) => i.status === 'yes' && i.paid).length,
   };
 
-  const inviteText = (inv: InvitationWithContact) =>
-    et('event.waMessage', {
-      name: inv.contacts.name,
-      title: event.title,
-      when: [formatWhen(event.starts_at, LOCALE_TAG[evLang]), event.venue_name].filter(Boolean).join(' · '),
-      link: rsvpUrl(inv.token),
-    });
+  // Menü dağılımı (gelen haneler)
+  const menuCounts = (settings.menu ?? []).map((m) => ({ m, n: invitations.filter((i) => i.status === 'yes' && i.menu === m).length })).filter((x) => x.n > 0);
 
-  const submitGuest = async () => {
-    setFormError(null);
-    if (!name.trim()) {
-      setFormError(t('event.form.errName'));
-      return;
-    }
-    const normalized = phone.trim() ? normalizePhone(phone) : null;
-    if (phone.trim() && !normalized) {
-      setFormError(t('event.form.errPhone'));
-      return;
-    }
-    setAdding(true);
+  const quickStatus = async (inv: InvitationWithContact, s: RsvpStatus) => {
     try {
-      await addGuest(event.id, { name: name.trim(), phone: normalized, side, max_party: Math.min(20, Math.max(1, Number(maxParty) || 1)) });
-      setName('');
-      setPhone('');
-      setFeedback({ tone: 'success', text: t('event.form.added', { name: name.trim() }) });
+      await setStatus(inv.id, s, s === 'yes' ? (inv.party_size || 1) : 0);
       reload();
     } catch (e) {
-      setFormError(e instanceof Error ? e.message : t('event.form.errAdd'));
-    } finally {
-      setAdding(false);
+      setFeedback({ tone: 'error', text: e instanceof Error ? e.message : String(e) });
     }
   };
 
-  const sendAll = async (kind: 'invite' | 'reminder') => {
-    setSending(true);
-    setFeedback({ tone: 'info', text: kind === 'invite' ? t('event.send.sendingInvites') : t('event.send.sendingReminders') });
+  const togglePaid = async (inv: InvitationWithContact) => {
     try {
-      const r = await sendInvitations(event.id, kind);
-      setFeedback({
-        tone: r.failed ? 'error' : 'success',
-        text: `${t('event.send.sent', { count: r.sent })}${r.failed ? t('event.send.failed', { count: r.failed }) : ''}${r.skipped ? t('event.send.skipped', { count: r.skipped }) : ''}.`,
-      });
+      await setPaid(inv.id, !inv.paid);
       reload();
-    } catch {
-      setFeedback({
-        tone: 'error',
-        text: t('event.send.unavailable'),
-      });
-    } finally {
-      setSending(false);
+    } catch (e) {
+      setFeedback({ tone: 'error', text: e instanceof Error ? e.message : String(e) });
     }
   };
 
-  const setStatus = async (inv: InvitationWithContact, s: RsvpStatus) => {
-    await setInvitationStatus(inv.id, s, s === 'yes' ? inv.party_size ?? 1 : 0);
-    reload();
+  const unarchive = async () => {
+    try {
+      await updateEvent(event.id, { status: 'active' });
+      reload();
+    } catch (e) {
+      setFeedback({ tone: 'error', text: e instanceof Error ? e.message : String(e) });
+    }
   };
 
-  const stat = (label: string, value: string, tone: keyof typeof statusTokens | 'neutral') => {
+  const stat = (label: string, value: string, tone: keyof typeof statusTokens | 'neutral', sub?: string) => {
     const st = tone === 'neutral' ? { bg: color.surface, ink: color.ink } : statusTokens[tone];
     return (
       <View key={label} style={{ flexGrow: 1, flexBasis: wide ? 0 : '45%', backgroundColor: st.bg, borderRadius: radius.xl, padding: 20, gap: 6, boxShadow: tone === 'neutral' ? shadow.card : 'none' }}>
         <Text style={{ fontFamily: font.serif, fontSize: 40, lineHeight: 42, color: st.ink }}>{value}</Text>
         <Text style={{ fontFamily: font.semibold, fontSize: 14, color: st.ink }}>{label}</Text>
+        {sub ? <Text style={{ fontFamily: font.medium, fontSize: 12, color: st.ink, opacity: 0.8 }}>{sub}</Text> : null}
       </View>
     );
+  };
+
+  const filters: [Filter, number][] = [
+    ['all', counts.all],
+    ['yes', counts.yes],
+    ['pending', counts.pending],
+    ['no', counts.no],
+    ...(roster ? ([['waitlist', counts.waitlist]] as [Filter, number][]) : []),
+    ['failed', counts.failed],
+  ];
+
+  const answerLine = (inv: InvitationWithContact) => {
+    const parts = questions.map((q) => (inv.answers?.[q.id] ? `${q.label}: ${inv.answers[q.id]}` : null)).filter(Boolean);
+    return parts.length ? parts.join(' · ') : null;
   };
 
   return (
@@ -154,84 +147,99 @@ export default function EventDetail() {
             <Pill label={typeName} bg={cfg.iconBg} fg={color.ink} />
             <Pill label={t('event.invitationLang', { lang: LANG_NAMES[evLang] })} bg={color.surfaceSoft} fg={color.inkSoft} />
             {event.status === 'draft' && <Pill label={t('status.event.draft')} bg={color.ink} fg="#FFFFFF" />}
+            {archived && <Pill label={t('status.event.archived')} bg={color.goldTint} fg={color.goldInk} />}
+            {settings.recurring === 'weekly' && <Pill label={t('event.weekly')} bg={color.sageTint} fg={color.sageInk} />}
           </View>
           <Display size={wide ? 48 : 38}>{event.title}</Display>
           <Caption>{[formatWhen(event.starts_at, locale), event.venue_name].filter(Boolean).join(' · ') || t('event.noDateVenue')}</Caption>
         </View>
-        <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
-          {counts.pending > 0 && invitations.some((i) => i.delivery !== 'not_sent') && (
-            <Button label={t('event.remind', { count: counts.pending })} variant="secondary" icon="send" loading={sending} onPress={() => sendAll('reminder')} />
-          )}
-          <Button label={t('event.inviteWhatsApp')} variant="accent" icon="send" loading={sending} disabled={!invitations.length} onPress={() => sendAll('invite')} />
+        <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Button label={t('event.edit')} variant="secondary" icon="edit" onPress={() => router.push({ pathname: '/etkinlik/[id]/duzenle', params: { id: event.id } })} />
+          <Button label={t('event.send')} variant="accent" icon="send" disabled={!invitations.length || archived} onPress={() => setSendOpen(true)} />
         </View>
       </View>
+
+      {archived && (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12, backgroundColor: color.goldTint, borderRadius: radius.lg, padding: 16 }}>
+          <Icon name="archive" size={20} color={color.goldInk} />
+          <Text style={{ flex: 1, minWidth: 200, fontFamily: font.semibold, fontSize: 14, color: color.goldInk }}>{t('event.archivedBanner')}</Text>
+          <Button label={t('event.unarchive')} variant="secondary" onPress={unarchive} />
+        </View>
+      )}
 
       {feedback && <Notice tone={feedback.tone} text={feedback.text} />}
 
       {/* Özet */}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
-        {stat(t('event.stats.attending'), formatNumber(summary?.attending_people ?? 0, locale), 'yes')}
-        {stat(t('event.stats.pending'), formatNumber(counts.pending, locale), 'pending')}
-        {stat(t('event.stats.declined'), formatNumber(counts.no, locale), 'no')}
-        {days !== null && days >= 0
-          ? stat(t('event.stats.daysLeft'), formatNumber(days, locale), 'neutral')
-          : stat(t('event.stats.invited'), formatNumber(counts.all, locale), 'neutral')}
+        {roster ? (
+          <>
+            {stat(t('event.stats.squad'), `${formatNumber(counts.yes, locale)}/${roster}`, 'yes')}
+            {stat(t('event.stats.waitlist'), formatNumber(counts.waitlist, locale), 'maybe')}
+            {stat(t('event.stats.pending'), formatNumber(counts.pending, locale), 'pending')}
+            {fee
+              ? stat(t('event.stats.paid'), `${counts.paid}/${counts.yes}`, 'neutral', t('event.feeLine', { collected: formatTry(counts.paid * fee, locale), expected: formatTry(counts.yes * fee, locale) }))
+              : stat(t('event.stats.declined'), formatNumber(counts.no, locale), 'no')}
+          </>
+        ) : (
+          <>
+            {stat(t('event.stats.attending'), formatNumber(summary?.attending_people ?? 0, locale), 'yes')}
+            {stat(t('event.stats.pending'), formatNumber(counts.pending, locale), 'pending')}
+            {stat(t('event.stats.declined'), formatNumber(counts.no, locale), 'no')}
+            {days !== null && days >= 0 ? stat(t('event.stats.daysLeft'), formatNumber(days, locale), 'neutral') : stat(t('event.stats.invited'), formatNumber(counts.all, locale), 'neutral')}
+          </>
+        )}
       </View>
 
-      {cfg.tools.seating && <SeatingCard eventId={event.id} invitations={invitations} wide={wide} />}
-
-      <View style={{ flexDirection: wide ? 'row' : 'column', gap: 20, alignItems: 'flex-start' }}>
-        {/* Davetli ekle */}
-        <Surface style={{ width: wide ? 360 : '100%', gap: 14 }}>
-          <Title>{t('event.form.title')}</Title>
-          <Field label={t('event.form.name')} placeholder={t('event.form.namePlaceholder')} value={name} onChangeText={setName} />
-          <Field
-            label={t('event.form.phone')}
-            placeholder={t('event.form.phonePlaceholder')}
-            keyboardType="phone-pad"
-            value={phone}
-            onChangeText={setPhone}
-            hint={t('event.form.phoneHint')}
-          />
-          {cfg.tools.seating && (
-            <View style={{ gap: 8 }}>
-              <Label>{t('event.form.side')}</Label>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                {(['gelin', 'damat', 'ortak'] as Side[]).map((s) => (
-                  <Pressable
-                    key={s}
-                    accessibilityRole="radio"
-                    accessibilityState={{ checked: side === s }}
-                    onPress={() => setSide(side === s ? null : s)}
-                    style={{ paddingHorizontal: 14, height: 38, borderRadius: 999, justifyContent: 'center', backgroundColor: side === s ? color.ink : color.surfaceSoft }}>
-                    <Text style={{ fontFamily: font.semibold, fontSize: 13, color: side === s ? '#FFFFFF' : color.inkSoft }}>
-                      {t(`status.side.${s}`)}
-                    </Text>
-                  </Pressable>
-                ))}
+      {menuCounts.length > 0 && (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+          <Caption style={{ marginRight: 4 }}>{t('event.menuSummary')}</Caption>
+          {menuCounts.map(({ m, n }) => (
+            <View key={m} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 14, paddingRight: 6, height: 34, borderRadius: 999, backgroundColor: color.surface, boxShadow: shadow.card }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: color.ink }}>{m}</Text>
+              <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, backgroundColor: color.sageTint }}>
+                <Text style={{ fontFamily: font.bold, fontSize: 12, color: color.sageInk }}>{n}</Text>
               </View>
             </View>
-          )}
-          {cfg.questions.partySize && <Field label={t('event.form.maxParty')} keyboardType="number-pad" value={maxParty} onChangeText={setMaxParty} />}
-          {formError && <Notice tone="error" text={formError} />}
-          <Button label={t('event.form.submit')} icon="plus" loading={adding} onPress={submitGuest} />
-          <Caption>{t('event.form.importSoon')}</Caption>
-        </Surface>
+          ))}
+        </View>
+      )}
+
+      <View style={{ flexDirection: wide ? 'row' : 'column', gap: 16 }}>
+        {cfg.tools.seating && (
+          <FeatureCard
+            icon="table"
+            tint={color.lavenderTint}
+            ink={color.lavenderInk}
+            title={t('event.seatingCard.title')}
+            body={
+              invitations.some((i) => i.status !== 'no')
+                ? t('event.seatingCard.progress', { seated: invitations.filter((i) => i.status !== 'no' && i.table_id).length, total: invitations.filter((i) => i.status !== 'no').length })
+                : t('event.seatingCard.empty')
+            }
+            cta={t('event.seatingCard.open')}
+            onPress={() => router.push({ pathname: '/etkinlik/[id]/oturma', params: { id: event.id } })}
+          />
+        )}
+        <FeatureCard
+          icon="image"
+          tint={color.coralTint}
+          ink={color.coralInk}
+          title={t('event.designCard.title')}
+          body={settings.design ? t('event.designCard.bodyHas') : t('event.designCard.body')}
+          cta={settings.design ? t('event.designCard.edit') : t('event.designCard.open')}
+          onPress={() => router.push({ pathname: '/etkinlik/[id]/tasarim', params: { id: event.id } })}
+        />
+      </View>
+
+      <View style={{ flexDirection: wide ? 'row' : 'column', gap: 20, alignItems: 'flex-start' }}>
+        <View style={{ width: wide ? 380 : '100%' }}>{!archived && <GuestAdder event={event} onAdded={reload} />}</View>
 
         {/* Liste */}
         <Surface style={{ flex: wide ? 1 : undefined, width: wide ? undefined : '100%', gap: 16 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
             <Display size={32}>{t('event.list.title')}</Display>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {(
-                [
-                  ['all', counts.all],
-                  ['yes', counts.yes],
-                  ['pending', counts.pending],
-                  ['no', counts.no],
-                  ['failed', counts.failed],
-                ] as [Exclude<Filter, 'maybe' | 'waitlist'>, number][]
-              ).map(([k, n]) => {
+              {filters.map(([k, n]) => {
                 const label = t(`event.list.filters.${k}` as TKey);
                 const on = filter === k;
                 return (
@@ -262,47 +270,73 @@ export default function EventDetail() {
               <Body center>{t('event.list.emptyFilterBody')}</Body>
             </View>
           ) : (
-            filtered.map((inv, idx) => (
-              <View key={inv.id} style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12, paddingVertical: 12, borderTopWidth: idx ? 1 : 0, borderTopColor: color.hairline }}>
-                <Avatar text={initials(inv.contacts.name)} index={idx} />
-                <View style={{ flex: 1, minWidth: 160, gap: 2 }}>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 15, color: color.ink }}>{inv.contacts.name}</Text>
-                  <Caption>
-                    {[
-                      inv.contacts.phone ?? t('event.list.noPhone'),
-                      inv.status === 'yes' ? t('event.list.party', { count: inv.party_size ?? 1 }) : t('event.list.maxParty', { count: inv.contacts.max_party }),
-                      inv.menu,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </Caption>
-                  {inv.delivery === 'failed' && <Caption color={color.coralInk}>{t('event.list.deliveryFailed')}</Caption>}
+            filtered.map((inv, idx) => {
+              const answers = answerLine(inv);
+              return (
+                <View key={inv.id} style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12, paddingVertical: 12, borderTopWidth: idx ? 1 : 0, borderTopColor: color.hairline }}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('event.actions.edit', { name: inv.contacts.name })}
+                    onPress={() => setEditing(inv)}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1, minWidth: 200 }}>
+                    {filter === 'waitlist' ? (
+                      <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: color.lavenderTint, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontFamily: font.serif, fontSize: 22, color: color.lavenderInk }}>{idx + 1}</Text>
+                      </View>
+                    ) : (
+                      <Avatar text={initials(inv.contacts.name)} index={idx} />
+                    )}
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: color.ink }}>{inv.contacts.name}</Text>
+                      <Caption numberOfLines={1}>
+                        {[
+                          inv.contacts.phone ?? inv.contacts.email ?? t('event.list.noPhone'),
+                          inv.status === 'yes' || inv.status === 'waitlist' ? t('event.list.party', { count: inv.party_size || 1 }) : t('event.list.maxParty', { count: inv.contacts.max_party }),
+                          inv.menu,
+                          inv.contacts.side ? t(`status.side.${inv.contacts.side}`) : inv.contacts.group_label,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </Caption>
+                      {answers && (
+                        <Caption numberOfLines={1} color={color.lavenderInk}>
+                          {answers}
+                        </Caption>
+                      )}
+                      {inv.delivery === 'failed' && <Caption color={color.coralInk}>{t('event.list.deliveryFailed')}</Caption>}
+                    </View>
+                  </Pressable>
+                  <StatusBadge status={inv.status} />
+                  {roster && inv.status === 'yes' && (
+                    <Pressable
+                      accessibilityRole="switch"
+                      accessibilityState={{ checked: inv.paid }}
+                      accessibilityLabel={t('event.actions.paid')}
+                      onPress={() => togglePaid(inv)}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 6, height: 30, paddingHorizontal: 10, borderRadius: 999, backgroundColor: inv.paid ? color.sageTint : color.surfaceSoft }}>
+                      <Icon name={inv.paid ? 'check' : 'creditCard'} size={13} color={inv.paid ? color.sageInk : color.muted} strokeWidth={2.2} />
+                      <Text style={{ fontFamily: font.semibold, fontSize: 12, color: inv.paid ? color.sageInk : color.muted }}>{inv.paid ? t('event.actions.paid') : t('event.actions.unpaid')}</Text>
+                    </Pressable>
+                  )}
+                  <View style={{ flexDirection: 'row', gap: 6 }}>
+                    {inv.contacts.phone && (
+                      <SmallAction icon="whatsapp" label={t('event.actions.whatsapp')} onPress={() => Linking.openURL(waMeLink(inv.contacts.phone, guestMessage(event, inv, inv.status === 'pending' && inv.delivery !== 'not_sent' ? 'reminder' : 'invite')))} />
+                    )}
+                    <SmallAction
+                      icon="copy"
+                      label={t('event.actions.copyLink')}
+                      onPress={async () => {
+                        await Clipboard.setStringAsync(rsvpUrl(inv.token));
+                        setFeedback({ tone: 'success', text: t('event.actions.linkCopied', { name: inv.contacts.name }) });
+                      }}
+                    />
+                    {inv.status !== 'yes' && <SmallAction icon="check" label={t('event.actions.markYes')} onPress={() => quickStatus(inv, 'yes')} />}
+                    {inv.status !== 'no' && <SmallAction icon="close" label={t('event.actions.markNo')} onPress={() => quickStatus(inv, 'no')} />}
+                    <SmallAction icon="edit" label={t('event.actions.edit', { name: inv.contacts.name })} onPress={() => setEditing(inv)} />
+                  </View>
                 </View>
-                <StatusBadge status={inv.status} />
-                <View style={{ flexDirection: 'row', gap: 6 }}>
-                  <SmallAction icon="whatsapp" label={t('event.actions.whatsapp')} onPress={() => Linking.openURL(waMeLink(inv.contacts.phone, inviteText(inv)))} />
-                  <SmallAction
-                    icon="copy"
-                    label={t('event.actions.copyLink')}
-                    onPress={async () => {
-                      await Clipboard.setStringAsync(rsvpUrl(inv.token));
-                      setFeedback({ tone: 'success', text: t('event.actions.linkCopied', { name: inv.contacts.name }) });
-                    }}
-                  />
-                  <SmallAction icon="check" label={t('event.actions.markYes')} onPress={() => setStatus(inv, 'yes')} />
-                  <SmallAction icon="close" label={t('event.actions.markNo')} onPress={() => setStatus(inv, 'no')} />
-                  <SmallAction
-                    icon="trash"
-                    tone="danger"
-                    label={t('event.actions.remove')}
-                    onPress={async () => {
-                      await removeInvitation(inv.id);
-                      reload();
-                    }}
-                  />
-                </View>
-              </View>
-            ))
+              );
+            })
           )}
         </Surface>
       </View>
@@ -316,11 +350,24 @@ export default function EventDetail() {
           <Button label={t('event.guestPage.open')} variant="secondary" iconRight="arrowRight" onPress={() => router.push({ pathname: '/r/[token]', params: { token: invitations[0].token } })} />
         )}
       </Surface>
+
+      <Sheet open={sendOpen} onClose={() => setSendOpen(false)} title={t('send.title')} italic={t('send.titleAccent')} subtitle={t('send.subtitle')} maxWidth={640}>
+        <SendPanel flat event={event} invitations={invitations} onSent={reload} />
+      </Sheet>
+
+      <GuestEditSheet
+        open={!!editing}
+        onClose={() => setEditing(null)}
+        onChanged={reload}
+        contactId={editing?.contact_id ?? null}
+        invitation={editing}
+        event={{ type: event.type, settings }}
+      />
     </Screen>
   );
 }
 
-function SmallAction({ icon, label, onPress, tone }: { icon: 'whatsapp' | 'copy' | 'check' | 'close' | 'trash'; label: string; onPress: () => void; tone?: 'danger' }) {
+function SmallAction({ icon, label, onPress, tone }: { icon: IconName; label: string; onPress: () => void; tone?: 'danger' }) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -332,59 +379,34 @@ function SmallAction({ icon, label, onPress, tone }: { icon: 'whatsapp' | 'copy'
   );
 }
 
-/** Oturma planına giriş: küçük bir salon çizimi ve yerleşim durumu. */
-function SeatingCard({ eventId, invitations, wide }: { eventId: string; invitations: InvitationWithContact[]; wide: boolean }) {
-  const { t } = useI18n();
-  const coming = invitations.filter((i) => i.status !== 'no');
-  const seated = coming.filter((i) => i.table_id).length;
-  const dots = [color.coral, color.lavender, color.sage, color.gold, color.lavender, color.coral];
+/** Oturma planı / davetiye tasarımı gibi araçlara giriş kartı. */
+function FeatureCard({ icon, tint, ink, title, body, cta, onPress }: { icon: IconName; tint: string; ink: string; title: string; body: string; cta: string; onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t('event.seatingCard.a11y')}
-      onPress={() => router.push({ pathname: '/etkinlik/[id]/oturma', params: { id: eventId } })}
+      accessibilityLabel={`${title}. ${cta}`}
+      onPress={onPress}
       style={({ pressed }) => ({
-        flexDirection: wide ? 'row' : 'column',
-        alignItems: wide ? 'center' : 'flex-start',
-        gap: 22,
-        padding: 22,
+        flex: 1,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: 16,
+        padding: 20,
         borderRadius: radius.xl,
-        backgroundColor: color.lavenderTint,
+        backgroundColor: tint,
         transform: [{ scale: pressed ? 0.99 : 1 }],
       })}>
-      <View style={{ width: 150, height: 92 }}>
-        <View style={{ position: 'absolute', left: 40, top: 0, width: 70, height: 14, borderRadius: 5, backgroundColor: color.ink }} />
-        {[0, 1, 2].map((c) => (
-          <View key={c} style={{ position: 'absolute', left: 12 + c * 46, top: 38 }}>
-            {dots.slice(0, 6).map((d, i) => {
-              const a = (i / 6) * Math.PI * 2 - Math.PI / 2;
-              const filled = i < 3 + c;
-              return (
-                <View
-                  key={i}
-                  style={{
-                    position: 'absolute',
-                    left: 14 + Math.cos(a) * 19 - 3.5,
-                    top: 14 + Math.sin(a) * 19 - 3.5,
-                    width: 7,
-                    height: 7,
-                    borderRadius: 4,
-                    backgroundColor: filled ? d : '#FFFFFF',
-                  }}
-                />
-              );
-            })}
-            <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#FFFFFF', boxShadow: '0px 2px 6px rgba(40,30,20,0.10)' }} />
-          </View>
-        ))}
+      <View style={{ width: 52, height: 52, borderRadius: 18, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
+        <Icon name={icon} size={24} color={ink} />
       </View>
-      <View style={{ flex: wide ? 1 : undefined, gap: 4 }}>
-        <Title>{t('event.seatingCard.title')}</Title>
-        <Body>{coming.length ? t('event.seatingCard.progress', { seated, total: coming.length }) : t('event.seatingCard.empty')}</Body>
+      <View style={{ flex: 1, minWidth: 180, gap: 3 }}>
+        <Title>{title}</Title>
+        <Caption>{body}</Caption>
       </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: color.lavender, paddingHorizontal: 18, height: 46, borderRadius: radius.pill }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: '#FFFFFF' }}>{t('event.seatingCard.open')}</Text>
-        <Icon name="arrowRight" size={18} color="#FFFFFF" strokeWidth={2} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: ink, paddingHorizontal: 14, height: 40, borderRadius: radius.pill }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 14, color: '#FFFFFF' }}>{cta}</Text>
+        <Icon name="arrowRight" size={16} color="#FFFFFF" strokeWidth={2} />
       </View>
     </Pressable>
   );

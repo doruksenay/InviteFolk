@@ -1,1 +1,62 @@
-export const send = {};
+export const send = {
+  title: 'Davetleri',
+  titleAccent: 'gönder',
+  subtitle: 'Kanalı seç. Her davetliye kendine özel cevap linki gider.',
+  kind: { invite: 'Davet', reminder: 'Hatırlatma' },
+  kindHint: {
+    invite: 'Henüz davet gitmemiş {count} haneye',
+    inviteAll: 'Listedeki {count} haneye',
+    reminder: 'Cevap vermemiş {count} haneye',
+  },
+  resendAll: 'Daha önce gönderilenlere de gönder',
+  nobody: 'Bu seçime uyan davetli yok.',
+  waAuto: {
+    title: 'WhatsApp, otomatik',
+    body: 'Senin numaran yerine onaylı işletme hesabından tek seferde gider; cevaplar listeye kendiliğinden düşer.',
+    quota: 'Bugün kalan hakkın: {count} mesaj',
+    noQuota: 'Paketinde otomatik WhatsApp gönderimi yok ya da bugünkü hakkın bitti. Tek tek gönderebilir ya da paketini yükseltebilirsin.',
+    noPhone: { one: '{count} davetlinin telefonu yok', other: '{count} davetlinin telefonu yok' },
+    button: { one: '{count} haneye gönder', other: '{count} haneye gönder' },
+  },
+  waManual: {
+    title: 'WhatsApp, tek tek',
+    body: 'Her davetli için WhatsApp kendi telefonunda hazır mesajla açılır; sen gönder’e basarsın. Ücretsiz.',
+    button: 'Sırayla gönder',
+  },
+  email: {
+    title: 'E-posta',
+    body: 'E-posta adresi olan davetlilere şık bir davetiye ve cevap düğmesi gider.',
+    quota: 'Bugün kalan hakkın: {count} e-posta',
+    noQuota: 'Bugünkü e-posta hakkın bitti.',
+    noEmail: 'Listede e-posta adresi olan davetli yok. Davetliyi düzenleyip e-posta ekleyebilirsin.',
+    button: { one: '{count} kişiye e-posta gönder', other: '{count} kişiye e-posta gönder' },
+  },
+  links: {
+    title: 'Linkleri kopyala',
+    body: 'İsim ve kişiye özel link listesi; istediğin yerden paylaş.',
+    button: 'Listeyi kopyala',
+    copied: '{count} davetlinin linki kopyalandı.',
+  },
+  plans: 'Paketleri gör',
+  sending: 'Gönderiliyor…',
+  done: '{sent} gönderildi',
+  doneFailed: ', {failed} ulaşmadı',
+  doneSkipped: ', {skipped} atlandı',
+  queue: {
+    title: 'Sırayla',
+    titleAccent: 'gönder',
+    progress: '{done} / {total}',
+    open: 'WhatsApp’ı aç',
+    next: 'Gönderildi, sıradaki',
+    skip: 'Atla',
+    finished: 'Hepsi bu kadar. {count} davetliye mesaj açtın.',
+    close: 'Kapat',
+    noPhoneLeft: 'Telefonu olan başka davetli kalmadı.',
+    preview: 'Mesaj',
+  },
+  // Davetliye giden metinler: etkinliğin dilinde.
+  message: {
+    invite: '{name}, {title} davetiniz: {when}\nKatılım durumunuzu buradan bildirebilirsiniz: {link}',
+    reminder: '{name}, {title} için cevabınızı bekliyoruz: {when}\nBuradan tek dokunuşla bildirebilirsiniz: {link}',
+  },
+};

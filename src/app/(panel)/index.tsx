@@ -1,8 +1,11 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { useWindowDimensions, View } from 'react-native';
 
 import { useI18n } from '@/i18n';
-import { listMyEvents, useQuery } from '@/lib/api';
+import { getMyPlan, useQuery } from '@/lib/api';
+import { listEvents } from '@/lib/api-guests';
+import { OptionChip } from '@/ui/guests/common';
 import { useSession } from '@/lib/session';
 import { BrandBar } from '@/ui/BrandBar';
 import { EventCard } from '@/ui/EventCard';
@@ -14,7 +17,9 @@ export default function MyEvents() {
   const { profile } = useSession();
   const { t } = useI18n();
   const { width } = useWindowDimensions();
-  const { data, loading, error, reload } = useQuery(listMyEvents, []);
+  const [showArchived, setShowArchived] = useState(false);
+  const { data, loading, error, reload } = useQuery(() => listEvents(showArchived), [showArchived]);
+  const plan = useQuery(() => getMyPlan().catch(() => null), []);
 
   const columns = width >= 1160 ? 3 : width >= 720 ? 2 : 1;
   const gap = 18;
@@ -22,7 +27,13 @@ export default function MyEvents() {
   const cardWidth = columns === 1 ? '100%' : (contentWidth - gap * (columns - 1)) / columns;
 
   const firstName = profile?.full_name?.split(' ')[0];
-  const pending = (data ?? []).reduce((s, e) => s + (e.summary?.pending_households ?? 0), 0);
+  const active = (data ?? []).filter((e) => e.status !== 'archived');
+  const archivedN = (data ?? []).length - active.length;
+  const pending = active.reduce((s, e) => s + (e.summary?.pending_households ?? 0), 0);
+  // Paket sınırına yaklaşınca nazik bir uyarı.
+  const p = plan.data;
+  const nearEvents = !!p && p.usage.events >= Math.max(1, p.limits.max_events - 1);
+  const nearContacts = !!p && p.usage.contacts >= p.limits.max_contacts * 0.9;
 
   return (
     <Screen>
@@ -36,12 +47,34 @@ export default function MyEvents() {
             <DisplayItalic style={{ color: color.lavender }}>{firstName ?? ''}</DisplayItalic>
           </Display>
           <Body>
-            {data && data.length
-              ? `${t('home.summary', { count: data.length })}${pending ? t('home.summaryPending', { count: pending }) : ''}.`
+            {active.length
+              ? `${t('home.summary', { count: active.length })}${pending ? t('home.summaryPending', { count: pending }) : ''}.`
               : t('home.firstInvite')}
           </Body>
         </View>
         <Button label={t('home.newEvent')} variant="accent" size="lg" icon="plus" onPress={() => router.push('/yeni')} />
+      </View>
+
+      {p && (nearEvents || nearContacts) && (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
+          <View style={{ flex: 1, minWidth: 240 }}>
+            <Notice
+              tone="info"
+              text={[
+                nearEvents ? t('home.limit.events', { max: p.limits.max_events, used: p.usage.events }) : null,
+                nearContacts ? t('home.limit.contacts', { max: p.limits.max_contacts, used: p.usage.contacts }) : null,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            />
+          </View>
+          <Button label={t('home.limit.cta')} variant="secondary" icon="star" onPress={() => router.push('/paketler')} />
+        </View>
+      )}
+
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <OptionChip small icon="archive" label={t('home.showArchived')} on={showArchived} onPress={() => setShowArchived((v) => !v)} />
+        {showArchived && archivedN > 0 && <Body>{t('home.archivedCount', { count: archivedN })}</Body>}
       </View>
 
       {error && (
@@ -62,7 +95,7 @@ export default function MyEvents() {
             </Surface>
           ))}
         </View>
-      ) : data && data.length === 0 ? (
+      ) : data && data.length === 0 && !showArchived ? (
         <EmptyState
           title={t('home.emptyTitle')}
           body={t('home.emptyBody')}

@@ -14,4 +14,8 @@ export const auth = {
   verifyFailed: 'Kod doğrulanamadı. Kodu kontrol et ya da yenisini iste.',
   signIn: 'Giriş yap',
   changeEmail: 'E-postayı değiştir',
+  legalNotice: "Devam ederek {terms}'nı ve {privacy}'nı kabul etmiş olursun. Kişisel verilerin {kvkk} kapsamında işlenir.",
+  terms: 'Kullanım Koşulları',
+  privacy: 'Gizlilik Politikası',
+  kvkk: 'KVKK Aydınlatma Metni',
 };

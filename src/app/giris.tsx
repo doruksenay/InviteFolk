@@ -4,6 +4,7 @@ import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { useI18n } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import { Body, Button, Caption, Display, DisplayItalic, Field, Notice, Surface } from '@/ui/primitives';
+import { RichText } from '@/ui/RichText';
 import { Screen } from '@/ui/Screen';
 import { color } from '@/ui/tokens';
 
@@ -96,6 +97,15 @@ export default function SignIn() {
             </>
           )}
         </Surface>
+        <RichText
+          template={t('auth.legalNotice')}
+          links={{
+            terms: { label: t('auth.terms'), href: '/yasal/kosullar' },
+            privacy: { label: t('auth.privacy'), href: '/yasal/gizlilik' },
+            kvkk: { label: t('auth.kvkk'), href: '/yasal/kvkk' },
+          }}
+          style={{ textAlign: 'center', paddingHorizontal: 12 }}
+        />
       </KeyboardAvoidingView>
     </Screen>
   );

@@ -4,16 +4,17 @@ import { Pressable, Text, TextInput, useWindowDimensions, View } from 'react-nat
 
 import { LANG_NAMES, LANGS, type Lang, useI18n } from '@/i18n';
 import { deleteMyAccount, setProfileLocale } from '@/lib/api';
+import { setNotifyRsvp } from '@/lib/api-billing';
 import { useSession } from '@/lib/session';
 import { Icon } from '@/ui/Icon';
-import { Body, Button, Caption, Display, DisplayItalic, IconButton, Label, Notice, Pill, Surface, Title } from '@/ui/primitives';
+import { Body, Button, Caption, Display, DisplayItalic, IconButton, Label, Notice, Pill, Surface, Title, ToggleRow } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { color, font, radius } from '@/ui/tokens';
 
 /** Ayarlar: uygulama dili, hesap, güvenlik ve hesabı kalıcı silme (App Store kuralı, KVKK). */
 export default function SettingsScreen() {
   const { t, lang, setLang } = useI18n();
-  const { session, profile, isAdmin, aal, signOut } = useSession();
+  const { session, profile, isAdmin, aal, signOut, refreshProfile } = useSession();
   const { width } = useWindowDimensions();
   const wide = width >= 900;
 
@@ -21,6 +22,33 @@ export default function SettingsScreen() {
   const [deleting, setDeleting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const word = t('settings.confirmWord');
+  const [notify, setNotify] = useState<boolean | null>(null);
+  const notifyValue = notify ?? profile?.notify_rsvp ?? true;
+  const [notifyErr, setNotifyErr] = useState(false);
+
+  const changeNotify = (v: boolean) => {
+    if (!profile) return;
+    setNotify(v);
+    setNotifyErr(false);
+    setNotifyRsvp(profile.id, v)
+      .then(() => refreshProfile())
+      .catch(() => {
+        setNotify(!v);
+        setNotifyErr(true);
+      });
+  };
+
+  const legalLink = (label: string, doc: 'gizlilik' | 'kosullar' | 'kvkk', first: boolean) => (
+    <Pressable
+      key={doc}
+      accessibilityRole="link"
+      onPress={() => router.push({ pathname: '/yasal/[doc]', params: { doc } })}
+      style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderTopWidth: first ? 0 : 1, borderTopColor: color.hairline, opacity: pressed ? 0.6 : 1 })}>
+      <Icon name="file" size={18} color={color.muted} />
+      <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, color: color.ink }}>{label}</Text>
+      <Icon name="arrowRight" size={16} color={color.muted} />
+    </Pressable>
+  );
 
   const changeLang = (l: Lang) => {
     setLang(l);
@@ -88,7 +116,28 @@ export default function SettingsScreen() {
             <Title>{t('settings.accountTitle')}</Title>
             <Body>{t('settings.signedInAs', { email: session?.user.email ?? '' })}</Body>
             {profile && <Pill label={t('settings.plan', { plan: t(`status.plan.${profile.plan}`) })} bg={color.sageTint} fg={color.sageInk} />}
-            <Button label={t('common.signOut')} icon="logout" variant="secondary" onPress={signOut} style={{ alignSelf: 'flex-start', marginTop: 4 }} />
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 4 }}>
+              <Button label={t('settings.plansButton')} icon="star" variant="accent" onPress={() => router.push('/paketler')} />
+              <Button label={t('common.signOut')} icon="logout" variant="secondary" onPress={signOut} />
+            </View>
+          </Surface>
+
+          {/* Bildirimler */}
+          <Surface style={{ gap: 8 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Icon name="bell" size={20} color={color.coral} />
+              <Title>{t('settings.notificationsTitle')}</Title>
+            </View>
+            <ToggleRow label={t('settings.notifyRsvp')} hint={t('settings.notifyRsvpHint')} value={notifyValue} onChange={changeNotify} disabled={!profile} />
+            {notifyErr && <Notice tone="error" text={t('settings.notifyFailed')} />}
+          </Surface>
+
+          {/* Yasal */}
+          <Surface style={{ gap: 4 }}>
+            <Title style={{ marginBottom: 4 }}>{t('settings.legalTitle')}</Title>
+            {legalLink(t('settings.legalPrivacy'), 'gizlilik', true)}
+            {legalLink(t('settings.legalTerms'), 'kosullar', false)}
+            {legalLink(t('settings.legalKvkk'), 'kvkk', false)}
           </Surface>
         </View>
 

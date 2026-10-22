@@ -18,5 +18,14 @@ export const home: typeof TR = {
   },
   brand: {
     adminBadge: 'ADMIN',
+    contacts: 'Contacts',
+    plans: 'Plans',
+  },
+  showArchived: 'Archive',
+  archivedCount: { one: 'Showing {count} archived event', other: 'Showing {count} archived events' },
+  limit: {
+    events: 'Your plan includes {max} events and you’re using {used}.',
+    contacts: 'You have {used} of {max} contacts.',
+    cta: 'See plans',
   },
 };

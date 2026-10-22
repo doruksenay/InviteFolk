@@ -1,29 +1,33 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, type PressableStateCallbackType, Switch, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, type PressableStateCallbackType, Text, useWindowDimensions, View } from 'react-native';
 
 import { EVENT_TYPE_ORDER, EVENT_TYPES, eventCopy, type EventTypeKey } from '@/core/event-types';
 import { formatDayMonth, formatWhen } from '@/core/format';
-import { THEME_ORDER, THEMES, type ThemeKey } from '@/core/themes';
-import { type Lang, LANG_NAMES, LANGS, LOCALE_TAG, useI18n } from '@/i18n';
-import { createEvent } from '@/lib/api';
+import { THEMES, type ThemeKey } from '@/core/themes';
+import type { EventRow } from '@/core/types';
+import { type Lang, LOCALE_TAG, useI18n } from '@/i18n';
+import { createEvent, getEvent, useQuery } from '@/lib/api';
+import { toIso } from '@/ui/eventForm/dates';
+import { LangPicker, ThemePicker } from '@/ui/eventForm/Pickers';
+import { GuestAdder } from '@/ui/guests/GuestAdder';
 import { Icon } from '@/ui/Icon';
 import { InvitationCard } from '@/ui/InvitationCard';
-import { Body, Button, Caption, Display, DisplayItalic, Field, IconButton, Label, Notice, Pill, Surface, tapFeedback, Title } from '@/ui/primitives';
+import { Body, Button, Caption, Display, DisplayItalic, Field, IconButton, Label, Notice, Pill, Surface, tapFeedback, Title, ToggleRow } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
+import { SendPanel } from '@/ui/send/SendPanel';
 import { Stepper } from '@/ui/Stepper';
 import { color, font, shadow, WIDE_BREAKPOINT } from '@/ui/tokens';
 import { WhatsAppPreview } from '@/ui/WhatsAppPreview';
 
 type PressState = PressableStateCallbackType & { hovered?: boolean };
 
-/** "2027-06-12" + "19:00" -> Türkiye saatiyle ISO (UTC+3) */
-function toIso(date: string, time: string): string | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
-  const t = /^\d{1,2}:\d{2}$/.test(time) ? time.padStart(5, '0') : '19:00';
-  const d = new Date(`${date}T${t}:00+03:00`);
-  return Number.isNaN(d.getTime()) ? null : d.toISOString();
-}
+const STEP_COPY = [
+  { title: 'wizard.step1Title', accent: 'wizard.step1Accent', body: 'wizard.step1Body' },
+  { title: 'wizard.step2Title', accent: 'wizard.step2Accent', body: 'wizard.step2Body' },
+  { title: 'wizard.step3Title', accent: 'wizard.step3Accent', body: 'wizard.step3Body' },
+  { title: 'wizard.step4Title', accent: 'wizard.step4Accent', body: 'wizard.step4Body' },
+] as const;
 
 export default function NewEvent() {
   const { width } = useWindowDimensions();
@@ -51,12 +55,17 @@ export default function NewEvent() {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // 2. adımdan sonra etkinlik oluşur; 3-4. adımlar bu kayıt üzerinde çalışır.
+  const [created, setCreated] = useState<EventRow | null>(null);
+  const [sentAny, setSentAny] = useState(false);
+  const guestsQ = useQuery(() => (created ? getEvent(created.id) : Promise.resolve(null)), [created?.id ?? '']);
+  const invitations = guestsQ.data?.invitations ?? [];
 
   const cfg = EVENT_TYPES[type];
   const ec = eventCopy(type, eventLang); // davetliye görünen metinler
   const uiCopy = eventCopy(type, uiLang); // organizatöre görünen tür adı ve özellikler
   const th = THEMES[theme];
-  const startsAt = toIso(date, time);
+  const startsAt = date ? toIso(date, time) : null;
   const eventLocale = LOCALE_TAG[eventLang];
   const deadlineText = /^\d{4}-\d{2}-\d{2}$/.test(deadline.trim()) ? formatDayMonth(deadline.trim(), eventLocale) : deadline.trim();
 
@@ -74,6 +83,10 @@ export default function NewEvent() {
     }),
     [ec, title, startsAt, eventLocale, venue, deadlineText],
   );
+
+  const goToEvent = () => {
+    if (created) router.replace({ pathname: '/etkinlik/[id]', params: { id: created.id } });
+  };
 
   const pickType = (k: EventTypeKey) => {
     tapFeedback();
@@ -97,6 +110,10 @@ export default function NewEvent() {
       if (cfg.questions.roster) settings.roster_size = Math.max(2, Number(rosterSize) || 14);
       if (cfg.tools.recurring) settings.recurring = weekly ? 'weekly' : null;
       if (cfg.questions.menu && ec.menu) settings.menu = ec.menu;
+      if (created) {
+        setStep(2);
+        return;
+      }
       const ev = await createEvent({
         type,
         theme,
@@ -108,7 +125,8 @@ export default function NewEvent() {
         rsvp_deadline: /^\d{4}-\d{2}-\d{2}$/.test(deadline) ? deadline : null,
         settings,
       });
-      router.replace({ pathname: '/etkinlik/[id]', params: { id: ev.id } });
+      setCreated(ev);
+      setStep(2);
     } catch (e) {
       setError(e instanceof Error ? e.message : t('wizard.errors.save'));
     } finally {
@@ -227,49 +245,14 @@ export default function NewEvent() {
           <Title>{t('wizard.theme')}</Title>
           <Caption>{t('wizard.themeHint')}</Caption>
         </View>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
-          {THEME_ORDER.map((k) => {
-            const tm = THEMES[k];
-            const themeName = t(`themes.${k}`);
-            const on = k === theme;
-            return (
-              <Pressable
-                key={k}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: on }}
-                accessibilityLabel={t('wizard.themeA11y', { name: themeName })}
-                onPress={() => {
-                  tapFeedback();
-                  setTheme(k);
-                  setThemeTouched(true);
-                }}
-                style={(s: PressState) => [{ width: 104, gap: 10 }, s.hovered && { transform: [{ translateY: -3 }] }]}>
-                <View
-                  style={{
-                    width: 104,
-                    height: 130,
-                    borderRadius: 18,
-                    overflow: 'hidden',
-                    backgroundColor: tm.bg,
-                    boxShadow: on ? `0 0 0 2px ${color.bg}, 0 0 0 4px ${color.ink}, 0px 12px 26px rgba(40,30,20,0.14)` : shadow.card,
-                  }}>
-                  <View style={{ position: 'absolute', left: -22, top: -22, width: 80, height: 80, borderRadius: 40, backgroundColor: tm.shapeA }} />
-                  <View style={{ position: 'absolute', right: 12, top: 30, width: 36, height: 60, borderTopLeftRadius: 18, borderTopRightRadius: 18, backgroundColor: tm.shapeB }} />
-                  <Text style={{ position: 'absolute', left: 12, bottom: 12, fontFamily: font.serif, fontSize: 20, color: tm.ink }}>A & M</Text>
-                  {on && (
-                    <View style={{ position: 'absolute', right: 8, top: 8, width: 22, height: 22, borderRadius: 11, backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center' }}>
-                      <Icon name="check" size={11} color="#FFFFFF" strokeWidth={3.5} />
-                    </View>
-                  )}
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 4 }}>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: color.ink }}>{themeName}</Text>
-                  {k === cfg.suggestedTheme && !on && <Pill label={t('wizard.suggested')} bg={color.lavenderTint} fg={color.lavenderInk} style={{ paddingHorizontal: 7, paddingVertical: 2 }} />}
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
+        <ThemePicker
+          value={theme}
+          suggested={cfg.suggestedTheme}
+          onChange={(k) => {
+            setTheme(k);
+            setThemeTouched(true);
+          }}
+        />
       </View>
     </View>
   );
@@ -280,33 +263,7 @@ export default function NewEvent() {
     <Surface style={{ gap: 18 }}>
       <View style={{ gap: 8 }}>
         <Label>{t('wizard.language')}</Label>
-        <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-          {LANGS.map((l) => {
-            const on = l === eventLang;
-            return (
-              <Pressable
-                key={l}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: on }}
-                onPress={() => {
-                  tapFeedback();
-                  setEventLang(l);
-                }}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 8,
-                  height: 40,
-                  paddingHorizontal: 16,
-                  borderRadius: 999,
-                  backgroundColor: on ? color.ink : color.surfaceSoft,
-                }}>
-                <Icon name="globe" size={15} color={on ? '#FFFFFF' : color.inkSoft} strokeWidth={2} />
-                <Text style={{ fontFamily: font.semibold, fontSize: 14, color: on ? '#FFFFFF' : color.ink }}>{LANG_NAMES[l]}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <LangPicker value={eventLang} onChange={setEventLang} />
         <Caption>{t('wizard.languageHint')}</Caption>
       </View>
       <Field label={t('wizard.fields.title')} placeholder={ec.sample.title.replace('\n', ' ')} value={title} onChangeText={setTitle} hint={t('wizard.fields.titleHint')} multiline={false} />
@@ -326,16 +283,37 @@ export default function NewEvent() {
         hint={t('wizard.fields.deadlineHint')}
       />
       {cfg.questions.roster && <Field label={t('wizard.fields.roster')} value={rosterSize} onChangeText={setRosterSize} keyboardType="number-pad" hint={t('wizard.fields.rosterHint')} />}
-      {cfg.tools.recurring && (
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <View style={{ flex: 1 }}>
-            <Label>{t('wizard.fields.weekly')}</Label>
-            <Caption>{t('wizard.fields.weeklyHint')}</Caption>
-          </View>
-          <Switch accessibilityLabel={t('wizard.fields.weekly')} value={weekly} onValueChange={setWeekly} trackColor={{ true: cfg.accent, false: '#DDD6CC' }} />
-        </View>
-      )}
+      {cfg.tools.recurring && <ToggleRow label={t('wizard.fields.weekly')} hint={t('wizard.fields.weeklyHint')} value={weekly} onChange={setWeekly} />}
     </Surface>
+  );
+
+  // ------------------------------------------------------------------ adım 3-4
+  const guestCount = (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 4 }}>
+      <Icon name="users" size={18} color={color.lavender} strokeWidth={2} />
+      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: color.ink }}>
+        {invitations.length ? t('wizard.addedCount', { count: invitations.length }) : t('wizard.noGuestsYet')}
+      </Text>
+    </View>
+  );
+  const stepThree = created && (
+    <View style={{ gap: 16 }}>
+      {guestCount}
+      <GuestAdder event={created} onAdded={guestsQ.reload} />
+    </View>
+  );
+  const stepFour = created && (
+    <View style={{ gap: 16 }}>
+      {guestCount}
+      <SendPanel
+        event={guestsQ.data?.event ?? created}
+        invitations={invitations}
+        onSent={() => {
+          setSentAny(true);
+          guestsQ.reload();
+        }}
+      />
+    </View>
   );
 
   // ------------------------------------------------------------------ yerleşim
@@ -351,14 +329,29 @@ export default function NewEvent() {
         </Text>
       </View>
       {step === 1 && <Button label={t('common.back')} variant="ghost" onPress={() => setStep(0)} />}
-      <Button label={step === 0 ? t('common.continue') : t('wizard.create')} size="lg" iconRight="arrowRight" loading={saving} onPress={step === 0 ? () => setStep(1) : save} />
+      {step <= 1 && (
+        <Button
+          label={step === 0 ? t('common.continue') : created ? t('common.continue') : t('wizard.create')}
+          size="lg"
+          iconRight="arrowRight"
+          loading={saving}
+          onPress={step === 0 ? () => setStep(1) : save}
+        />
+      )}
+      {step === 2 && <Button label={t('wizard.toSend')} size="lg" iconRight="arrowRight" onPress={() => setStep(3)} />}
+      {step === 3 && !sentAny && <Button label={t('wizard.skipSend')} variant="ghost" onPress={goToEvent} />}
+      {step === 3 && <Button label={t('wizard.goToEvent')} size="lg" iconRight="arrowRight" onPress={goToEvent} />}
     </View>
   );
 
   return (
     <Screen>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-        <IconButton icon="arrowLeft" label={t('wizard.backToEvents')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+        <IconButton
+          icon="arrowLeft"
+          label={created ? t('wizard.goToEvent') : t('wizard.backToEvents')}
+          onPress={() => (created ? goToEvent() : router.canGoBack() ? router.back() : router.replace('/'))}
+        />
         <Stepper steps={STEPS} current={step} />
         <View style={{ width: 42 }} />
       </View>
@@ -367,22 +360,14 @@ export default function NewEvent() {
         <View style={{ flex: wide ? 1 : undefined, width: wide ? undefined : '100%', gap: 32 }}>
           <View style={{ gap: 12 }}>
             <Pill label={t('wizard.stepPill', { n: step + 1, total: STEPS.length })} bg={color.lavenderTint} fg={color.lavenderInk} />
-            {step === 0 ? (
-              <Display size={wide ? 64 : 46}>
-                {t('wizard.step1Title')}
-                <DisplayItalic style={{ color: color.lavender }}>{t('wizard.step1Accent')}</DisplayItalic>
-              </Display>
-            ) : (
-              <Display size={wide ? 64 : 46}>
-                {t('wizard.step2Title')}
-                <DisplayItalic style={{ color: color.lavender }}>{t('wizard.step2Accent')}</DisplayItalic>
-              </Display>
-            )}
-            <Body style={{ maxWidth: 540, fontSize: 17, lineHeight: 27 }}>
-              {step === 0 ? t('wizard.step1Body') : t('wizard.step2Body')}
-            </Body>
+            <Display size={wide ? 64 : 46}>
+              {t(STEP_COPY[step].title)}
+              <DisplayItalic style={{ color: color.lavender }}>{t(STEP_COPY[step].accent)}</DisplayItalic>
+            </Display>
+            <Body style={{ maxWidth: 540, fontSize: 17, lineHeight: 27 }}>{t(STEP_COPY[step].body)}</Body>
           </View>
-          {step === 0 ? stepOne : stepTwo}
+          {created && step >= 2 && <Notice tone="success" text={t('wizard.created')} />}
+          {step === 0 ? stepOne : step === 1 ? stepTwo : step === 2 ? stepThree : stepFour}
           {error && <Notice tone="error" text={error} />}
           {wide && summaryBar}
         </View>

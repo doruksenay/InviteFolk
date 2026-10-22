@@ -8,6 +8,7 @@ export const errors: typeof TR = {
   quota: "You've reached your plan's limit: {what}. Upgrade to add more.",
   rateLimited: "You're going a little fast. Wait a moment and try again.",
   invalidInput: 'Some of the information you entered is not valid.',
+  duplicate: 'This phone number is already in your contacts.',
   quotaWhat: { events: 'number of events', guests: 'number of guests', contacts: 'number of contacts', hall: 'number of hall items', whatsapp: 'daily WhatsApp messages' },
   notFound: "We couldn't find what you were looking for.",
 };

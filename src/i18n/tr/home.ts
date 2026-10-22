@@ -16,5 +16,14 @@ export const home = {
   },
   brand: {
     adminBadge: 'YÖNETİM',
+    contacts: 'Rehber',
+    plans: 'Paketler',
+  },
+  showArchived: 'Arşiv',
+  archivedCount: { one: '{count} arşivlenmiş etkinlik gösteriliyor', other: '{count} arşivlenmiş etkinlik gösteriliyor' },
+  limit: {
+    events: 'Paketinde {max} etkinlik hakkın var, {used} tanesini kullanıyorsun.',
+    contacts: 'Rehberinde {used} / {max} kişi var.',
+    cta: 'Paketleri gör',
   },
 };

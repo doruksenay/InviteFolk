@@ -16,4 +16,8 @@ export const auth: typeof TR = {
   verifyFailed: "That code didn't work. Check it or request a new one.",
   signIn: 'Sign in',
   changeEmail: 'Use a different email',
+  legalNotice: 'By continuing you accept the {terms} and {privacy}. Your personal data is processed as described in the {kvkk}.',
+  terms: 'Terms of Use',
+  privacy: 'Privacy Policy',
+  kvkk: 'KVKK Notice',
 };

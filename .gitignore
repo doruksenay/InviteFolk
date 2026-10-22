@@ -47,3 +47,6 @@ dist-web/
 dist-native/
 supabase/.env
 supabase/.temp/
+
+# mağaza gönderim anahtarları
+secrets/

@@ -77,6 +77,32 @@ export function sendInviteTemplate(args: {
   });
 }
 
+/**
+ * "Masanız" şablonu (ayrı onaylı şablon, ör. davet_masa).
+ * Gövde 3 değişken bekler: {{1}} davetli adı, {{2}} etkinlik başlığı, {{3}} masa adı. Düğme yok.
+ */
+export function sendTableTemplate(args: { to: string; template: string; language?: string; guestName: string; eventTitle: string; tableLabel: string }) {
+  return post({
+    messaging_product: 'whatsapp',
+    to: args.to,
+    type: 'template',
+    template: {
+      name: args.template,
+      language: { code: args.language ?? 'tr' },
+      components: [
+        {
+          type: 'body',
+          parameters: [
+            { type: 'text', text: args.guestName },
+            { type: 'text', text: args.eventTitle },
+            { type: 'text', text: args.tableLabel },
+          ],
+        },
+      ],
+    },
+  });
+}
+
 /** Davetli butona bastıktan sonra açılan 24 saatlik pencerede kişi sayısı sorusu (liste mesajı), etkinlik dilinde. */
 export function sendPartySizeQuestion(to: string, token: string, maxParty: number, lang: Lang) {
   const tx = text(lang);

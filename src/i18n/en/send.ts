@@ -1,3 +1,63 @@
 import type { send as TR } from '../tr/send';
 
-export const send: typeof TR = {};
+export const send: typeof TR = {
+  title: 'Send',
+  titleAccent: 'invitations',
+  subtitle: 'Choose a channel. Every guest gets their own personal reply link.',
+  kind: { invite: 'Invitation', reminder: 'Reminder' },
+  kindHint: {
+    invite: 'To {count} households not yet invited',
+    inviteAll: 'To all {count} households on the list',
+    reminder: 'To {count} households who haven’t replied',
+  },
+  resendAll: 'Also send to those already invited',
+  nobody: 'No guests match this selection.',
+  waAuto: {
+    title: 'WhatsApp, automatic',
+    body: 'Sent all at once from a verified business account instead of your number; replies land in your list by themselves.',
+    quota: 'Left today: {count} messages',
+    noQuota: 'Your plan doesn’t include automatic WhatsApp, or today’s allowance is used up. Send one by one, or upgrade your plan.',
+    noPhone: { one: '{count} guest has no phone number', other: '{count} guests have no phone number' },
+    button: { one: 'Send to {count} household', other: 'Send to {count} households' },
+  },
+  waManual: {
+    title: 'WhatsApp, one by one',
+    body: 'WhatsApp opens on your phone with the message ready for each guest; you tap send. Free.',
+    button: 'Send in turn',
+  },
+  email: {
+    title: 'Email',
+    body: 'Guests with an email address get a beautiful invitation with a reply button.',
+    quota: 'Left today: {count} emails',
+    noQuota: 'Today’s email allowance is used up.',
+    noEmail: 'No guests on your list have an email address. Edit a guest to add one.',
+    button: { one: 'Email {count} guest', other: 'Email {count} guests' },
+  },
+  links: {
+    title: 'Copy links',
+    body: 'A list of names and personal links to share anywhere.',
+    button: 'Copy list',
+    copied: 'Links for {count} guests copied.',
+  },
+  plans: 'See plans',
+  sending: 'Sending…',
+  done: '{sent} sent',
+  doneFailed: ', {failed} not delivered',
+  doneSkipped: ', {skipped} skipped',
+  queue: {
+    title: 'Send',
+    titleAccent: 'in turn',
+    progress: '{done} / {total}',
+    open: 'Open WhatsApp',
+    next: 'Sent, next one',
+    skip: 'Skip',
+    finished: 'That’s everyone. You opened a message for {count} guests.',
+    close: 'Close',
+    noPhoneLeft: 'No more guests with a phone number.',
+    preview: 'Message',
+  },
+  message: {
+    invite: "{name}, you're invited to {title}: {when}\nYou can let us know if you're coming here: {link}",
+    reminder: "{name}, we'd love to hear from you about {title}: {when}\nYou can reply in one tap here: {link}",
+  },
+};

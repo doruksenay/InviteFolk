@@ -21,3 +21,27 @@ otp_length = 6
 
 [functions.whatsapp-webhook]
 verify_jwt = false
+
+# Davetli sayfası tasarım görselini ister (girişsiz; davet anahtarı fonksiyon içinde doğrulanır)
+[functions.invitation-design]
+verify_jwt = false
+
+# Web ödemesi başlatma (giriş yapmış kullanıcı)
+[functions.iyzico-checkout]
+verify_jwt = true
+
+# iyzico'nun dönüşü (tarayıcı yönlendirmesi; ödeme sonucu sunucudan iyzico'ya sorulur)
+[functions.iyzico-callback]
+verify_jwt = false
+
+# RevenueCat sunucu bildirimi (Authorization başlığındaki gizli anahtarla doğrulanır)
+[functions.revenuecat-webhook]
+verify_jwt = false
+
+# Zamanlanmış işler (CRON_SECRET başlığıyla doğrulanır)
+[functions.scheduled]
+verify_jwt = false
+
+# E-posta daveti (giriş yapmış kullanıcı)
+[functions.send-email]
+verify_jwt = true

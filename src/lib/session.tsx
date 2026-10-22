@@ -3,6 +3,7 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useS
 
 import type { Profile } from '@/core/types';
 
+import { disablePush } from './push';
 import { supabase } from './supabase';
 
 export type Aal = 'aal1' | 'aal2';
@@ -72,7 +73,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     refreshProfile: () => loadProfile(session),
     refreshAal: async () => setAal(await readAal()),
     signOut: async () => {
-      // Yalnızca bu cihazdaki oturum kapanır; sunucuda yenileme anahtarı da iptal edilir.
+      // Önce bu cihazın bildirim kaydı silinir (oturum açıkken; RLS gereği), sonra oturum kapanır.
+      // Böylece çıkış yapılan telefona önceki hesabın davetli bildirimleri gelmez.
+      await disablePush().catch(() => {});
       await supabase.auth.signOut({ scope: 'local' });
     },
   };

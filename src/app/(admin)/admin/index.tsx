@@ -1,10 +1,12 @@
-import { Text, useWindowDimensions, View } from 'react-native';
+import { router } from 'expo-router';
+import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 
 import { EVENT_TYPE_ORDER, eventCopy, getEventType } from '@/core/event-types';
 import { formatNumber, formatShortDate, formatTry } from '@/core/format';
 import { useI18n } from '@/i18n';
 import { adminRecentEvents, adminRecentUsers, adminStats, useQuery } from '@/lib/api';
 import { BrandBar } from '@/ui/BrandBar';
+import { Icon } from '@/ui/Icon';
 import { Avatar, Body, Button, Caption, Display, DisplayItalic, Notice, Pill, Skeleton, Surface, Title } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { color, font, radius } from '@/ui/tokens';
@@ -36,11 +38,36 @@ export default function AdminHome() {
   return (
     <Screen>
       <BrandBar area="admin" />
-      <View style={{ gap: 8 }}>
-        <Display size={wide ? 56 : 42}>
-          {t('admin.titleA')} <DisplayItalic style={{ color: color.lavender }}>{t('admin.titleB')}</DisplayItalic>
-        </Display>
-        <Body>{t('admin.subtitle')}</Body>
+      <View style={{ flexDirection: wide ? 'row' : 'column', alignItems: wide ? 'flex-end' : 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+        <View style={{ gap: 8, flexShrink: 1 }}>
+          <Display size={wide ? 56 : 42}>
+            {t('admin.titleA')} <DisplayItalic style={{ color: color.lavender }}>{t('admin.titleB')}</DisplayItalic>
+          </Display>
+          <Body>{t('admin.subtitle')}</Body>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('admin.manageUsers')}
+          onPress={() => router.push('/admin/kullanicilar')}
+          style={({ pressed }) => ({
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 14,
+            paddingVertical: 14,
+            paddingHorizontal: 18,
+            borderRadius: radius.xl,
+            backgroundColor: color.ink,
+            transform: [{ scale: pressed ? 0.98 : 1 }],
+          })}>
+          <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="users" size={20} color="#FFFFFF" />
+          </View>
+          <View>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: '#FFFFFF' }}>{t('admin.manageUsers')}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>{t('admin.manageUsersHint')}</Text>
+          </View>
+          <Icon name="arrowRight" size={18} color="#FFFFFF" />
+        </Pressable>
       </View>
 
       {stats.error && (

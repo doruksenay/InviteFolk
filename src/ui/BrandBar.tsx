@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Text, View } from 'react-native';
+import { Text, useWindowDimensions, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 import { useI18n } from '@/i18n';
@@ -23,6 +23,7 @@ export function BrandMark({ size = 30 }: { size?: number }) {
 export function BrandBar({ area }: { area: 'panel' | 'admin' }) {
   const { isAdmin, signOut } = useSession();
   const { t } = useI18n();
+  const wide = useWindowDimensions().width >= 760;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -35,8 +36,20 @@ export function BrandBar({ area }: { area: 'panel' | 'admin' }) {
         )}
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        {isAdmin && area === 'panel' && <Button label={t('common.adminPanel')} variant="secondary" icon="shield" onPress={() => router.push('/admin')} />}
+        {isAdmin && area === 'panel' && (wide ? <Button label={t('common.adminPanel')} variant="secondary" icon="shield" onPress={() => router.push('/admin')} /> : <IconButton icon="shield" label={t('common.adminPanel')} onPress={() => router.push('/admin')} />)}
         {area === 'admin' && <Button label={t('common.userPanel')} variant="secondary" icon="calendar" onPress={() => router.push('/')} />}
+        {area === 'panel' &&
+          (wide ? (
+            <>
+              <Button label={t('home.brand.contacts')} variant="ghost" icon="users" onPress={() => router.push('/rehber')} />
+              <Button label={t('home.brand.plans')} variant="ghost" icon="star" onPress={() => router.push('/paketler')} />
+            </>
+          ) : (
+            <>
+              <IconButton icon="users" label={t('home.brand.contacts')} onPress={() => router.push('/rehber')} />
+              <IconButton icon="star" label={t('home.brand.plans')} onPress={() => router.push('/paketler')} />
+            </>
+          ))}
         <IconButton icon="settings" label={t('common.settings')} onPress={() => router.push('/ayarlar')} />
         <IconButton icon="logout" label={t('common.signOut')} onPress={signOut} />
       </View>
