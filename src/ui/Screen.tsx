@@ -5,7 +5,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { color } from './tokens';
 
 /** Sıcak zemin, köşelerde çok hafif renk ışımaları, ortalanmış ve genişliği sınırlı içerik. */
-export function Screen({ children, maxWidth = 1360, scroll = true, contentStyle }: { children: ReactNode; maxWidth?: number; scroll?: boolean; contentStyle?: ViewStyle }) {
+export function Screen({
+  children,
+  maxWidth = 1360,
+  scroll = true,
+  scrollEnabled = true,
+  contentStyle,
+}: {
+  children: ReactNode;
+  maxWidth?: number;
+  scroll?: boolean;
+  /** Sürükleme sırasında sayfa kaymasın diye geçici olarak kapatılabilir. */
+  scrollEnabled?: boolean;
+  contentStyle?: ViewStyle;
+}) {
   const inner = <View style={[styles.inner, { maxWidth }, contentStyle]}>{children}</View>;
   return (
     <SafeAreaView style={styles.root} edges={['top', 'left', 'right']}>
@@ -16,7 +29,7 @@ export function Screen({ children, maxWidth = 1360, scroll = true, contentStyle 
         </View>
       )}
       {scroll ? (
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" scrollEnabled={scrollEnabled}>
           {inner}
         </ScrollView>
       ) : (

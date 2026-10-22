@@ -3,6 +3,14 @@
 Davet; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, halı saha maçı ve benzeri her tür etkinlik için bir davetiye ve katılım (LCV) uygulamasıdır. Davetiyeler WhatsApp ile gönderilir, davetlinin cevabı listeye kendiliğinden düşer.
 
 - **Kullanıcı paneli** (`/`, `/yeni`, `/etkinlik/[id]`): etkinlik oluşturma sihirbazı, davetli listesi, WhatsApp ile gönderim ve hatırlatma, elle durum düzenleme.
+- **Oturma planı** (`/etkinlik/[id]/oturma`):
+  - Masa ekleme (4–14 kişilik, yuvarlak ya da uzun) ve sürükle-bırak.
+  - Sahne, dans pisti, bar, DJ, pasta, fotoğraf köşesi ve giriş nesneleri.
+  - "Hızlı kurulum": "300 kişi, 10'luk masa" gibi bir girdiden salonun tamamı kurulur.
+  - Davetliyi seçip masaya dokunarak yerleştirme.
+  - Otomatik yerleştirme: gelin tarafı soldan, damat tarafı sağdan dolar; aileler bölünmez.
+  - Önizleme modu ve salona gönderilecek masa listesini kopyalama.
+  - Davetli, atandığı masayı kendi sayfasında görür.
 - **Yönetim paneli** (`/admin`): yalnızca `role = 'admin'` olan hesaplara açılır. Platform istatistikleri, etkinlik türleri, son kullanıcılar ve son etkinlikler burada görünür.
 - **Davetli sayfası** (`/r/[token]`): giriş ve uygulama indirme gerektirmez. Davetli katılıp katılmayacağını, kaç kişi geleceğini, menü tercihini ve notunu buradan bildirir.
 
@@ -37,10 +45,14 @@ Supabase ayarları yapılmamışsa uygulama, eksik değişkenleri gösteren bir 
    npx supabase link --project-ref PROJE_REF
    npx supabase db push
    ```
-   `supabase/migrations/20261022000000_init.sql` şunları kurar:
+   `supabase/migrations/` klasöründeki dosyalar sırayla uygulanır. `20261022000000_init.sql` şunları kurar:
    - tablolar ve RLS politikaları;
    - davetli sayfasının kullandığı `get_invitation` ve `respond_invitation` fonksiyonları;
    - `event_summaries` görünümü ve `admin_stats` fonksiyonu.
+
+   `20261023000000_seating.sql` oturma planı için şunları ekler:
+   - salon nesneleri ve `assign_tables` toplu atama fonksiyonu;
+   - davetin yalnızca kendi etkinliğindeki bir masaya atanabilmesi; "gelmiyorum" diyen davetli masasından otomatik kalkar.
 3. **Authentication → Email**: giriş 6 haneli kodla yapılır. E-posta şablonunda `{{ .Token }}` kullanın. Canlıya çıkmadan önce kendi SMTP sağlayıcınızı bağlayın (ör. Resend), çünkü Supabase'in yerleşik SMTP'si saatlik limitlidir.
 4. Kendinizi admin yapın. Önce uygulamaya bir kez giriş yapın, sonra SQL Editor'da şunu çalıştırın:
    ```sql
@@ -108,6 +120,7 @@ src/app/             Ekranlar (Expo Router)
 src/core/            Etkinlik türleri, temalar, biçimlendirme, tipler
 src/lib/             Supabase istemcisi, oturum, API çağrıları
 src/ui/              Tasarım dili: renkler, bileşenler, davetiye kartı
+src/ui/seating/      Salon tuvali, sürüklenebilir masa, paneller, hızlı kurulum
 supabase/migrations/ Şema + RLS
 supabase/functions/  send-invitations, whatsapp-webhook
 ```
@@ -123,7 +136,7 @@ Her etkinlik türü `src/core/event-types.ts` içinde bir ayar kaydıdır: cevap
 
 ## Yol haritası
 
-1. Oturma planı: masa ekleme (kapasite seçimi), sürükle-bırak, sahne ve dans pisti nesneleri, davetliyi masaya atama
+1. ~~Oturma planı~~ (tamam). Sonraki adım: WhatsApp ile "masanız" mesajı ve masa kartı PDF çıktısı
 2. Kendi PDF ya da görsel davetiyesini yükleme ve isim alanını kişiye özel yazma
 3. Excel/CSV ile toplu davetli aktarma ve rehberden seçme
 4. Paketler: ücretsiz / 500 / 750 / 1.000 TL. Uygulama içi satın alma için RevenueCat, web için iyzico

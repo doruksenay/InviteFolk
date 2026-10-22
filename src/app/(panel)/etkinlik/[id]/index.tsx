@@ -166,6 +166,8 @@ export default function EventDetail() {
           : stat('hane davetli', String(counts.all), 'neutral')}
       </View>
 
+      {cfg.tools.seating && <SeatingCard eventId={event.id} invitations={invitations} wide={wide} />}
+
       <View style={{ flexDirection: wide ? 'row' : 'column', gap: 20, alignItems: 'flex-start' }}>
         {/* Davetli ekle */}
         <Surface style={{ width: wide ? 360 : '100%', gap: 14 }}>
@@ -300,6 +302,67 @@ function SmallAction({ icon, label, onPress, tone }: { icon: 'whatsapp' | 'copy'
       onPress={onPress}
       style={({ pressed }) => [{ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: tone === 'danger' ? color.coralTint : color.surfaceSoft }, pressed && { transform: [{ scale: 0.94 }] }]}>
       <Icon name={icon} size={16} color={tone === 'danger' ? color.coralInk : color.ink} strokeWidth={2} />
+    </Pressable>
+  );
+}
+
+/** Oturma planına giriş: küçük bir salon çizimi ve yerleşim durumu. */
+function SeatingCard({ eventId, invitations, wide }: { eventId: string; invitations: InvitationWithContact[]; wide: boolean }) {
+  const coming = invitations.filter((i) => i.status !== 'no');
+  const seated = coming.filter((i) => i.table_id).length;
+  const dots = [color.coral, color.lavender, color.sage, color.gold, color.lavender, color.coral];
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Oturma planını aç"
+      onPress={() => router.push({ pathname: '/etkinlik/[id]/oturma', params: { id: eventId } })}
+      style={({ pressed }) => ({
+        flexDirection: wide ? 'row' : 'column',
+        alignItems: wide ? 'center' : 'flex-start',
+        gap: 22,
+        padding: 22,
+        borderRadius: radius.xl,
+        backgroundColor: color.lavenderTint,
+        transform: [{ scale: pressed ? 0.99 : 1 }],
+      })}>
+      <View style={{ width: 150, height: 92 }}>
+        <View style={{ position: 'absolute', left: 40, top: 0, width: 70, height: 14, borderRadius: 5, backgroundColor: color.ink }} />
+        {[0, 1, 2].map((c) => (
+          <View key={c} style={{ position: 'absolute', left: 12 + c * 46, top: 38 }}>
+            {dots.slice(0, 6).map((d, i) => {
+              const a = (i / 6) * Math.PI * 2 - Math.PI / 2;
+              const filled = i < 3 + c;
+              return (
+                <View
+                  key={i}
+                  style={{
+                    position: 'absolute',
+                    left: 14 + Math.cos(a) * 19 - 3.5,
+                    top: 14 + Math.sin(a) * 19 - 3.5,
+                    width: 7,
+                    height: 7,
+                    borderRadius: 4,
+                    backgroundColor: filled ? d : '#FFFFFF',
+                  }}
+                />
+              );
+            })}
+            <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#FFFFFF', boxShadow: '0px 2px 6px rgba(40,30,20,0.10)' }} />
+          </View>
+        ))}
+      </View>
+      <View style={{ flex: wide ? 1 : undefined, gap: 4 }}>
+        <Title>Oturma planı</Title>
+        <Body>
+          {coming.length
+            ? `${seated} / ${coming.length} hane masasına yerleşti. Masaları sürükle, sahneyi koy, davetlileri tek dokunuşla dağıt.`
+            : 'Masaları kur, sahneyi ve dans pistini yerleştir; davetliler geldikçe masalara dağıt.'}
+        </Body>
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: color.lavender, paddingHorizontal: 18, height: 46, borderRadius: radius.pill }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: '#FFFFFF' }}>Planı aç</Text>
+        <Icon name="arrowRight" size={18} color="#FFFFFF" strokeWidth={2} />
+      </View>
     </Pressable>
   );
 }

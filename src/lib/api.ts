@@ -8,6 +8,7 @@ import type {
   Profile,
   PublicInvitation,
   RsvpStatus,
+  SeatingItem,
   Side,
 } from '@/core/types';
 
@@ -80,6 +81,40 @@ export async function sendInvitations(eventId: string, kind: 'invite' | 'reminde
 }
 
 // ---------------------------------------------------------------------------
+// Oturma planı
+// ---------------------------------------------------------------------------
+const SEATING_COLS = 'id, event_id, kind, label, shape, capacity, x, y, rotation, width, height';
+
+export async function getSeating(eventId: string): Promise<{ event: EventRow; items: SeatingItem[]; invitations: InvitationWithContact[] }> {
+  const [event, items, invitations] = await Promise.all([
+    supabase.from('events').select('*').eq('id', eventId).single(),
+    supabase.from('seating_tables').select(SEATING_COLS).eq('event_id', eventId).order('created_at', { ascending: true }),
+    supabase.from('invitations').select('*, contacts!inner(name, phone, side, max_party)').eq('event_id', eventId).order('created_at', { ascending: true }),
+  ]);
+  return { event: must(event) as EventRow, items: must(items) as SeatingItem[], invitations: must(invitations) as InvitationWithContact[] };
+}
+
+export async function addSeatingItems(eventId: string, items: Omit<SeatingItem, 'id' | 'event_id'>[]): Promise<SeatingItem[]> {
+  if (!items.length) return [];
+  return must(await supabase.from('seating_tables').insert(items.map((i) => ({ ...i, event_id: eventId }))).select(SEATING_COLS)) as SeatingItem[];
+}
+
+export async function updateSeatingItem(id: string, patch: Partial<Omit<SeatingItem, 'id' | 'event_id'>>) {
+  must(await supabase.from('seating_tables').update(patch).eq('id', id).select('id'));
+}
+
+export async function deleteSeatingItems(ids: string[]) {
+  if (!ids.length) return;
+  must(await supabase.from('seating_tables').delete().in('id', ids).select('id'));
+}
+
+/** Davetleri masalara topluca atar (table_id null → masadan kaldır). */
+export async function assignTables(pairs: { id: string; table_id: string | null }[]) {
+  if (!pairs.length) return 0;
+  return must(await supabase.rpc('assign_tables', { p_pairs: pairs })) as number;
+}
+
+// ---------------------------------------------------------------------------
 // Davetli (girişsiz)
 // ---------------------------------------------------------------------------
 export async function getPublicInvitation(token: string): Promise<PublicInvitation | null> {
@@ -144,7 +179,11 @@ export function useQuery<T>(fn: () => Promise<T>, deps: readonly unknown[] = [])
     setNonce((n) => n + 1);
   }, []);
 
-  const setData = useCallback((data: T | null) => setState((s) => ({ ...s, data })), []);
+  const setData = useCallback(
+    (next: T | null | ((prev: T | null) => T | null)) =>
+      setState((s) => ({ ...s, data: typeof next === 'function' ? (next as (prev: T | null) => T | null)(s.data) : next })),
+    [],
+  );
 
   return { data: state.data, error: state.error, loading: state.loading, reload, setData };
 }

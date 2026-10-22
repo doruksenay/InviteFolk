@@ -20,7 +20,13 @@ export type IconName =
   | 'logout'
   | 'chart'
   | 'mail'
-  | 'trash';
+  | 'trash'
+  | 'minus'
+  | 'rotate'
+  | 'wand'
+  | 'eye'
+  | 'layout'
+  | 'table';
 
 type Props = { name: IconName; size?: number; color?: string; strokeWidth?: number };
 
@@ -135,6 +141,36 @@ export function Icon({ name, size = 22, color = '#24212B', strokeWidth = 1.7 }: 
             return <Path d="M4 20V10M10 20V4M16 20v-7M22 20H2" {...p} />;
           case 'trash':
             return <Path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" {...p} />;
+          case 'minus':
+            return <Path d="M5 12h14" {...p} />;
+          case 'rotate':
+            return <Path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" {...p} />;
+          case 'wand':
+            return <Path d="M4 20L15 9M13 4v3M17.5 6.5l-2 2M19 11h-3M8 3l.8 1.7L10.5 5.5 8.8 6.3 8 8l-.8-1.7L5.5 5.5l1.7-.8z" {...p} />;
+          case 'eye':
+            return (
+              <>
+                <Path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" {...p} />
+                <Circle cx={12} cy={12} r={3} {...p} />
+              </>
+            );
+          case 'layout':
+            return (
+              <>
+                <Rect x={3} y={3} width={18} height={18} rx={3} {...p} />
+                <Path d="M3 9h18M9 21V9" {...p} />
+              </>
+            );
+          case 'table':
+            return (
+              <>
+                <Circle cx={12} cy={12} r={5} {...p} />
+                <Circle cx={12} cy={3.5} r={1.5} {...p} />
+                <Circle cx={12} cy={20.5} r={1.5} {...p} />
+                <Circle cx={3.5} cy={12} r={1.5} {...p} />
+                <Circle cx={20.5} cy={12} r={1.5} {...p} />
+              </>
+            );
           case 'mail':
             return (
               <>

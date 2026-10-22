@@ -63,7 +63,7 @@ export const EVENT_TYPES: Record<EventTypeKey, EventTypeConfig> = {
     accent: '#C9573A', tint: '#FFF5EF', iconBg: '#FCE0D3', glow: 'rgba(201,87,58,0.15)', suggestedTheme: 'mercan',
     rsvp: DEFAULT_RSVP,
     questions: { partySize: true, menu: null, roster: false },
-    tools: { seating: false, recurring: false, payments: false, companyFields: false },
+    tools: { seating: true, recurring: false, payments: false, companyFields: false },
     features: [
       { title: 'Düğünle ortak liste', detail: 'Aynı davetlilere ikinci etkinlik tek dokunuşla.' },
       { title: 'Kadın ya da karma davet', detail: 'Kimlerin davetli olduğunu filtreyle seç.' },
@@ -89,7 +89,7 @@ export const EVENT_TYPES: Record<EventTypeKey, EventTypeConfig> = {
     accent: '#5E8F73', tint: '#F3F9F5', iconBg: '#DCEBE1', glow: 'rgba(94,143,115,0.16)', suggestedTheme: 'adacayi',
     rsvp: DEFAULT_RSVP,
     questions: { partySize: true, menu: ['Et', 'Balık', 'Vejetaryen'], roster: false },
-    tools: { seating: false, recurring: false, payments: false, companyFields: false },
+    tools: { seating: true, recurring: false, payments: false, companyFields: false },
     features: [
       { title: 'Menü tercihi', detail: 'Et, balık ya da vejetaryen seçimi.' },
       { title: 'Kişi sınırı', detail: 'Masa kaç kişilikse o kadar davet.' },

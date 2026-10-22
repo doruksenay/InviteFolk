@@ -73,6 +73,23 @@ export type Invitation = {
   created_at: string;
 };
 
+export type SeatingKind = 'table' | 'stage' | 'dance' | 'bar' | 'dj' | 'entrance' | 'cake' | 'photo';
+
+/** Salondaki bir öğe: masa ya da sahne, dans pisti gibi bir nesne (seating_tables). */
+export type SeatingItem = {
+  id: string;
+  event_id: string;
+  kind: SeatingKind;
+  label: string;
+  shape: 'round' | 'rect';
+  capacity: number;
+  x: number;
+  y: number;
+  rotation: number;
+  width: number;
+  height: number;
+};
+
 export type InvitationWithContact = Invitation & { contacts: Pick<Contact, 'name' | 'phone' | 'side' | 'max_party'> };
 
 /** get_invitation(token) fonksiyonunun döndürdüğü, davetliye açık veri. */
@@ -83,6 +100,8 @@ export type PublicInvitation = {
   party_size: number | null;
   menu: string | null;
   note: string | null;
+  /** Yalnızca katılıyorsa ve masası atanmışsa dolu. */
+  table_label?: string | null;
   event: Pick<EventRow, 'type' | 'theme' | 'title' | 'host_names' | 'starts_at' | 'venue_name' | 'venue_address' | 'rsvp_deadline' | 'settings'>;
 };
 

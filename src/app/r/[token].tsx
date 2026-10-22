@@ -97,6 +97,7 @@ export default function GuestRsvp() {
                 }}
                 actions={
                   <View style={{ gap: 10, paddingTop: 8 }}>
+                    {inv.table_label && <TableTicket theme={theme} label={inv.table_label} />}
                     {inv.status !== 'pending' && (
                       <Text style={[styles.small, { color: theme.soft, textAlign: 'center' }]}>
                         Daha önce “{inv.status === 'yes' ? cfg.rsvp.yes : cfg.rsvp.no}” dediniz. İsterseniz değiştirebilirsiniz.
@@ -168,12 +169,39 @@ export default function GuestRsvp() {
                   ? `${inv.party_size ?? 1} kişi olarak kaydettik. Etkinlikten önce size hatırlatacağız.`
                   : 'Notunuz iletildi. Fikriniz değişirse bu sayfadan güncelleyebilirsiniz.'}
               </Text>
+              {inv.table_label && <TableTicket theme={theme} label={inv.table_label} />}
               <PillButton theme={theme} label="Cevabımı değiştir" onPress={() => setStep('invite')} />
             </View>
           )}
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+/** Organizatör masayı atadıysa davetliye gösterilen küçük "yer kartı". */
+function TableTicket({ theme, label }: { theme: InvitationTheme; label: string }) {
+  return (
+    <View
+      accessibilityLabel={`Masanız: ${label}`}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 14,
+        paddingVertical: 14,
+        paddingHorizontal: 18,
+        borderRadius: 20,
+        backgroundColor: theme.dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.75)',
+        boxShadow: `inset 0 0 0 1px ${theme.dark ? 'rgba(255,255,255,0.14)' : 'rgba(120,100,80,0.16)'}`,
+      }}>
+      <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: theme.shapeA, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: theme.dark ? theme.bg : '#FFFFFF' }} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.small, { color: theme.soft, letterSpacing: 1.4 }]}>MASANIZ</Text>
+        <Text style={[styles.h1, { fontSize: 30, lineHeight: 34, color: theme.ink }]}>{label}</Text>
+      </View>
+    </View>
   );
 }
 
