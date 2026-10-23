@@ -1,6 +1,6 @@
 // Paketler, ödeme ve admin kullanıcı yönetimi için istemci çağrıları.
 // Güvenlik: fiyat ve paket istemciden belirlenmez; ödeme sunucuda doğrulanır ve paketi yalnızca sunucu verir.
-import type { Plan } from '@/core/types';
+import type { Plan, PlanLimits } from '@/core/types';
 
 import { must, supabase } from './api';
 
@@ -8,15 +8,7 @@ export type PaidPlan = 'temel' | 'otomatik' | 'tam';
 export const PAID_PLANS: PaidPlan[] = ['temel', 'otomatik', 'tam'];
 
 export type PlanPrice = { plan: PaidPlan; amount_try: number; rank: number };
-export type PlanLimits = {
-  plan: Plan;
-  max_events: number;
-  max_guests_per_event: number;
-  max_contacts: number;
-  max_hall_items_per_event: number;
-  whatsapp_per_day: number;
-  email_per_day: number;
-};
+export type { PlanLimits } from '@/core/types';
 
 export async function getPlanCatalog(): Promise<{ prices: PlanPrice[]; limits: PlanLimits[] }> {
   const [prices, limits] = await Promise.all([

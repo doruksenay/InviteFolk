@@ -48,7 +48,33 @@ export type IconName =
   | 'phone'
   | 'map'
   | 'question'
-  | 'list';
+  | 'list'
+  | 'message'
+  | 'gift'
+  | 'music'
+  | 'play'
+  | 'pause'
+  | 'volume'
+  | 'volumeOff'
+  | 'qr'
+  | 'scan'
+  | 'userPlus'
+  | 'megaphone'
+  | 'camera'
+  | 'sun'
+  | 'cloud'
+  | 'rain'
+  | 'clock'
+  | 'heart'
+  | 'trophy'
+  | 'shirt'
+  | 'basket'
+  | 'vote'
+  | 'video'
+  | 'child'
+  | 'eyeOff'
+  | 'envelope'
+  | 'grid';
 
 type Props = { name: IconName; size?: number; color?: string; strokeWidth?: number };
 
@@ -288,6 +314,113 @@ export function Icon({ name, size = 22, color = '#1F1B2E', strokeWidth = 1.7 }: 
             );
           case 'list':
             return <Path d="M9 6h11M9 12h11M9 18h11M4 6h.5M4 12h.5M4 18h.5" {...p} />;
+          case 'message':
+            return <Path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1zM8 10h8M8 13.5h5" {...p} />;
+          case 'gift':
+            return (
+              <>
+                <Rect x={3} y={8} width={18} height={4} rx={1} {...p} />
+                <Path d="M5 12v8h14v-8M12 8v12M12 8c-1.5-3-5-3.5-5-1.2C7 8 9 8 12 8zM12 8c1.5-3 5-3.5 5-1.2C17 8 15 8 12 8z" {...p} />
+              </>
+            );
+          case 'music':
+            return (
+              <>
+                <Path d="M9 18V5l11-2v13" {...p} />
+                <Circle cx={6.5} cy={18} r={2.5} {...p} />
+                <Circle cx={17.5} cy={16} r={2.5} {...p} />
+              </>
+            );
+          case 'play':
+            return <Path d="M7 4.5v15l12-7.5z" {...p} />;
+          case 'pause':
+            return <Path d="M8 5v14M16 5v14" {...p} />;
+          case 'volume':
+            return <Path d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" {...p} />;
+          case 'volumeOff':
+            return <Path d="M4 9h4l5-4v14l-5-4H4zM17 9.5l5 5M22 9.5l-5 5" {...p} />;
+          case 'qr':
+            return (
+              <>
+                <Rect x={3} y={3} width={7} height={7} rx={1.5} {...p} />
+                <Rect x={14} y={3} width={7} height={7} rx={1.5} {...p} />
+                <Rect x={3} y={14} width={7} height={7} rx={1.5} {...p} />
+                <Path d="M14 14h3v3M21 14v.5M14 21h.5M17.5 21H21v-3.5M6.5 6.5h0M17.5 6.5h0M6.5 17.5h0" {...p} />
+              </>
+            );
+          case 'scan':
+            return <Path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16" {...p} />;
+          case 'userPlus':
+            return (
+              <>
+                <Circle cx={9} cy={8} r={4} {...p} />
+                <Path d="M2 21c0-4 3-6 7-6s7 2 7 6M19 8v6M16 11h6" {...p} />
+              </>
+            );
+          case 'megaphone':
+            return <Path d="M3 10v4a1 1 0 0 0 1 1h3l9 5V4L7 9H4a1 1 0 0 0-1 1zM7 15l1.5 5h3L10 15.5M19 9.5a3 3 0 0 1 0 5" {...p} />;
+          case 'camera':
+            return (
+              <>
+                <Path d="M3 8a2 2 0 0 1 2-2h2.5L9 4h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" {...p} />
+                <Circle cx={12} cy={13} r={4} {...p} />
+              </>
+            );
+          case 'sun':
+            return (
+              <>
+                <Circle cx={12} cy={12} r={4} {...p} />
+                <Path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" {...p} />
+              </>
+            );
+          case 'cloud':
+            return <Path d="M7 18h10a4 4 0 0 0 .5-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z" {...p} />;
+          case 'rain':
+            return <Path d="M7 15h10a4 4 0 0 0 .5-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 15zM8 18l-1 3M12 18l-1 3M16 18l-1 3" {...p} />;
+          case 'clock':
+            return (
+              <>
+                <Circle cx={12} cy={12} r={9} {...p} />
+                <Path d="M12 7v5l3 2" {...p} />
+              </>
+            );
+          case 'heart':
+            return <Path d="M12 20s-7.5-4.6-9-9.3C1.8 6.8 4.4 4 7.3 4c2 0 3.5 1.1 4.7 2.8C13.2 5.1 14.7 4 16.7 4c2.9 0 5.5 2.8 4.3 6.7-1.5 4.7-9 9.3-9 9.3z" {...p} />;
+          case 'trophy':
+            return <Path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4.5a3 3 0 0 0 3.5 4.5M16 6h3.5a3 3 0 0 1-3.5 4.5M12 13v4M8.5 20h7M10 17h4v3h-4z" {...p} />;
+          case 'shirt':
+            return <Path d="M8 3l4 2 4-2 5 3-2 4-2-1v12H7V9L5 10 3 6z" {...p} />;
+          case 'basket':
+            return <Path d="M3 10h18l-2 10H5zM7 10l3-6M17 10l-3-6M9 14v3M12 14v3M15 14v3" {...p} />;
+          case 'vote':
+            return <Path d="M4 13h16v7H4zM8 13V5h8v8M10 9l1.5 1.5L14.5 7" {...p} />;
+          case 'video':
+            return (
+              <>
+                <Rect x={3} y={6} width={13} height={12} rx={2.5} {...p} />
+                <Path d="M16 10l5-3v10l-5-3" {...p} />
+              </>
+            );
+          case 'child':
+            return (
+              <>
+                <Circle cx={12} cy={6} r={3} {...p} />
+                <Path d="M7 12l5-2 5 2M12 10v6M9 21l3-5 3 5" {...p} />
+              </>
+            );
+          case 'eyeOff':
+            return <Path d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0 1 12 6c6.4 0 10 6 10 6a17 17 0 0 1-3.2 3.8M6.5 7.6C3.7 9.4 2 12 2 12s3.6 6 10 6a9.6 9.6 0 0 0 4.4-1.1M9.9 10a3 3 0 0 0 4.2 4.2" {...p} />;
+          case 'envelope':
+            return <Path d="M3 7l9 7 9-7M3 7v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V7l-9-4z" {...p} />;
+          case 'grid':
+            return (
+              <>
+                <Rect x={3} y={3} width={7.5} height={7.5} rx={2} {...p} />
+                <Rect x={13.5} y={3} width={7.5} height={7.5} rx={2} {...p} />
+                <Rect x={3} y={13.5} width={7.5} height={7.5} rx={2} {...p} />
+                <Rect x={13.5} y={13.5} width={7.5} height={7.5} rx={2} {...p} />
+              </>
+            );
           case 'mail':
             return (
               <>

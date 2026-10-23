@@ -14,7 +14,18 @@ Invitefolk; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, ha
 - Kendi davetiye tasarımı: görsel ya da PDF yükle (PDF web panelinde), isim alanını sürükle, yazı tipini/boyutunu/rengini seç; her davetli kendi adını tasarımın üstünde görür.
 - Oturma planı: masa ekle (4–14 kişi), sürükle-bırak, sahne/dans pisti/bar/DJ/pasta/foto köşesi/giriş, hızlı kurulum ("300 kişi, 10'luk masa"), otomatik yerleştirme, önizleme, masaları WhatsApp/e-posta ile bildirme, masa kartı ve isimlik çıktısı.
 - Etkinlik düzenleme: tüm bilgiler, menü seçenekleri, en fazla 3 özel soru, hediye notu, otomatik hatırlatma, arşivleme, silme.
-- Halı saha: kadro ve yedek listesi (kadro dolunca yedeğe, biri çıkınca ilk yedek kadroya), kişi başı ücret ve "kim ödedi" takibi, her hafta otomatik tekrar ve davet.
+- Davetiye sayfası düzenleyici: 24 şablon (düğün, nişan, kına, doğum günü, yemek, kurumsal, halı saha…), mühürlü zarf açılışı, geri sayım, birden fazla tören (kına + nikâh + düğün) programı, takı/IBAN kartı (kopyalanır, masaya karekodlu kart basılır), fon müziği, fotoğraf galerisi, video davetiye, yapay zekâ ile davet metni.
+- Davetliye sorulanlar: kişi sayısının içinde kaç çocuk, yanındakilerin adları; tarih anketi (tarih belli değilse); "kim ne getiriyor" listesi (doğum günü, yemek).
+- Ortak yöneticiler: eş, aile ya da arkadaş e-postayla davet edilir ve birlikte yönetir; silme yalnızca sahibe açık.
+- Duyuru: saat/yer değişikliği davetiye sayfasının üstünde görünür; istenirse WhatsApp, e-posta ya da SMS ile de gider.
+- Liste: davetiyeyi açtı/açmadı takibi, "açmayanlar" filtresi, Excel (.xlsx), CSV ve yazdırılabilir PDF.
+- Kapıda giriş: katılan her davetliye kişisel giriş karekodu; organizatör telefon kamerasıyla okutur ya da listeden işaretler, gelen sayısı canlı.
+- Fotoğraf albümü: masadaki karekodla davetliler uygulama indirmeden fotoğraf yükler; organizatör gizler, siler, indirir.
+- Bilgi toplama linki: aile gruplarına atılan tek link; davetli adını, telefonunu, kişi sayısını kendisi yazar, organizatör onaylayınca listeye girer.
+- SMS yedeği: WhatsApp'a ulaşılamayan davet ve hatırlatmalar SMS ile gider (Netgsm).
+- Basılı davetiyeden doldurma: davetiyenin fotoğrafından başlık, tarih, saat ve yer yapay zekâ ile okunur.
+- Hava durumu: etkinliğe 14 gün kala davetli sayfasında tahmin.
+- Halı saha: kadro ve yedek listesi (kadro dolunca yedeğe, biri çıkınca ilk yedek kadroya), kişi başı ücret ve "kim ödedi" takibi (oyuncu "ödedim" der, organizatör onaylar), her hafta otomatik tekrar ve davet, seviye ve mevkiye göre dengeli takım, maç skoru ve goller, maçın oyuncusu oylaması, gol krallığı, takvime abone olma (her hafta kendiliğinden).
 - Rehber: tüm etkinliklerde ortak kişi listesi.
 - Paketler: ücretsiz / Temel 500 ₺ / Otomatik 750 ₺ / Tam 1.000 ₺ (bir yıl geçerli). iOS ve Android'de mağaza içi satın alma (RevenueCat), web'de iyzico.
 - Telefon bildirimi: davetli cevap verince, yedekten kadroya geçişte, paket tanımlanınca.
@@ -24,6 +35,8 @@ Invitefolk; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, ha
 - Kişiye özel link (`/r/<token>`): tema ya da organizatörün tasarımı üstünde kendi adı.
 - Katılım, kişi sayısı, menü, özel sorular, not; halı sahada kadro/yedek durumu ve ücret.
 - Takvime ekle, haritada aç, masası belli ise "Masanız", TR · EN seçici, KVKK bağlantısı.
+- Zarf açılışı ve müzik, geri sayım, program, galeri, video, takı/IBAN kopyalama, duyurular, hava durumu, tarih anketi, getir listesi, giriş karekodu, albüme yükleme; halı sahada takımım, "ödedim", maçın oyuncusu oyu.
+- Herkese açık kısa sayfalar (giriş gerekmez, dizinlenmez): `/a/<kod>` albüme yükleme, `/h/<kod>` hediye bilgisi, `/k/<kod>` bilgi toplama formu, `/katil/<anahtar>` ortak yönetici daveti (giriş ister).
 
 **Yönetim paneli** (`/admin`, iki adımlı doğrulama zorunlu)
 - Platform özeti (yalnızca sayılar) ve kullanıcı yönetimi: arama, paket atama, askıya alma. Davetli kişisel verilerine erişim yoktur; her işlem denetim kaydına yazılır.
@@ -56,7 +69,7 @@ npx expo start               # Expo Go ile telefonda dene; w: web
 ### 1. Supabase
 
 1. [supabase.com](https://supabase.com) üzerinde proje açın; URL ve publishable key'i `.env.local`'a yazın.
-2. Şemayı yükleyin (6 migration sırayla uygulanır: şema, oturma planı, güvenlik, özellikler, depolama, otomasyon):
+2. Şemayı yükleyin (11 migration sırayla uygulanır: şema, oturma planı, güvenlik, özellikler, depolama, otomasyon, sağlamlaştırma, ortak yönetim, davetiye sayfası, araçlar, inceleme düzeltmeleri):
    ```bash
    npx supabase login
    npx supabase link --project-ref PROJE_REF
@@ -78,6 +91,16 @@ npx expo start               # Expo Go ile telefonda dene; w: web
    | tam | 1.000 ₺ | 20 | 1.000 | 2.000 | 2.000 |
    | b2b | — | 200 | 5.000 | 20.000 | 20.000 |
 
+   | Paket | Ortak yönetici | Galeri | Albüm | SMS/gün | Yapay zekâ/gün | Müzik | Video | Kapıda giriş | Bilgi toplama |
+   |---|---|---|---|---|---|---|---|---|---|
+   | free | 0 | 3 | — | — | 3 | — | — | — | — |
+   | temel | 1 | 8 | — | — | 20 | ✓ | — | — | ✓ |
+   | otomatik | 2 | 12 | 300 | 100 | 40 | ✓ | — | ✓ | ✓ |
+   | tam | 5 | 24 | 1.500 | 300 | 100 | ✓ | ✓ | ✓ | ✓ |
+   | b2b | 20 | 24 | 5.000 | 2.000 | 500 | ✓ | ✓ | ✓ | ✓ |
+
+   Ortak yöneticinin işlemleri etkinlik sahibinin paketinden ve kotalarından düşer.
+
 ### 2. Sunucu fonksiyonları
 
 ```bash
@@ -90,12 +113,18 @@ npx supabase functions deploy                          # tümü; JWT ayarları s
 | `send-invitations` | WhatsApp şablonuyla davet, hatırlatma, "masanız" |
 | `send-email` | E-posta ile davet, hatırlatma, "masanız" |
 | `whatsapp-webhook` | Teslim durumları ve WhatsApp düğmesinden gelen cevaplar |
-| `invitation-design` | Davetliye tasarım görselinin kısa süreli imzalı linki |
+| `invitation-design` | Davetliye tasarım görseli, müzik, video ve galerinin kısa süreli imzalı linkleri |
+| `send-sms` | SMS ile davet, hatırlatma, duyuru (Netgsm); WhatsApp ulaşmazsa yedek |
+| `cohost-invite` | Ortak yönetici davet e-postası |
+| `ai-assist` | Davet metni yazma ve basılı davetiyeden bilgi okuma (Claude API; günlük hak paketten) |
+| `album-upload` | Davetlinin albüme tek kullanımlık imzalı linkle fotoğraf yüklemesi |
+| `weather` | Davetli sayfası için hava tahmini (Open-Meteo, 3 saat önbellek) |
+| `calendar` | Haftalık halı saha için takvim aboneliği (ICS) |
 | `scheduled` | Haftalık tekrar, otomatik hatırlatma, telefon bildirimleri (10 dakikada bir) |
 | `iyzico-checkout`, `iyzico-callback` | Web ödemesi |
 | `revenuecat-webhook` | Mağaza satın alma ve iadeleri |
 
-- WhatsApp kurulumu, şablon metinleri (`davet_lcv`, `davet_masa`; TR ve EN), e-posta ve zamanlama (pg_cron): **[docs/automation.md](docs/automation.md)**
+- WhatsApp kurulumu, şablon metinleri (`davet_lcv`, `davet_masa`, `davet_duyuru`; TR ve EN), SMS, yapay zekâ, e-posta ve zamanlama (pg_cron): **[docs/automation.md](docs/automation.md)**
 - Ödeme kurulumu (App Store Connect, Play Console, RevenueCat, iyzico, sandbox testleri): **[docs/payments.md](docs/payments.md)**
 - Mağaza metinleri, App Privacy / Veri Güvenliği cevapları, ekran görüntüsü planı: **[docs/store-listing.md](docs/store-listing.md)**
 
@@ -107,7 +136,7 @@ npx supabase functions deploy                          # tümü; JWT ayarları s
 npm run build:web     # dist/ + güvenlik başlıkları (_headers) + SPA yönlendirmesi (_redirects)
 ```
 
-`dist/` klasörünü Cloudflare Pages'e yükleyin. `EXPO_PUBLIC_WEB_URL`, `APP_WEB_URL` ve `ALLOWED_ORIGINS` aynı adresi göstermelidir. PDF'ten tasarım yükleme `public/pdfjs` klasörünü kullanır (bkz. içindeki README).
+`dist/` klasörünü Cloudflare Pages'e yükleyin. `EXPO_PUBLIC_WEB_URL`, `APP_WEB_URL` ve `ALLOWED_ORIGINS` aynı adresi göstermelidir. PDF'ten tasarım yükleme `public/pdfjs` klasörünü kullanır (bkz. içindeki README). Web'de kapıda karekod okuma, tarayıcıda yerleşik okuyucu yoksa (iOS Safari, Firefox) `public/zxing/zxing_reader.wasm` dosyasını kullanır; `barcode-detector` sürümünü yükseltirseniz bu dosyayı `node_modules/zxing-wasm/dist/reader/` içinden yeniden kopyalayın.
 
 ### 4. App Store ve Google Play
 
@@ -136,9 +165,11 @@ src/app/                       Ekranlar (Expo Router)
   _layout.tsx                  Oturum korumaları, dil sağlayıcısı
   giris.tsx                    E-posta kodu ile giriş
   (panel)/                     Organizatör: etkinlikler, sihirbaz, rehber, paketler, ayarlar
-  (panel)/etkinlik/[id]/       Etkinlik, düzenleme, oturma planı, tasarım
+  (panel)/etkinlik/[id]/       Etkinlik, düzenleme, oturma planı, tasarım, davetiye sayfası (sayfa),
+                               ortak yöneticiler (ekip), kapıda giriş (giris), albüm, başvurular, takımlar (takim)
   (admin)/admin/               Yönetim paneli (MFA kapısı arkasında)
   r/[token].tsx                Davetli sayfası (herkese açık)
+  a/ h/ k/ katil/              Albüme yükleme, hediye bilgisi, bilgi toplama, ortak yönetici daveti
   yasal/[doc].tsx              Gizlilik, koşullar, KVKK (herkese açık)
 src/core/                      Etkinlik türleri, temalar, oturma geometrisi, Excel/CSV okuyucu, tipler
 src/i18n/                      Türkçe ve İngilizce sözlükler
@@ -148,11 +179,12 @@ supabase/migrations/           Şema, RLS, fonksiyonlar, kotalar, depolama
 supabase/functions/            Edge Functions
 docs/                          Otomasyon, ödeme, mağaza
 public/pdfjs/                  PDF'ten görsel üretimi (yalnızca web)
+public/zxing/                  Karekod okuyucu WASM (yalnızca web, yerleşik okuyucu yoksa)
 ```
 
 ## Güvenlik
 
-İlke: uygulama ya da web sitesi tamamen ele geçirilse bile saldırganın elinde yalnızca herkese açık anahtar ve en fazla kendi oturumu olur; asıl koruma veritabanındadır. 113 saldırı ve işlev senaryosu gerçek Postgres üzerinde test edildi; ayrıca bağımsız bir güvenlik incelemesinin bulduğu 5 açık kapatıldı ve tekrar test edildi. Son cevap günü bilerek yalnızca bilgi amaçlıdır: geç cevaplar da kabul edilir.
+İlke: uygulama ya da web sitesi tamamen ele geçirilse bile saldırganın elinde yalnızca herkese açık anahtar ve en fazla kendi oturumu olur; asıl koruma veritabanındadır. 280 saldırı ve işlev senaryosu gerçek Postgres üzerinde test edildi. İki ayrı bağımsız güvenlik incelemesi yapıldı: ilki 5, ortak yönetim ve yeni araçlar için yapılan ikincisi 11 bulgu çıkardı; hepsi kapatılıp tekrar test edildi. Son cevap günü bilerek yalnızca bilgi amaçlıdır: geç cevaplar da kabul edilir.
 
 **Veritabanı**
 - Satır düzeyi güvenlik: herkes yalnızca kendi etkinlik, kişi, masa, davet, tasarım dosyası ve bildirim anahtarını görür.
@@ -160,9 +192,14 @@ public/pdfjs/                  PDF'ten görsel üretimi (yalnızca web)
 - Kolon yetkileri: istemci rolünü, paketini, paket süresini, davet anahtarını, teslim durumunu, etkinlik sahibini değiştiremez; mesaj, satın alma, ödeme oturumu, bildirim kuyruğu yazamaz.
 - Paket yalnızca ödeme sağlayıcısının sunucudan doğrulanan bildirimiyle verilir; fiyat sunucuda belirlenir; aynı ödeme iki kez işlenmez.
 - Admin en az yetkiyle çalışır ve iki adımlı doğrulama (TOTP, `aal2`) olmadan admin sayılmaz; davetli adı/telefonu admin'e hiç gelmez, e-posta yalnızca tam eşleşmede görünür.
-- Askıya alınan hesap yazamaz; kotalar, hız sınırları ve girdi sınırları kötüye kullanımı keser.
+- Askıya alınan hesap yazamaz; kotalar, hız sınırları ve girdi sınırları kötüye kullanımı keser. Günlük WhatsApp/e-posta/SMS hakkı her mesajın kaydı açılırken veritabanında atomik düşülür: paralel isteklerle aşılamaz. SMS yalnızca Türkiye cep numaralarına gider. Duyuru metni sunucuda kayıttan okunur ve her duyuru her kanaldan bir kez gönderilir; sayıp-ekleyen tüm sınırlar etkinlik satırını kilitler.
 - Tüm fonksiyonlar varsayılan kapalı; gerekenler tek tek açıldı. Denetim kaydı API'den erişilemez.
 - Tasarım dosyaları özel kovada; davetli yalnızca davet anahtarı doğrulandıktan sonra 15 dakikalık imzalı linkle görür.
+- Müzik, video, galeri (`media`) ve albüm (`album`) kovaları da özel; yollar her zaman etkinlik sahibinin klasöründe, yazma yalnızca etkinliği düzenleyebilenlere. Davetli albüme yalnızca sunucunun verdiği tek kullanımlık imzalı linkle, boyut ve tür sınırıyla yükler; albüm kotası ve saatlik hız sınırı veritabanında.
+- Ortak yönetici yalnızca davet edilen e-postayla giriş yapıp linki bir kez kabul edebilir; davet anahtarı kullanılınca değişir. Ortak yönetici etkinliği silemez ya da arşivleyemez, başkalarını davet edemez, takı/IBAN bilgisini değiştiremez (IBAN değişiklikleri denetim kaydına yazılır), başkasının rehberindeki kişileri düzeltemez ve etkinliğe yalnızca kendi kişilerini bağlar. Davet e-postaları kullanıcı başına günde 20 ve aynı adrese 10 dakikada bir ile sınırlı.
+- Herkese açık kısa sayfalar (`/a`, `/h`, `/k`) 12+ karakterlik rastgele kodla çalışır, kod tek tıkla yenilenir; yalnızca gereken alanları döndürür (ör. hediye sayfası yalnızca organizatörün herkese açık işaretlediği IBAN'ı). Bilgi toplama formunda hız ve bekleyen başvuru sınırı vardır, telefonla tekrar engellenir.
+- IBAN sunucuda mod-97 ile doğrulanır; uygulama para toplamaz, yalnızca bilgiyi gösterir. "Ödedim" yalnızca oyuncunun beyanıdır; ödemeyi organizatör işaretler.
+- Yapay zekâ anahtarı yalnızca sunucuda; günlük kullanım hakkı veritabanında sayılır. Görseller kaydedilmez.
 
 **Sunucu fonksiyonları**
 - Kullanıcı adına çalışan fonksiyonlar kullanıcının yetkisiyle okur; servis anahtarı yalnızca istemcinin yazamadığı kayıtlar için.
@@ -172,7 +209,8 @@ public/pdfjs/                  PDF'ten görsel üretimi (yalnızca web)
 
 **Uygulama ve web**
 - Telefonda oturum anahtarları Keychain/Keystore'da şifreli; Android yedeği kapalı; çıkışta cihazın bildirim kaydı silinir.
-- Web'de sıkı CSP (yalnızca kendi betiklerimiz, yalnızca kendi Supabase projemize istek), HSTS, çerçeveleme yasağı, `no-referrer`, davet linkleri dizinlenmez.
+- Web'de sıkı CSP (yalnızca kendi betiklerimiz, yalnızca kendi Supabase projemize istek), HSTS, çerçeveleme yasağı, `no-referrer`, davet linkleri dizinlenmez. Kamera yalnızca kendi sayfalarımızda (kapıda giriş), mikrofon ve konum kapalı. `wasm-unsafe-eval` yalnızca kendi alan adımızdan gelen karekod WASM'ı için; JavaScript `eval` kapalı.
+- Dışa aktarılan Excel/CSV'de formül enjeksiyonuna karşı `=`, `+`, `-`, `@` ile başlayan hücreler metin olarak yazılır.
 
 **Canlıya çıkmadan Supabase panelinde**
 1. SSL zorunluluğu açık; doğrudan veritabanı erişimi yalnızca sizin IP'nize açık (Network restrictions).
@@ -185,7 +223,10 @@ public/pdfjs/                  PDF'ten görsel üretimi (yalnızca web)
 ## Yayından önce sizin yapmanız gerekenler
 
 - Yasal metinlerdeki `[Şirket Unvanı]`, `[Adres]`, `[KEP]`, `[e-posta]` alanlarını doldurup bir avukata kontrol ettirin.
-- Meta'da `davet_lcv` ve `davet_masa` şablonlarını TR ve EN onaylatın.
+- Meta'da `davet_lcv`, `davet_masa` ve `davet_duyuru` şablonlarını TR ve EN onaylatın.
+- SMS için Netgsm hesabı açıp başlığınızı (gönderici adı) onaylatın ve İYS kaydını yapın; `supabase/functions/_shared/sms.ts` içindeki istek biçimini Netgsm'in güncel dokümanıyla doğrulayın.
+- Yapay zekâ için Anthropic API anahtarı alın (`ANTHROPIC_API_KEY`); yoksa bu düğmeler "şu an kullanılamıyor" der, uygulamanın geri kalanı etkilenmez.
+- Fon müziği için kullanıcıların telif hakkına sahip olduğu ya da serbest parçalar yüklediğini kullanım koşullarında belirtin.
 - App Store Connect / Play Console'da `invitefolk_temel`, `invitefolk_otomatik`, `invitefolk_tam` ürünlerini, RevenueCat'te webhook'u, iyzico'da üye işyerini kurun.
 - Gerçek telefonlarda test: oturma planında sürükleme, bildirimler, satın alma (sandbox), PDF/görsel yükleme.
 

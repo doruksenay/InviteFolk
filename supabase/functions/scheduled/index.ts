@@ -5,6 +5,7 @@
 //   a) Haftalık etkinlikleri (halı saha) bir sonraki haftaya alır; auto_invite açıksa davetleri yeniden gönderir.
 //   b) Otomatik hatırlatması açık etkinliklerde cevap vermeyenlere hatırlatma yollar.
 //   c) Organizatör bildirim kuyruğunu telefonlara (Expo Push) iletir.
+//   d) Fotoğraf albümünde yarıda kalmış (yüklenmemiş) ayırmaları ve dosyalarını temizler.
 // Her adım kotaya uyar, ~50 saniyede durur; yarım kalan iş bir sonraki çalıştırmada devam eder.
 //
 // Ortam: CRON_SECRET, (WhatsApp/e-posta/push için send-invitations, send-email ve EXPO_ACCESS_TOKEN ile aynı değişkenler)
@@ -199,6 +200,18 @@ Deno.serve(async (req) => {
     }
   } catch (e) {
     console.error('push drain failed', e instanceof Error ? e.message : e);
+  }
+
+  // d) Albüm temizliği
+  try {
+    if (timeLeft() > 3_000) {
+      const { data: paths, error } = await db.rpc('album_cleanup');
+      if (error) throw error;
+      const list = ((paths ?? []) as string[]).filter((x) => typeof x === 'string');
+      for (let i = 0; i < list.length; i += 100) await db.storage.from('album').remove(list.slice(i, i + 100));
+    }
+  } catch (e) {
+    console.error('album cleanup failed', e instanceof Error ? e.message : e);
   }
 
   return new Response(JSON.stringify({ ok: true, ms: Date.now() - started, ...summary }), {

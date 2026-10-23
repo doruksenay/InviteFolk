@@ -10,6 +10,10 @@ import type { EventSettings, InvitationWithContact, RsvpStatus } from '@/core/ty
 import { eventLang, LANG_NAMES, type TKey, useI18n } from '@/i18n';
 import { getEvent, useQuery } from '@/lib/api';
 import { setPaid, setStatus, updateEvent } from '@/lib/api-guests';
+import { getEventLimits } from '@/lib/api-tools';
+import { AnnounceSheet } from '@/ui/event/AnnounceSheet';
+import { ExportSheet } from '@/ui/event/ExportSheet';
+import { type ToolTile, ToolsGrid } from '@/ui/event/ToolsGrid';
 import { GuestAdder } from '@/ui/guests/GuestAdder';
 import { GuestEditSheet } from '@/ui/guests/GuestEditSheet';
 import { Icon, type IconName } from '@/ui/Icon';
@@ -19,7 +23,7 @@ import { guestMessage, SendPanel } from '@/ui/send/SendPanel';
 import { Sheet } from '@/ui/Sheet';
 import { color, font, radius, shadow, status as statusTokens } from '@/ui/tokens';
 
-type Filter = 'all' | RsvpStatus | 'failed';
+type Filter = 'all' | RsvpStatus | 'failed' | 'unopened';
 type Feedback = { tone: 'success' | 'error' | 'info'; text: string } | null;
 
 export default function EventDetail() {
@@ -33,10 +37,15 @@ export default function EventDetail() {
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [sendOpen, setSendOpen] = useState(false);
   const [editing, setEditing] = useState<InvitationWithContact | null>(null);
+  const [announceOpen, setAnnounceOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const lim = useQuery(() => getEventLimits(id).catch(() => null), [id]);
 
   const invitations = useMemo(() => data?.invitations ?? [], [data]);
   const filtered = useMemo(() => {
-    const list = invitations.filter((i) => filter === 'all' || (filter === 'failed' ? i.delivery === 'failed' : i.status === filter));
+    const list = invitations.filter((i) =>
+      filter === 'all' ? true : filter === 'failed' ? i.delivery === 'failed' : filter === 'unopened' ? i.delivery !== 'not_sent' && !i.opened_at && i.status === 'pending' : i.status === filter,
+    );
     if (filter === 'waitlist') return [...list].sort((a, b) => (a.responded_at ?? a.created_at).localeCompare(b.responded_at ?? b.created_at));
     return list;
   }, [invitations, filter]);
@@ -80,7 +89,30 @@ export default function EventDetail() {
     waitlist: invitations.filter((i) => i.status === 'waitlist').length,
     failed: invitations.filter((i) => i.delivery === 'failed').length,
     paid: invitations.filter((i) => i.status === 'yes' && i.paid).length,
+    unopened: invitations.filter((i) => i.delivery !== 'not_sent' && !i.opened_at && i.status === 'pending').length,
+    opened: invitations.filter((i) => i.opened_at).length,
+    checkedIn: invitations.filter((i) => i.checked_in_at).length,
+    claims: invitations.filter((i) => i.paid_claimed_at && !i.paid).length,
   };
+  const L = lim.data?.limits ?? null;
+  const isOwner = lim.data?.is_owner ?? true;
+  const saha = event.type === 'saha';
+  const go = (path: '/etkinlik/[id]/sayfa' | '/etkinlik/[id]/ekip' | '/etkinlik/[id]/giris' | '/etkinlik/[id]/album' | '/etkinlik/[id]/basvurular' | '/etkinlik/[id]/takim') => router.push({ pathname: path, params: { id: event.id } });
+  const plan = (k: 'temel' | 'otomatik' | 'tam') => t('tools.locked', { plan: t(`status.plan.${k}`) });
+  const tiles: ToolTile[] = [
+    { key: 'page', icon: 'envelope', title: t('tools.card.page.title'), body: t('tools.card.page.body'), tint: color.coralTint, ink: color.coralInk, onPress: () => go('/etkinlik/[id]/sayfa') },
+    ...(saha ? [{ key: 'teams', icon: 'shirt' as const, title: t('tools.card.teams.title'), body: t('tools.card.teams.body'), badge: counts.claims ? t('tools.teams.paidClaims', { count: counts.claims }) : null, tint: color.sageTint, ink: color.sageInk, onPress: () => go('/etkinlik/[id]/takim') }] : []),
+    { key: 'announce', icon: 'megaphone', title: t('tools.card.announce.title'), body: t('tools.card.announce.body'), tint: color.goldTint, ink: color.goldInk, onPress: () => setAnnounceOpen(true) },
+    { key: 'export', icon: 'download', title: t('tools.card.export.title'), body: t('tools.card.export.body'), tint: color.sageTint, ink: color.sageInk, onPress: () => setExportOpen(true) },
+    { key: 'team', icon: 'userPlus', title: t('tools.card.team.title'), body: t('tools.card.team.body'), locked: L && L.max_cohosts <= 0 ? plan('temel') : null, badge: lim.data?.cohosts ? String(lim.data.cohosts) : null, tint: color.lavenderTint, ink: color.lavenderInk, onPress: () => go('/etkinlik/[id]/ekip') },
+    { key: 'checkin', icon: 'scan', title: t('tools.card.checkin.title'), body: t('tools.card.checkin.body'), locked: L && !L.checkin ? plan('otomatik') : null, badge: counts.checkedIn ? `${counts.checkedIn}/${counts.yes}` : null, tint: color.lavenderTint, ink: color.lavenderInk, onPress: () => go('/etkinlik/[id]/giris') },
+    ...(saha
+      ? []
+      : [
+          { key: 'album', icon: 'camera' as const, title: t('tools.card.album.title'), body: t('tools.card.album.body'), locked: L && L.album_photos <= 0 ? plan('otomatik') : null, badge: lim.data?.album_used ? String(lim.data.album_used) : null, tint: color.coralTint, ink: color.coralInk, onPress: () => go('/etkinlik/[id]/album') },
+          { key: 'collector', icon: 'qr' as const, title: t('tools.card.collector.title'), body: t('tools.card.collector.body'), locked: L && !L.collector ? plan('temel') : null, tint: color.goldTint, ink: color.goldInk, onPress: () => go('/etkinlik/[id]/basvurular') },
+        ]),
+  ];
 
   // Menü dağılımı (gelen haneler)
   const menuCounts = (settings.menu ?? []).map((m) => ({ m, n: invitations.filter((i) => i.status === 'yes' && i.menu === m).length })).filter((x) => x.n > 0);
@@ -129,6 +161,7 @@ export default function EventDetail() {
     ['pending', counts.pending],
     ['no', counts.no],
     ...(roster ? ([['waitlist', counts.waitlist]] as [Filter, number][]) : []),
+    ...(counts.unopened ? ([['unopened', counts.unopened]] as [Filter, number][]) : []),
     ['failed', counts.failed],
   ];
 
@@ -149,6 +182,7 @@ export default function EventDetail() {
             {event.status === 'draft' && <Pill label={t('status.event.draft')} bg={color.ink} fg="#FFFFFF" />}
             {archived && <Pill label={t('status.event.archived')} bg={color.goldTint} fg={color.goldInk} />}
             {settings.recurring === 'weekly' && <Pill label={t('event.weekly')} bg={color.sageTint} fg={color.sageInk} />}
+            {!isOwner && <Pill label={t('tools.team.shared')} bg={color.lavenderTint} fg={color.lavenderInk} />}
           </View>
           <Display size={wide ? 48 : 38}>{event.title}</Display>
           <Caption>{[formatWhen(event.starts_at, locale), event.venue_name].filter(Boolean).join(' · ') || t('event.noDateVenue')}</Caption>
@@ -163,7 +197,7 @@ export default function EventDetail() {
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12, backgroundColor: color.goldTint, borderRadius: radius.lg, padding: 16 }}>
           <Icon name="archive" size={20} color={color.goldInk} />
           <Text style={{ flex: 1, minWidth: 200, fontFamily: font.semibold, fontSize: 14, color: color.goldInk }}>{t('event.archivedBanner')}</Text>
-          <Button label={t('event.unarchive')} variant="secondary" onPress={unarchive} />
+          {isOwner && <Button label={t('event.unarchive')} variant="secondary" onPress={unarchive} />}
         </View>
       )}
 
@@ -231,6 +265,11 @@ export default function EventDetail() {
         />
       </View>
 
+      <View style={{ gap: 10 }}>
+        <Caption>{t('tools.section')}</Caption>
+        <ToolsGrid tiles={tiles} columns={width >= 1100 ? 4 : width >= 760 ? 3 : 2} />
+      </View>
+
       <View style={{ flexDirection: wide ? 'row' : 'column', gap: 20, alignItems: 'flex-start' }}>
         <View style={{ width: wide ? 380 : '100%' }}>{!archived && <GuestAdder event={event} onAdded={reload} />}</View>
 
@@ -240,7 +279,7 @@ export default function EventDetail() {
             <Display size={32}>{t('event.list.title')}</Display>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {filters.map(([k, n]) => {
-                const label = t(`event.list.filters.${k}` as TKey);
+                const label = k === 'unopened' ? t('tools.list.filterNotOpened') : t(`event.list.filters.${k}` as TKey);
                 const on = filter === k;
                 return (
                   <Pressable
@@ -304,6 +343,14 @@ export default function EventDetail() {
                         </Caption>
                       )}
                       {inv.delivery === 'failed' && <Caption color={color.coralInk}>{t('event.list.deliveryFailed')}</Caption>}
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                        {inv.delivery !== 'not_sent' && inv.status === 'pending' && (
+                          <MiniBadge icon={inv.opened_at ? 'eye' : 'eyeOff'} label={inv.opened_at ? t('tools.list.opened') : t('tools.list.notOpened')} tone={inv.opened_at ? 'lavender' : 'muted'} />
+                        )}
+                        {inv.status === 'yes' && inv.children > 0 && <MiniBadge icon="child" label={t('tools.list.children', { count: inv.children })} tone="gold" />}
+                        {inv.checked_in_at && <MiniBadge icon="check" label={t('tools.list.checkedIn')} tone="sage" />}
+                        {roster && inv.paid_claimed_at && !inv.paid && <MiniBadge icon="creditCard" label={t('tools.list.paidClaim')} tone="gold" />}
+                      </View>
                     </View>
                   </Pressable>
                   <StatusBadge status={inv.status} />
@@ -355,6 +402,9 @@ export default function EventDetail() {
         <SendPanel flat event={event} invitations={invitations} onSent={reload} />
       </Sheet>
 
+      <AnnounceSheet open={announceOpen} onClose={() => setAnnounceOpen(false)} eventId={event.id} limits={L} onDone={reload} />
+      <ExportSheet open={exportOpen} onClose={() => setExportOpen(false)} event={event} invitations={invitations} />
+
       <GuestEditSheet
         open={!!editing}
         onClose={() => setEditing(null)}
@@ -364,6 +414,17 @@ export default function EventDetail() {
         event={{ type: event.type, settings }}
       />
     </Screen>
+  );
+}
+
+function MiniBadge({ icon, label, tone }: { icon: IconName; label: string; tone: 'sage' | 'gold' | 'lavender' | 'muted' }) {
+  const bg = tone === 'sage' ? color.sageTint : tone === 'gold' ? color.goldTint : tone === 'lavender' ? color.lavenderTint : color.surfaceSoft;
+  const ink = tone === 'sage' ? color.sageInk : tone === 'gold' ? color.goldInk : tone === 'lavender' ? color.lavenderInk : color.muted;
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, height: 22, borderRadius: 999, backgroundColor: bg }}>
+      <Icon name={icon} size={11} color={ink} strokeWidth={2.2} />
+      <Text style={{ fontFamily: font.semibold, fontSize: 11, color: ink }}>{label}</Text>
+    </View>
   );
 }
 

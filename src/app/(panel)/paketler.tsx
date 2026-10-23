@@ -147,6 +147,17 @@ export default function PlansScreen() {
       t('billing.included.seating'),
       t('billing.included.design'),
       t('billing.included.import'),
+      t('billing.included.page'),
+      t('billing.included.export'),
+      ...(l.max_gallery > 0 ? [t('billing.included.gallery', { count: l.max_gallery })] : []),
+      ...(l.music ? [t('billing.included.music')] : []),
+      ...(l.video ? [t('billing.included.video')] : []),
+      ...(l.max_cohosts > 0 ? [t('billing.included.cohosts', { count: l.max_cohosts })] : []),
+      ...(l.collector ? [t('billing.included.collector')] : []),
+      ...(l.checkin ? [t('billing.included.checkin')] : []),
+      ...(l.album_photos > 0 ? [t('billing.included.album', { count: n(l.album_photos) })] : []),
+      ...(l.sms_per_day > 0 ? [t('billing.included.sms', { count: n(l.sms_per_day) })] : []),
+      ...(l.ai_per_day > 0 ? [t('billing.included.ai', { count: n(l.ai_per_day) })] : []),
     ];
   };
 

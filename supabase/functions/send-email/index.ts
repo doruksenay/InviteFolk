@@ -1,5 +1,5 @@
-// POST { event_id: uuid, invitation_ids?: uuid[], kind?: 'invite' | 'reminder' | 'table' }
-// Organizatörün kendi etkinliğindeki, e-posta adresi olan davetlilere davet / hatırlatma / "masanız" e-postası gönderir.
+// POST { event_id: uuid, invitation_ids?: uuid[], kind?: 'invite' | 'reminder' | 'table' | 'announcement', announcement_id?, audience? }
+// Etkinliği yönetenin (sahip ya da ortak yönetici), e-posta adresi olan davetlilerine davet / hatırlatma / "masanız" / duyuru e-postası gönderir.
 // Yanıt: { sent, failed, skipped, quota_left }  ·  Kota bittiğinde 402 { error: 'quota_exceeded', detail: 'email' }
 // Ortam: RESEND_API_KEY, EMAIL_FROM, EMAIL_REPLY_TO (isteğe bağlı), APP_WEB_URL, ALLOWED_ORIGINS
 //
@@ -9,7 +9,7 @@
 import { deliverEmail } from '../_shared/delivery.ts';
 import { appWebUrl } from '../_shared/email.ts';
 import { langOf } from '../_shared/messages.ts';
-import { parseSendRequest } from '../_shared/send.ts';
+import { parseSendRequest, quotaLeft } from '../_shared/send.ts';
 import { adminClient, corsHeaders, json } from '../_shared/supabase.ts';
 
 Deno.serve(async (req) => {
@@ -20,11 +20,10 @@ Deno.serve(async (req) => {
     return json(req, { error: 'not_configured' }, 503);
   }
 
-  const r = await parseSendRequest(req);
+  const r = await parseSendRequest(req, 'email');
   if ('error' in r) return json(req, { error: r.error }, r.status);
 
-  const { data: left } = await r.asUser.rpc('email_quota_left');
-  let quota = Number(left ?? 0);
+  let quota = await quotaLeft(r, 'email');
   if (quota <= 0) return json(req, { error: 'quota_exceeded', detail: 'email', sent: 0, failed: 0, skipped: r.targets.length }, 402);
 
   const lang = langOf(r.event.settings);
@@ -38,7 +37,7 @@ Deno.serve(async (req) => {
       skipped++;
       continue;
     }
-    const outcome = await deliverEmail(db, r.event, target, r.kind, lang, r.hostName);
+    const outcome = await deliverEmail(db, r.event, target, r.kind, lang, r.hostName, r.message);
     if (outcome === 'sent') sent++;
     else if (outcome === 'failed') failed++;
     else skipped++;

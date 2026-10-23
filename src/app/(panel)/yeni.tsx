@@ -8,6 +8,8 @@ import { THEMES, type ThemeKey } from '@/core/themes';
 import type { EventRow } from '@/core/types';
 import { type Lang, LOCALE_TAG, useI18n } from '@/i18n';
 import { createEvent, getEvent, useQuery } from '@/lib/api';
+import { aiExtractInvitation } from '@/lib/api-ai';
+import { pickPhotoBase64 } from '@/lib/media-pick';
 import { toIso } from '@/ui/eventForm/dates';
 import { LangPicker, ThemePicker } from '@/ui/eventForm/Pickers';
 import { GuestAdder } from '@/ui/guests/GuestAdder';
@@ -15,6 +17,7 @@ import { Icon } from '@/ui/Icon';
 import { InvitationCard } from '@/ui/InvitationCard';
 import { Body, Button, Caption, Display, DisplayAccent, Field, IconButton, Label, Notice, Pill, Surface, tapFeedback, Title, ToggleRow } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
+import { ThemeArt } from '@/ui/theme/ThemeArt';
 import { SendPanel } from '@/ui/send/SendPanel';
 import { Stepper } from '@/ui/Stepper';
 import { color, font, shadow, WIDE_BREAKPOINT } from '@/ui/tokens';
@@ -52,6 +55,9 @@ export default function NewEvent() {
   const [deadline, setDeadline] = useState('');
   const [rosterSize, setRosterSize] = useState('14');
   const [weekly, setWeekly] = useState(true);
+  const [message, setMessage] = useState('');
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiNote, setAiNote] = useState<{ tone: 'success' | 'error' | 'info'; text: string } | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,14 +80,14 @@ export default function NewEvent() {
       greet: ec.sample.greet,
       kicker: ec.sample.kicker,
       title: title.trim() ? title.trim() : ec.sample.title,
-      line: ec.sample.line,
+      line: message.trim() || ec.sample.line,
       when: formatWhen(startsAt, eventLocale) ?? ec.sample.when,
       where: venue.trim() || ec.sample.where,
       deadline: deadlineText || ec.sample.deadline,
       yes: ec.rsvp.yes,
       no: ec.rsvp.no,
     }),
-    [ec, title, startsAt, eventLocale, venue, deadlineText],
+    [ec, title, startsAt, eventLocale, venue, deadlineText, message],
   );
 
   const goToEvent = () => {
@@ -110,6 +116,7 @@ export default function NewEvent() {
       if (cfg.questions.roster) settings.roster_size = Math.max(2, Number(rosterSize) || 14);
       if (cfg.tools.recurring) settings.recurring = weekly ? 'weekly' : null;
       if (cfg.questions.menu && ec.menu) settings.menu = ec.menu;
+      if (message.trim()) settings.message = message.trim().slice(0, 400);
       if (created) {
         setStep(2);
         return;
@@ -257,6 +264,36 @@ export default function NewEvent() {
     </View>
   );
 
+  // Basılı davetiyenin fotoğrafından alanları doldur (yalnızca boş alanlar değil: okunanlar yazılır, kullanıcı düzeltir).
+  const fillFromPhoto = async () => {
+    setAiNote(null);
+    try {
+      const img = await pickPhotoBase64();
+      if (!img) return;
+      setAiBusy(true);
+      const f = await aiExtractInvitation(img);
+      let n = 0;
+      const set = (v: string | null, fn: (s: string) => void) => {
+        if (v && v.trim()) {
+          fn(v.trim());
+          n++;
+        }
+      };
+      set(f.title, setTitle);
+      set(f.host_names, setHosts);
+      if (f.date && /^\d{4}-\d{2}-\d{2}$/.test(f.date)) set(f.date, setDate);
+      if (f.time && /^\d{2}:\d{2}$/.test(f.time)) set(f.time, setTime);
+      set(f.venue_name, setVenue);
+      set(f.venue_address, setAddress);
+      set(f.message, (v) => setMessage(v.slice(0, 400)));
+      setAiNote(n ? { tone: 'success', text: t('tools.ai.filled') } : { tone: 'info', text: t('tools.ai.nothing') });
+    } catch (e) {
+      setAiNote({ tone: 'error', text: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setAiBusy(false);
+    }
+  };
+
   // ------------------------------------------------------------------ adım 2
   const half = wide || width >= 640 ? '48.5%' : '100%';
   const stepTwo = (
@@ -266,6 +303,22 @@ export default function NewEvent() {
         <LangPicker value={eventLang} onChange={setEventLang} />
         <Caption>{t('wizard.languageHint')}</Caption>
       </View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('tools.ai.fromPhoto')}
+        onPress={fillFromPhoto}
+        disabled={aiBusy}
+        style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 22, backgroundColor: color.lavenderTint, transform: [{ scale: pressed ? 0.99 : 1 }] })}>
+        <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name={aiBusy ? 'refresh' : 'camera'} size={20} color={color.lavenderInk} />
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={{ fontFamily: font.bold, fontSize: 15, color: color.lavenderInk }}>{aiBusy ? t('tools.ai.reading') : t('tools.ai.fromPhoto')}</Text>
+          <Caption>{t('tools.ai.fromPhotoHint')}</Caption>
+        </View>
+        <Icon name="sparkle" size={18} color={color.lavenderInk} />
+      </Pressable>
+      {aiNote && <Notice tone={aiNote.tone} text={aiNote.text} />}
       <Field label={t('wizard.fields.title')} placeholder={ec.sample.title.replace('\n', ' ')} value={title} onChangeText={setTitle} hint={t('wizard.fields.titleHint')} multiline={false} />
       <Field label={t('wizard.fields.hosts')} placeholder={t('wizard.fields.hostsPlaceholder')} value={hosts} onChangeText={setHosts} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
@@ -282,6 +335,7 @@ export default function NewEvent() {
         keyboardType="numbers-and-punctuation"
         hint={t('wizard.fields.deadlineHint')}
       />
+      <Field label={t('tools.page.message.title')} placeholder={ec.sample.line} value={message} onChangeText={setMessage} multiline maxLength={400} hint={t('tools.page.message.hint')} />
       {cfg.questions.roster && <Field label={t('wizard.fields.roster')} value={rosterSize} onChangeText={setRosterSize} keyboardType="number-pad" hint={t('wizard.fields.rosterHint')} />}
       {cfg.tools.recurring && <ToggleRow label={t('wizard.fields.weekly')} hint={t('wizard.fields.weeklyHint')} value={weekly} onChange={setWeekly} />}
     </Surface>
@@ -320,7 +374,7 @@ export default function NewEvent() {
   const summaryBar = (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 16, padding: 16, paddingLeft: 20, borderRadius: 26, backgroundColor: color.surface, boxShadow: shadow.raised }}>
       <View style={{ width: 44, height: 44, borderRadius: 14, overflow: 'hidden', backgroundColor: th.bg }}>
-        <View style={{ position: 'absolute', right: -10, bottom: -10, width: 34, height: 34, borderRadius: 17, backgroundColor: th.shapeA }} />
+        <ThemeArt theme={th} width={44} height={44} />
       </View>
       <View style={{ flex: 1, minWidth: 160 }}>
         <Caption>{t('wizard.yourChoice')}</Caption>

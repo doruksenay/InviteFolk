@@ -5,6 +5,8 @@ import type { InvitationTheme } from '@/core/themes';
 import { type Lang, LOCALE_TAG, makeT } from '@/i18n';
 
 import { Icon } from './Icon';
+import { ThemeArt } from './theme/ThemeArt';
+import { themeTitle } from './theme/typography';
 import { font } from './tokens';
 
 export type InvitationCopy = {
@@ -43,9 +45,9 @@ export function InvitationCard({
   return (
     <View style={[styles.card, { backgroundColor: theme.bg }, style]}>
       <View style={{ height: artHeight, overflow: 'hidden' }}>
-        <View style={[styles.shapeA, { backgroundColor: theme.shapeA }]} />
-        <View style={[styles.shapeB, { backgroundColor: theme.shapeB }]} />
-        <View style={[styles.shapeC, { backgroundColor: theme.dark ? theme.shapeC : '#FFFFFF', opacity: theme.dark ? 1 : 0.75 }]} />
+        <View style={StyleSheet.absoluteFill}>
+          <ThemeArt theme={theme} width="100%" height="100%" />
+        </View>
         <View style={[styles.greet, { backgroundColor: theme.chip }]}>
           <Text style={[styles.greetText, { color: theme.ink }]} numberOfLines={1}>
             {copy.greet}
@@ -54,7 +56,7 @@ export function InvitationCard({
       </View>
       <View style={styles.body}>
         <Text style={[styles.kicker, { color: theme.key_ }]}>{copy.kicker.toLocaleUpperCase(LOCALE_TAG[lang])}</Text>
-        <Text style={[styles.title, { color: theme.ink }]}>{copy.title}</Text>
+        <Text style={[themeTitle(theme, 48), { color: theme.ink }]}>{copy.title}</Text>
         <Text style={[styles.line, { color: theme.soft }]}>{copy.line}</Text>
         <View style={{ gap: 8, paddingTop: 4 }}>
           <View style={styles.row}>
@@ -84,14 +86,10 @@ export function InvitationCard({
 
 const styles = StyleSheet.create({
   card: { width: '100%', maxWidth: 360, alignSelf: 'center', borderRadius: 28, overflow: 'hidden', boxShadow: '0px 26px 56px rgba(30,20,10,0.20)' },
-  shapeA: { position: 'absolute', left: -56, top: -70, width: 220, height: 220, borderRadius: 110 },
-  shapeB: { position: 'absolute', right: 28, top: 54, width: 104, height: 160, borderTopLeftRadius: 52, borderTopRightRadius: 52 },
-  shapeC: { position: 'absolute', right: 120, top: 126, width: 56, height: 56, borderRadius: 28 },
   greet: { position: 'absolute', left: 18, bottom: 16, maxWidth: '86%', paddingVertical: 7, paddingHorizontal: 12, borderRadius: 999 },
   greetText: { fontFamily: font.semibold, fontSize: 12 },
   body: { paddingHorizontal: 24, paddingTop: 20, paddingBottom: 24, gap: 14 },
   kicker: { fontFamily: font.bold, fontSize: 12, letterSpacing: 1.6 },
-  title: { fontFamily: font.serif, fontSize: 48, lineHeight: 46, letterSpacing: -0.4 },
   line: { fontFamily: font.regular, fontSize: 15, lineHeight: 23 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   rowText: { fontFamily: font.medium, fontSize: 14, flexShrink: 1 },

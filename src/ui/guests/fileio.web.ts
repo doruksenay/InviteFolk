@@ -18,3 +18,15 @@ export async function shareTextFile(name: string, text: string, mimeType = 'text
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   return true;
 }
+
+export async function shareBinaryFile(name: string, bytes: Uint8Array, mimeType: string, _uti?: string): Promise<boolean> {
+  const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: mimeType }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return true;
+}

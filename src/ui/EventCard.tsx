@@ -7,11 +7,12 @@ import type { EventRow, EventSummary } from '@/core/types';
 import { useI18n } from '@/i18n';
 
 import { Icon } from './Icon';
+import { ThemeArt } from './theme/ThemeArt';
 import { color, font, shadow } from './tokens';
 
 type PressState = PressableStateCallbackType & { hovered?: boolean };
 
-export function EventCard({ event, summary, onPress, width }: { event: EventRow; summary: EventSummary | null; onPress: () => void; width: number | `${number}%` }) {
+export function EventCard({ event, summary, onPress, width, shared }: { event: EventRow; summary: EventSummary | null; onPress: () => void; width: number | `${number}%`; shared?: boolean }) {
   const { t, lang, locale } = useI18n();
   const cfg = getEventType(event.type);
   const typeName = eventCopy(event.type, lang).name;
@@ -30,8 +31,9 @@ export function EventCard({ event, summary, onPress, width }: { event: EventRow;
       onPress={onPress}
       style={(s: PressState) => [styles.card, { width }, event.status === 'archived' && { opacity: 0.72 }, s.hovered && { transform: [{ translateY: -3 }], boxShadow: shadow.raised }, s.pressed && { transform: [{ scale: 0.99 }] }]}>
       <View style={[styles.art, { backgroundColor: theme.bg }]}>
-        <View style={{ position: 'absolute', right: -30, top: -40, width: 140, height: 140, borderRadius: 70, backgroundColor: theme.shapeA }} />
-        <View style={{ position: 'absolute', right: 110, bottom: -36, width: 80, height: 80, borderRadius: 40, backgroundColor: theme.shapeB, opacity: 0.85 }} />
+        <View style={StyleSheet.absoluteFill}>
+          <ThemeArt theme={theme} width="100%" height="100%" align="xMaxYMin" />
+        </View>
         {badge ? (
           <View style={styles.date}>
             <Text style={styles.day}>{badge.day}</Text>
@@ -46,6 +48,11 @@ export function EventCard({ event, summary, onPress, width }: { event: EventRow;
           <Icon name={cfg.icon} size={14} color={cfg.accent} strokeWidth={2} />
           <Text style={[styles.typeText, { color: color.ink }]}>{typeName}</Text>
         </View>
+        {shared && (
+          <View style={[styles.draft, { right: undefined, left: 16, backgroundColor: color.lavender }]}>
+            <Text style={styles.draftText}>{t('tools.team.shared')}</Text>
+          </View>
+        )}
         {(event.status === 'draft' || event.status === 'archived') && (
           <View style={styles.draft}>
             <Text style={styles.draftText}>{t(`status.event.${event.status}`)}</Text>

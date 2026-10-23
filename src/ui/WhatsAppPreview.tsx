@@ -4,6 +4,8 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import type { InvitationTheme } from '@/core/themes';
 import { type Lang, makeT } from '@/i18n';
 
+import { ThemeArt } from './theme/ThemeArt';
+import { themeTitle } from './theme/typography';
 import { color, font } from './tokens';
 
 /** Davetin WhatsApp'ta nasıl göründüğünü ve butona basınca gelen takip sorusunu gösterir. `lang` davetiyenin dilidir. */
@@ -49,9 +51,10 @@ export function WhatsAppPreview({
       <View style={styles.chat}>
         <View style={styles.bubbleIn}>
           <View style={[styles.img, { backgroundColor: theme.bg }]}>
-            <View style={{ position: 'absolute', left: -40, top: -50, width: 150, height: 150, borderRadius: 75, backgroundColor: theme.shapeA }} />
-            <View style={{ position: 'absolute', right: 22, top: 30, width: 70, height: 120, borderTopLeftRadius: 35, borderTopRightRadius: 35, backgroundColor: theme.shapeB }} />
-            <Text style={[styles.imgTitle, { color: theme.ink }]}>{title}</Text>
+            <View style={StyleSheet.absoluteFill}>
+              <ThemeArt theme={theme} width="100%" height="100%" />
+            </View>
+            <Text style={[styles.imgTitle, themeTitle(theme, 28), { color: theme.ink }]}>{title}</Text>
           </View>
           <View style={{ paddingHorizontal: 12, paddingTop: 10, paddingBottom: 6, gap: 4 }}>
             <Text style={styles.msg}>{text}</Text>

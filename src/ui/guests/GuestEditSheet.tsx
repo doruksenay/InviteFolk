@@ -3,10 +3,11 @@ import { Text, View } from 'react-native';
 
 import { normalizePhone } from '@/core/format';
 import { EMAIL_RE } from '@/core/importer';
-import type { Contact, EventSettings, InvitationWithContact, RsvpStatus, Side } from '@/core/types';
-import { useI18n } from '@/i18n';
+import type { Contact, EventSettings, InvitationWithContact, PlayerPosition, RsvpStatus, Side } from '@/core/types';
+import { type TKey, useI18n } from '@/i18n';
 import { must, removeInvitation, supabase, useQuery } from '@/lib/api';
 import { deleteContact, updateContact, updateInvitation } from '@/lib/api-guests';
+import { useSession } from '@/lib/session';
 import { Button, Caption, Field, Label, Notice, Skeleton, ToggleRow } from '@/ui/primitives';
 import { Sheet } from '@/ui/Sheet';
 import { color, font, radius } from '@/ui/tokens';
@@ -69,6 +70,9 @@ function Form({
   onChanged: () => void;
 }) {
   const { t } = useI18n();
+  const { session } = useSession();
+  // Kişi kaydını yalnızca ekleyen düzeltir (ortak yöneticide başkasının rehberi salt okunur; veritabanı da böyle).
+  const ownsContact = !!session && contact.owner_id === session.user.id;
   const [name, setName] = useState(contact.name);
   const [phone, setPhone] = useState(contact.phone ?? '');
   const [email, setEmail] = useState(contact.email ?? '');
@@ -81,6 +85,10 @@ function Form({
   const [party, setParty] = useState(invitation?.party_size || 1);
   const [menu, setMenu] = useState<string | null>(invitation?.menu ?? null);
   const [paid, setPaid] = useState(invitation?.paid ?? false);
+  const [children, setChildren] = useState(invitation?.children ?? 0);
+  const [companions, setCompanions] = useState((invitation?.companions ?? []).join(', '));
+  const [skill, setSkill] = useState<number>(contact.skill ?? 3);
+  const [position, setPosition] = useState<PlayerPosition | null>(contact.position ?? null);
 
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -101,7 +109,7 @@ function Form({
     if (mail && !EMAIL_RE.test(mail)) return setErr(t('guests.adder.errEmail'));
     setBusy(true);
     try {
-      await updateContact(contact.id, {
+      if (ownsContact) await updateContact(contact.id, {
         name: name.trim().slice(0, 120),
         phone: normalized,
         email: mail || null,
@@ -109,6 +117,7 @@ function Form({
         group_label: group.trim().slice(0, 40) || null,
         max_party: Math.min(20, Math.max(1, maxParty)),
         notes: notes.trim().slice(0, 1000) || null,
+        ...(type === 'saha' ? { skill, position } : {}),
       });
       if (invitation) {
         const changedStatus = status !== invitation.status;
@@ -118,6 +127,17 @@ function Form({
           menu,
           paid,
           paid_at: paid ? (invitation.paid_at ?? new Date().toISOString()) : null,
+          ...(paid ? { paid_claimed_at: null } : {}),
+          ...(type !== 'saha'
+            ? {
+                children: status === 'yes' ? Math.min(children, Math.max(1, party)) : 0,
+                companions: companions
+                  .split(',')
+                  .map((x) => x.trim().slice(0, 80))
+                  .filter(Boolean)
+                  .slice(0, 19),
+              }
+            : {}),
           ...(changedStatus ? { responded_at: new Date().toISOString() } : {}),
         });
       }
@@ -160,14 +180,32 @@ function Form({
     <View style={{ gap: 18 }}>
       <View style={{ gap: 14 }}>
         <Label>{t('guests.edit.contactSection')}</Label>
-        <Field label={t('guests.adder.name')} value={name} onChangeText={setName} maxLength={120} />
-        <Field label={t('guests.adder.phone')} keyboardType="phone-pad" value={phone} onChangeText={setPhone} placeholder={t('guests.adder.phonePlaceholder')} />
-        <Field label={t('guests.adder.email')} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} value={email} onChangeText={setEmail} placeholder={t('guests.adder.emailPlaceholder')} />
+        {!ownsContact && <Notice tone="info" text={t('guests.edit.notOwner')} />}
+        <Field label={t('guests.adder.name')} value={name} onChangeText={setName} maxLength={120} editable={ownsContact} />
+        <Field label={t('guests.adder.phone')} editable={ownsContact} keyboardType="phone-pad" value={phone} onChangeText={setPhone} placeholder={t('guests.adder.phonePlaceholder')} />
+        <Field label={t('guests.adder.email')} editable={ownsContact} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} value={email} onChangeText={setEmail} placeholder={t('guests.adder.emailPlaceholder')} />
         <SideOrGroup type={type} side={side} onSide={setSide} group={group} onGroup={setGroup} />
         <View style={{ gap: 8 }}>
           <Label>{t('guests.adder.maxParty')}</Label>
           <NumberStepper label={t('guests.adder.maxParty')} value={maxParty} min={1} max={20} onChange={setMaxParty} />
         </View>
+        {type === 'saha' && (
+          <View style={{ gap: 8 }}>
+            <Label>{t('guests.edit.skill')}</Label>
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              {[1, 2, 3, 4, 5].map((v) => (
+                <OptionChip key={v} small label={String(v)} on={skill === v} onPress={() => setSkill(v)} />
+              ))}
+            </View>
+            <Label>{t('guests.edit.position')}</Label>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+              <OptionChip small label={t('guests.edit.noPosition')} on={!position} onPress={() => setPosition(null)} />
+              {(['kaleci', 'defans', 'orta', 'forvet'] as PlayerPosition[]).map((p) => (
+                <OptionChip key={p} small label={t(`tools.teams.positions.${p}` as TKey)} on={position === p} onPress={() => setPosition(p)} />
+              ))}
+            </View>
+          </View>
+        )}
         <Field label={t('guests.edit.notes')} placeholder={t('guests.edit.notesPlaceholder')} value={notes} onChangeText={setNotes} multiline maxLength={1000} />
         {invitation && <Caption>{t('guests.edit.sharedNote')}</Caption>}
       </View>
@@ -188,6 +226,15 @@ function Form({
               <Caption>{t('guests.edit.partySize')}</Caption>
               <NumberStepper label={t('guests.edit.partySize')} value={Math.min(party, maxParty)} min={1} max={maxParty} onChange={setParty} />
             </View>
+          )}
+          {type !== 'saha' && status === 'yes' && party > 1 && (settings.ask_children || children > 0) && (
+            <View style={{ gap: 8 }}>
+              <Caption>{t('guests.edit.children')}</Caption>
+              <NumberStepper label={t('guests.edit.children')} value={Math.min(children, party)} min={0} max={Math.min(party, maxParty)} onChange={setChildren} />
+            </View>
+          )}
+          {type !== 'saha' && status === 'yes' && party > 1 && (settings.ask_names || companions.trim() !== '') && (
+            <Field label={t('guests.edit.companions')} hint={t('guests.edit.companionsHint')} value={companions} onChangeText={setCompanions} maxLength={600} />
           )}
           {settings.menu && settings.menu.length > 0 && (
             <View style={{ gap: 8 }}>

@@ -101,7 +101,11 @@ export function usePushRouting() {
     const rid = last.notification.request.identifier;
     if (handledResponse === rid) return;
     handledResponse = rid;
-    const id = (last.notification.request.content.data as { event_id?: unknown } | undefined)?.event_id;
-    if (typeof id === 'string' && UUID.test(id)) router.push({ pathname: '/etkinlik/[id]', params: { id } });
+    const data = last.notification.request.content.data as { event_id?: unknown; kind?: unknown } | undefined;
+    const id = data?.event_id;
+    if (typeof id !== 'string' || !UUID.test(id)) return;
+    // Bilgi toplama başvurusu: doğrudan onay ekranı.
+    if (data?.kind === 'request') router.push({ pathname: '/etkinlik/[id]/basvurular', params: { id } });
+    else router.push({ pathname: '/etkinlik/[id]', params: { id } });
   }, [last]);
 }

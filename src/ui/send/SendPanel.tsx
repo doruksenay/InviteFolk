@@ -7,7 +7,7 @@ import { formatWhen, rsvpUrl, waMeLink } from '@/core/format';
 import type { EventRow, InvitationWithContact } from '@/core/types';
 import { eventLang, LOCALE_TAG, makeT, useI18n } from '@/i18n';
 import { useQuery } from '@/lib/api';
-import { emailQuotaLeft, sendEmail, sendWhatsApp, whatsappQuotaLeft } from '@/lib/api-guests';
+import { emailQuotaLeft, quotaLeft, sendEmail, sendSms, sendWhatsApp, whatsappQuotaLeft } from '@/lib/api-guests';
 import { Icon, type IconName } from '@/ui/Icon';
 import { Body, Button, Caption, Notice, Surface, Title, ToggleRow } from '@/ui/primitives';
 import { Sheet } from '@/ui/Sheet';
@@ -38,12 +38,13 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
   const { t } = useI18n();
   const [kind, setKind] = useState<Kind>('invite');
   const [resendAll, setResendAll] = useState(false);
-  const [busy, setBusy] = useState<'wa' | 'email' | null>(null);
+  const [busy, setBusy] = useState<'wa' | 'email' | 'sms' | null>(null);
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [queueOpen, setQueueOpen] = useState(false);
 
-  const waQuota = useQuery(() => whatsappQuotaLeft().catch(() => 0), [event.id]);
-  const mailQuota = useQuery(() => emailQuotaLeft().catch(() => 0), [event.id]);
+  const waQuota = useQuery(() => whatsappQuotaLeft(event.id).catch(() => 0), [event.id]);
+  const mailQuota = useQuery(() => emailQuotaLeft(event.id).catch(() => 0), [event.id]);
+  const smsQuota = useQuery(() => quotaLeft(event.id, 'sms').catch(() => 0), [event.id]);
 
   const active = invitations.filter((i) => i.status !== 'no');
   const notSent = active.filter((i) => i.delivery === 'not_sent');
@@ -55,6 +56,7 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
   const withEmail = targets.filter((i) => i.contacts.email);
   const waLeft = waQuota.data ?? 0;
   const mailLeft = mailQuota.data ?? 0;
+  const smsLeft = smsQuota.data ?? 0;
 
   const hint =
     kind === 'reminder'
@@ -63,10 +65,10 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
         ? t('send.kindHint.inviteAll', { count: targets.length })
         : t('send.kindHint.invite', { count: targets.length });
 
-  const report = (r: { sent: number; failed: number; skipped: number }) =>
+  const report = (r: { sent: number; failed: number; skipped: number; via_sms?: number }) =>
     setFeedback({
       tone: r.failed ? 'warning' : 'success',
-      text: `${t('send.done', { sent: r.sent })}${r.failed ? t('send.doneFailed', { failed: r.failed }) : ''}${r.skipped ? t('send.doneSkipped', { skipped: r.skipped }) : ''}.`,
+      text: `${t('send.done', { sent: r.sent })}${r.via_sms ? t('send.doneViaSms', { count: r.via_sms }) : ''}${r.failed ? t('send.doneFailed', { failed: r.failed }) : ''}${r.skipped ? t('send.doneSkipped', { skipped: r.skipped }) : ''}.`,
     });
 
   const sendWa = async () => {
@@ -89,6 +91,20 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
     try {
       report(await sendEmail(event.id, kind, withEmail.slice(0, 1000).map((i) => i.id)));
       mailQuota.reload();
+      onSent();
+    } catch (e) {
+      setFeedback({ tone: 'error', text: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const sendSmsNow = async () => {
+    setBusy('sms');
+    setFeedback(null);
+    try {
+      report(await sendSms(event.id, kind, withPhone.slice(0, 1000).map((i) => i.id)));
+      smsQuota.reload();
       onSent();
     } catch (e) {
       setFeedback({ tone: 'error', text: e instanceof Error ? e.message : String(e) });
@@ -173,6 +189,28 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
                 loading={busy === 'email'}
                 disabled={!!busy}
                 onPress={sendMail}
+                style={{ alignSelf: 'flex-start' }}
+              />
+            )}
+          </Channel>
+
+          <Channel
+            icon="message"
+            tint={color.coralTint}
+            ink={color.coralInk}
+            title={t('send.sms.title')}
+            body={t('send.sms.body')}
+            meta={[smsQuota.data !== null && smsLeft > 0 ? t('send.sms.quota', { count: smsLeft }) : null]}>
+            {smsQuota.data !== null && smsLeft <= 0 ? (
+              <Caption>{t('send.sms.noQuota')}</Caption>
+            ) : (
+              <Button
+                label={t('send.sms.button', { count: Math.min(withPhone.length, smsLeft || withPhone.length) })}
+                icon="message"
+                variant="secondary"
+                loading={busy === 'sms'}
+                disabled={!withPhone.length || !!busy}
+                onPress={sendSmsNow}
                 style={{ alignSelf: 'flex-start' }}
               />
             )}

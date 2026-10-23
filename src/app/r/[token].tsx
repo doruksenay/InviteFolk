@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { type ReactNode, useEffect, useState } from 'react';
 import { ActivityIndicator, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,20 +6,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { eventCopy, getEventType } from '@/core/event-types';
 import { formatDayMonth, formatTry, formatWhen, rsvpUrl } from '@/core/format';
 import { getTheme, type InvitationTheme } from '@/core/themes';
-import type { EventSettings, PublicInvitation } from '@/core/types';
+import type { GuestSettings, PublicInvitation } from '@/core/types';
 import { eventLang, LANG_NAMES, LANGS, type Lang, LOCALE_TAG, makeT, type TFn, useI18n } from '@/i18n';
 import { getPublicInvitation, respondInvitation, useQuery } from '@/lib/api';
-import { getPublicDesign, type PublicDesign } from '@/lib/api-design';
+import { calendarFeedUrl, getWeather, markOpened, type Weather } from '@/lib/api-guest';
+import { getGuestMedia, type GuestMedia, guestNeedsMedia } from '@/lib/api-page';
 import { addToCalendar, type CalEvent, googleCalendarUrl, mapsUrl } from '@/ui/design/calendar';
 import { GuestDesignCard } from '@/ui/design/GuestDesignCard';
+import { Envelope, sealFrom } from '@/ui/guest/Envelope';
+import { PollCard, SahaCards, SignupCard } from '@/ui/guest/Interactive';
+import { Gallery, MusicButton, useInvitationMusic, VideoInvite } from '@/ui/guest/Media';
+import { AlbumCard, AnnouncementCard, CheckinPass, Countdown, GiftCard, ProgramList, WeatherCard } from '@/ui/guest/Sections';
 import { Icon } from '@/ui/Icon';
 import { InvitationCard } from '@/ui/InvitationCard';
 import { tapFeedback } from '@/ui/primitives';
+import { ThemeArt } from '@/ui/theme/ThemeArt';
+import { themeProse, themeTitle } from '@/ui/theme/typography';
 import { font } from '@/ui/tokens';
 
 type Step = 'invite' | 'details' | 'no' | 'done';
-
-type GuestSettings = EventSettings & { has_design?: boolean };
 
 /**
  * Davetlinin gördüğü sayfa: giriş yok, uygulama yok.
@@ -32,6 +37,8 @@ export default function GuestRsvp() {
 
   const [step, setStep] = useState<Step>('invite');
   const [party, setParty] = useState<number | null>(null);
+  const [children, setChildren] = useState<number | null>(null);
+  const [names, setNames] = useState<string[] | null>(null);
   const [menu, setMenu] = useState<string | null>(null);
   const [note, setNote] = useState('');
   const [answers, setAnswers] = useState<Record<string, string> | null>(null);
@@ -39,25 +46,36 @@ export default function GuestRsvp() {
   const [err, setErr] = useState<string | null>(null);
   // Davetli sayfası organizatörün arayüz dilini değil, etkinliğin dilini izler; davetli değiştirebilir.
   const [langPick, setLangPick] = useState<Lang | null>(null);
-  const [design, setDesign] = useState<PublicDesign | null>(null);
-  const [designFailed, setDesignFailed] = useState(false);
+  const [media, setMedia] = useState<GuestMedia | null>(null);
+  const [mediaFailed, setMediaFailed] = useState(false);
+  const [weather, setWeather] = useState<Weather | null>(null);
+  const [envelopeDone, setEnvelopeDone] = useState(false);
   const device = useI18n();
 
-  const hasDesign = !!(data?.event.settings as GuestSettings | undefined)?.has_design;
+  const gs = data?.event.settings as GuestSettings | undefined;
+  const wantsMedia = guestNeedsMedia(gs);
   useEffect(() => {
-    if (!hasDesign || !token) return;
+    if (!wantsMedia || !token) return;
     let alive = true;
-    getPublicDesign(token)
-      .then((d) => {
-        if (!alive) return;
-        if (d.overlay && d.url) setDesign(d);
-        else setDesignFailed(true);
-      })
-      .catch(() => alive && setDesignFailed(true));
+    getGuestMedia(token)
+      .then((m) => alive && setMedia(m))
+      .catch(() => alive && setMediaFailed(true));
     return () => {
       alive = false;
     };
-  }, [hasDesign, token]);
+  }, [wantsMedia, token]);
+
+  // Davetli açtı (organizatörün önizlemesi veritabanında sayılmaz). Hava tahmini yalnızca yakın tarihli etkinliklerde.
+  const loaded = !!data;
+  const startsAt = data?.event.starts_at ?? null;
+  useEffect(() => {
+    if (!loaded || !token) return;
+    markOpened(token);
+    const days = startsAt ? (new Date(startsAt).getTime() - Date.now()) / 86400_000 : NaN;
+    if (days > -0.5 && days <= 14) getWeather(token).then(setWeather).catch(() => {});
+  }, [loaded, token, startsAt]);
+
+  const player = useInvitationMusic(media?.music?.url ?? null);
 
   if (loading && !data) {
     return (
@@ -85,14 +103,23 @@ export default function GuestRsvp() {
   const copyText = eventCopy(inv.event.type, lang);
   const theme = getTheme(inv.event.theme);
   const partyValue = party ?? Math.min(inv.party_size || inv.max_party, inv.max_party);
+  const childValue = Math.min(children ?? inv.children ?? 0, partyValue);
+  const nameValues = names ?? inv.companions ?? [];
   const storedMenu = settings.menu;
   const menuOptions = Array.isArray(storedMenu) && storedMenu.length ? storedMenu : cfg.questions.menu ? copyText.menu : null;
   const questions = (Array.isArray(settings.questions) ? settings.questions : []).filter((q) => q && typeof q.id === 'string' && typeof q.label === 'string').slice(0, 5);
   const answerValues = answers ?? inv.answers ?? {};
   const roster = inv.roster ?? null;
   const waitPos = roster?.waitlist_position ?? null;
-  const designReady = hasDesign && !!design && !designFailed;
-  const designPending = hasDesign && !design && !designFailed;
+  const design = media?.design && media.design.overlay ? media.design : null;
+  const designReady = !!settings.has_design && !!design;
+  const designPending = !!settings.has_design && !media && !mediaFailed;
+  const video = media?.video ?? null;
+  const askChildren = !!settings.ask_children && cfg.questions.partySize;
+  const askNames = !!settings.ask_names && cfg.questions.partySize;
+  const envelopeOn = !!settings.envelope?.enabled && !envelopeDone && step === 'invite';
+  const seal = (settings.envelope?.seal ?? '').trim() || sealFrom(inv.event.title, inv.event.host_names, locale);
+  const hasMusic = !!media?.music?.url;
 
   const where = [inv.event.venue_name, inv.event.venue_address].filter(Boolean).join(', ');
   const start = inv.event.starts_at ? new Date(inv.event.starts_at) : null;
@@ -112,7 +139,11 @@ export default function GuestRsvp() {
     setErr(null);
     try {
       const filled = Object.fromEntries(Object.entries(answerValues).filter(([, v]) => typeof v === 'string' && v.trim()).map(([k, v]) => [k, v.trim().slice(0, 200)]));
-      const updated = await respondInvitation(token, status, status === 'yes' ? partyValue : 0, menu, note.trim() || null, questions.length ? filled : null);
+      const companions = askNames ? nameValues.slice(0, Math.max(0, partyValue - 1)).map((n) => n.trim()).filter(Boolean) : null;
+      const updated = await respondInvitation(token, status, status === 'yes' ? partyValue : 0, menu, note.trim() || null, questions.length ? filled : null, {
+        children: askChildren && status === 'yes' ? childValue : null,
+        companions: askNames && status === 'yes' ? companions : null,
+      });
       setData(updated);
       setStep('done');
     } catch {
@@ -154,6 +185,23 @@ export default function GuestRsvp() {
     </View>
   );
 
+  const onGuestError = (msg: string) => setErr(msg);
+
+  // Kartın altındaki bölümler (davetiye ve "cevabınız alındı" ekranında ortak)
+  const sections = (
+    <View style={{ gap: 14 }}>
+      {weather && weather.available ? <WeatherCard theme={theme} w={weather} t={t} /> : null}
+      {settings.program?.length ? <ProgramList theme={theme} items={settings.program} t={t} locale={locale} /> : null}
+      {media?.gallery?.length ? <Gallery theme={theme} photos={media.gallery} t={t} /> : null}
+      {inv.poll ? <PollCard theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
+      {inv.signup?.length ? <SignupCard theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
+      {inv.event.type === 'saha' ? <SahaCards theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
+      {settings.gift?.iban ? <GiftCard theme={theme} gift={settings.gift} type={inv.event.type} t={t} /> : null}
+      {inv.checkin_code ? <CheckinPass theme={theme} code={inv.checkin_code} checkedIn={!!inv.checked_in} t={t} /> : null}
+      {settings.album_slug ? <AlbumCard theme={theme} t={t} onOpen={() => router.push({ pathname: '/a/[slug]', params: { slug: settings.album_slug! } })} /> : null}
+    </View>
+  );
+
   const extras = (
     <EventExtras
       theme={theme}
@@ -162,22 +210,33 @@ export default function GuestRsvp() {
       giftNote={typeof settings.gift_note === 'string' && settings.gift_note.trim() ? settings.gift_note.trim() : null}
       calEvent={calEvent}
       mapQuery={where || null}
+      feedUrl={settings.recurring === 'weekly' ? calendarFeedUrl(token) : null}
     />
   );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.dark ? theme.bg : '#F6F1E8' }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', padding: 20, paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', padding: 20, paddingBottom: 96 }}>
         <View style={{ width: '100%', maxWidth: 420, gap: 20, flexGrow: 1 }}>
           <LangToggle theme={theme} lang={lang} onChange={setLangPick} t={t} />
+          {inv.announcement ? <AnnouncementCard theme={theme} body={inv.announcement.body} at={inv.announcement.at} t={t} locale={locale} /> : null}
           {step === 'invite' && (
             <>
-              {designPending ? (
+              {video ? (
+                <View style={{ gap: 16 }}>
+                  <VideoInvite theme={theme} url={video.url} width={video.width} height={video.height} overlay={video.overlay} name={inv.guest_name} t={t} />
+                  <View style={{ gap: 8, paddingHorizontal: 4 }}>
+                    <InfoRow theme={theme} icon="calendar" text={formatWhen(inv.event.starts_at, locale) ?? t('rsvp.dateSoon')} />
+                    <InfoRow theme={theme} icon="pin" text={where || t('rsvp.placeSoon')} />
+                  </View>
+                  {actions}
+                </View>
+              ) : designPending ? (
                 <View accessibilityLabel={t('rsvp.designLoading')} style={{ height: 520, borderRadius: 28, backgroundColor: theme.dark ? 'rgba(255,255,255,0.05)' : '#EFE8DD', alignItems: 'center', justifyContent: 'center' }}>
                   <ActivityIndicator color={theme.ink} />
                 </View>
               ) : designReady && design ? (
-                <GuestDesignCard theme={theme} uri={design.url} naturalWidth={design.width} naturalHeight={design.height} overlay={design.overlay} name={inv.guest_name}>
+                <GuestDesignCard theme={theme} uri={design.url} naturalWidth={design.width} naturalHeight={design.height} overlay={design.overlay!} name={inv.guest_name}>
                   <View style={{ gap: 8 }}>
                     <InfoRow theme={theme} icon="calendar" text={formatWhen(inv.event.starts_at, locale) ?? t('rsvp.dateSoon')} />
                     <InfoRow theme={theme} icon="pin" text={where || t('rsvp.placeSoon')} />
@@ -198,7 +257,7 @@ export default function GuestRsvp() {
                     greet: t('rsvp.greet', { name: inv.guest_name }),
                     kicker: copyText.sample.kicker,
                     title: inv.event.title,
-                    line: inv.event.host_names ? t('rsvp.hostLine', { hosts: inv.event.host_names }) : copyText.sample.line,
+                    line: settings.message?.trim() || (inv.event.host_names ? t('rsvp.hostLine', { hosts: inv.event.host_names }) : copyText.sample.line),
                     when: formatWhen(inv.event.starts_at, locale) ?? t('rsvp.dateSoon'),
                     where: where || t('rsvp.placeSoon'),
                     deadline: formatDayMonth(inv.event.rsvp_deadline, locale),
@@ -208,7 +267,9 @@ export default function GuestRsvp() {
                   actions={actions}
                 />
               )}
-              {err && <Text style={[styles.small, { color: '#A3332A', textAlign: 'center' }]}>{err}</Text>}
+              {err && <Text style={[styles.small, { color: theme.dark ? '#FFB4A8' : '#A3332A', textAlign: 'center' }]}>{err}</Text>}
+              {settings.countdown && inv.event.starts_at ? <Countdown theme={theme} startsAt={inv.event.starts_at} t={t} /> : null}
+              {sections}
               {extras}
             </>
           )}
@@ -222,8 +283,45 @@ export default function GuestRsvp() {
                     <Text style={[styles.small, { color: theme.soft }]}>{t('rsvp.partyMax', { count: inv.max_party })}</Text>
                   </View>
                   <Round theme={theme} label="−" a11y={t('rsvp.decrease')} onPress={() => setParty(Math.max(1, partyValue - 1))} />
-                  <Text style={[styles.h1, { fontSize: 36, minWidth: 34, textAlign: 'center', color: theme.ink }]}>{partyValue}</Text>
+                  <Text style={[themeTitle(theme, 36), { minWidth: 34, textAlign: 'center', color: theme.ink }]}>{partyValue}</Text>
                   <Round theme={theme} label="+" a11y={t('rsvp.increase')} filled onPress={() => setParty(Math.min(inv.max_party, partyValue + 1))} />
+                </View>
+              )}
+              {askChildren && partyValue > 1 && (
+                <View style={[styles.box, { backgroundColor: theme.dark ? 'rgba(255,255,255,0.06)' : '#FFFFFF' }]}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.label, { color: theme.ink }]}>{t('guest.children.question')}</Text>
+                    <Text style={[styles.small, { color: theme.soft }]}>{t('guest.children.hint')}</Text>
+                  </View>
+                  <Round theme={theme} label="−" a11y={t('rsvp.decrease')} onPress={() => setChildren(Math.max(0, childValue - 1))} />
+                  <Text style={[themeTitle(theme, 36), { minWidth: 34, textAlign: 'center', color: theme.ink }]}>{childValue}</Text>
+                  <Round theme={theme} label="+" a11y={t('rsvp.increase')} filled onPress={() => setChildren(Math.min(partyValue, childValue + 1))} />
+                </View>
+              )}
+              {askNames && partyValue > 1 && (
+                <View style={{ gap: 10 }}>
+                  <View style={{ gap: 2 }}>
+                    <Text style={[styles.label, { color: theme.ink }]}>{t('guest.companions.title')}</Text>
+                    <Text style={[styles.small, { color: theme.soft }]}>{t('guest.companions.hint')}</Text>
+                  </View>
+                  {Array.from({ length: partyValue - 1 }, (_, i) => (
+                    <TextInput
+                      key={i}
+                      accessibilityLabel={t('guest.companions.placeholder', { n: i + 2 })}
+                      value={nameValues[i] ?? ''}
+                      onChangeText={(v) => {
+                        const next = [...nameValues];
+                        while (next.length < partyValue - 1) next.push('');
+                        next[i] = v;
+                        setNames(next);
+                      }}
+                      placeholder={t('guest.companions.placeholder', { n: i + 2 })}
+                      placeholderTextColor={theme.dark ? 'rgba(247,241,231,0.45)' : '#A49C90'}
+                      maxLength={60}
+                      autoCapitalize="words"
+                      style={[styles.input, { color: theme.ink, backgroundColor: theme.dark ? 'rgba(255,255,255,0.06)' : '#FFFFFF' }]}
+                    />
+                  ))}
                 </View>
               )}
               {menuOptions && (
@@ -261,7 +359,7 @@ export default function GuestRsvp() {
                 </View>
               )}
               <NoteField theme={theme} value={note} onChange={setNote} placeholder={t('rsvp.yesNotePlaceholder')} t={t} />
-              {err && <Text style={[styles.small, { color: '#A3332A' }]}>{err}</Text>}
+              {err && <Text style={[styles.small, { color: theme.dark ? '#FFB4A8' : '#A3332A' }]}>{err}</Text>}
               <PillButton theme={theme} filled label={busy ? t('rsvp.sending') : t('rsvp.sendAnswer')} onPress={() => submit('yes')} />
             </Sheet>
           )}
@@ -269,22 +367,21 @@ export default function GuestRsvp() {
           {step === 'no' && (
             <Sheet theme={theme} title={t('rsvp.noTitle')} subtitle={t('rsvp.noSubtitle')} backLabel={t('rsvp.backToInvite')} onBack={() => setStep('invite')}>
               <NoteField theme={theme} value={note} onChange={setNote} placeholder={t('rsvp.noNotePlaceholder')} t={t} />
-              {err && <Text style={[styles.small, { color: '#A3332A' }]}>{err}</Text>}
+              {err && <Text style={[styles.small, { color: theme.dark ? '#FFB4A8' : '#A3332A' }]}>{err}</Text>}
               <PillButton theme={theme} filled label={busy ? t('rsvp.sending') : t('rsvp.send')} onPress={() => submit('no')} />
             </Sheet>
           )}
 
           {step === 'done' && (
-            <View style={{ gap: 16, paddingTop: 40 }}>
-              <View style={{ height: 160 }}>
-                <View style={{ position: 'absolute', right: -10, top: 0, width: 160, height: 160, borderRadius: 80, backgroundColor: theme.shapeA }} />
-                <View style={{ position: 'absolute', right: 130, top: 80, width: 60, height: 60, borderRadius: 30, backgroundColor: theme.shapeB }} />
+            <View style={{ gap: 16, paddingTop: 12 }}>
+              <View style={{ height: 150, borderRadius: 24, overflow: 'hidden' }}>
+                <ThemeArt theme={theme} width="100%" height={150} />
               </View>
               <Text style={[styles.small, { color: theme.soft, letterSpacing: 1.2 }]}>{t('rsvp.doneKicker')}</Text>
-              <Text style={[styles.h1, { color: theme.ink }]}>
+              <Text style={[themeTitle(theme, 54), { color: theme.ink }]}>
                 {inv.status === 'waitlist' ? t('rsvp.doneWaitlistTitle') : inv.status === 'yes' ? t('rsvp.doneYesTitle') : t('rsvp.doneNoTitle')}
               </Text>
-              <Text style={[styles.serifBody, { color: theme.soft }]}>
+              <Text style={[themeProse(theme, 22), { color: theme.soft }]}>
                 {inv.status === 'waitlist'
                   ? t('rsvp.doneWaitlistBody', { position: waitPos ?? 1 })
                   : inv.status === 'yes'
@@ -292,7 +389,12 @@ export default function GuestRsvp() {
                     : t('rsvp.doneNoBody')}
               </Text>
               {inv.table_label && <TableTicket theme={theme} label={inv.table_label} t={t} />}
-              {(inv.status === 'yes' || inv.status === 'waitlist') && extras}
+              {(inv.status === 'yes' || inv.status === 'waitlist') && (
+                <>
+                  {sections}
+                  {extras}
+                </>
+              )}
               <PillButton theme={theme} label={t('rsvp.change')} onPress={() => setStep('invite')} />
             </View>
           )}
@@ -300,6 +402,19 @@ export default function GuestRsvp() {
           <Footer theme={theme} t={t} />
         </View>
       </ScrollView>
+      {hasMusic && !envelopeOn ? <MusicButton theme={theme} player={player} title={media?.music?.title ?? null} t={t} /> : null}
+      {envelopeOn && (
+        <Envelope
+          theme={theme}
+          seal={seal}
+          name={inv.guest_name}
+          t={t}
+          onOpen={() => {
+            if (hasMusic) player.play();
+          }}
+          onDone={() => setEnvelopeDone(true)}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -350,6 +465,7 @@ function EventExtras({
   giftNote,
   calEvent,
   mapQuery,
+  feedUrl,
 }: {
   theme: InvitationTheme;
   t: TFn;
@@ -357,6 +473,7 @@ function EventExtras({
   giftNote: string | null;
   calEvent: CalEvent | null;
   mapQuery: string | null;
+  feedUrl: string | null;
 }) {
   if (!fee && !giftNote && !calEvent && !mapQuery) return null;
   const soft = theme.dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.75)';
@@ -371,7 +488,7 @@ function EventExtras({
       {giftNote && (
         <View style={{ gap: 6, paddingVertical: 16, paddingHorizontal: 18, borderRadius: 20, backgroundColor: soft }}>
           <Text style={[styles.small, { color: theme.key_, letterSpacing: 1.4, fontFamily: font.bold, fontSize: 11 }]}>{t('rsvp.giftKicker')}</Text>
-          <Text style={[styles.serifBody, { color: theme.ink, fontSize: 20, lineHeight: 26 }]}>{giftNote}</Text>
+          <Text style={[themeProse(theme, 20), { color: theme.ink }]}>{giftNote}</Text>
         </View>
       )}
       {(calEvent || mapQuery) && (
@@ -383,6 +500,12 @@ function EventExtras({
       {calEvent && Platform.OS === 'web' && (
         <Pressable accessibilityRole="link" onPress={() => Linking.openURL(googleCalendarUrl(calEvent)).catch(() => {})} style={{ alignSelf: 'center', paddingVertical: 2 }}>
           <Text style={{ fontFamily: font.medium, fontSize: 12, color: theme.soft, textDecorationLine: 'underline' }}>{t('rsvp.googleCalendar')}</Text>
+        </Pressable>
+      )}
+      {feedUrl && (
+        <Pressable accessibilityRole="link" onPress={() => Linking.openURL(feedUrl).catch(() => {})} style={{ alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 2 }}>
+          <Icon name="refresh" size={13} color={theme.soft} strokeWidth={2} />
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: theme.soft, textDecorationLine: 'underline' }}>{t('guest.calendar.subscribe')}</Text>
         </Pressable>
       )}
     </View>
@@ -446,7 +569,7 @@ function TableTicket({ theme, label, t }: { theme: InvitationTheme; label: strin
       </View>
       <View style={{ flex: 1 }}>
         <Text style={[styles.small, { color: theme.soft, letterSpacing: 1.4 }]}>{t('rsvp.tableKicker')}</Text>
-        <Text style={[styles.h1, { fontSize: 30, lineHeight: 34, color: theme.ink }]}>{label}</Text>
+        <Text style={[themeTitle(theme, 30), { color: theme.ink }]}>{label}</Text>
       </View>
     </View>
   );
@@ -473,7 +596,7 @@ function Sheet({
         <Text style={{ fontFamily: font.semibold, fontSize: 18, color: theme.ink }}>‹</Text>
       </Pressable>
       <View style={{ gap: 6 }}>
-        <Text style={[styles.h1, { color: theme.ink }]}>{title}</Text>
+        <Text style={[themeTitle(theme, 54), { color: theme.ink }]}>{title}</Text>
         <Text style={[styles.p, { color: theme.soft }]}>{subtitle}</Text>
       </View>
       {children}

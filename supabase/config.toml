@@ -45,3 +45,27 @@ verify_jwt = false
 # E-posta daveti (giriş yapmış kullanıcı)
 [functions.send-email]
 verify_jwt = true
+
+# SMS ile davet (giriş yapmış kullanıcı)
+[functions.send-sms]
+verify_jwt = true
+
+# Ortak yönetici daveti (giriş yapmış kullanıcı)
+[functions.cohost-invite]
+verify_jwt = true
+
+# Yapay zekâ yardımcısı (giriş yapmış kullanıcı; günlük hak veritabanında)
+[functions.ai-assist]
+verify_jwt = true
+
+# Davetli sayfası: hava durumu (girişsiz; davet anahtarı fonksiyon içinde doğrulanır)
+[functions.weather]
+verify_jwt = false
+
+# Takvim aboneliği (.ics; takvim uygulamaları başlık gönderemez, davet anahtarı doğrulanır)
+[functions.calendar]
+verify_jwt = false
+
+# Davetlilerin fotoğraf albümü (girişsiz; herkese açık etkinlik bağlantısı doğrulanır)
+[functions.album-upload]
+verify_jwt = false

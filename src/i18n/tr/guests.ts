@@ -110,6 +110,13 @@ export const guests = {
     deleteContactHint: 'Kişi tüm etkinliklerinden de çıkarılır.',
     confirm: 'Emin misin? Tekrar dokun',
     sharedNote: 'Kişi bilgileri rehberindeki tüm etkinliklerde ortaktır.',
+    children: 'Bunların kaçı çocuk?',
+    companions: 'Yanındakiler',
+    companionsHint: 'Virgülle ayır: Ayşe Yılmaz, Can Yılmaz',
+    skill: 'Seviye',
+    position: 'Mevki',
+    noPosition: 'Farketmez',
+    notOwner: 'Bu kişiyi başka bir yönetici ekledi; ad, telefon ve e-postayı yalnızca o düzeltebilir. Bu etkinlikteki cevabı ve kişi sayısını değiştirebilirsin.',
   },
   book: {
     title: 'Kişi',

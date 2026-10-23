@@ -103,6 +103,34 @@ export function sendTableTemplate(args: { to: string; template: string; language
   });
 }
 
+/**
+ * Duyuru şablonu (ayrı onaylı şablon, ör. davet_duyuru; kategori: Utility).
+ * Gövde 4 değişken bekler: {{1}} davetli adı, {{2}} etkinlik başlığı, {{3}} duyuru metni, {{4}} davetiye linki.
+ */
+export function sendAnnouncementTemplate(args: { to: string; template: string; language?: string; guestName: string; eventTitle: string; message: string; link: string }) {
+  return post({
+    messaging_product: 'whatsapp',
+    to: args.to,
+    type: 'template',
+    template: {
+      name: args.template,
+      language: { code: args.language ?? 'tr' },
+      components: [
+        {
+          type: 'body',
+          parameters: [
+            { type: 'text', text: args.guestName },
+            { type: 'text', text: args.eventTitle },
+            // Meta şablon değişkeninde satır sonu ve art arda 4+ boşluk kabul etmez.
+            { type: 'text', text: args.message.replace(/\s*\n\s*/g, ' · ').replace(/ {4,}/g, ' ').slice(0, 500) },
+            { type: 'text', text: args.link },
+          ],
+        },
+      ],
+    },
+  });
+}
+
 /** Davetli butona bastıktan sonra açılan 24 saatlik pencerede kişi sayısı sorusu (liste mesajı), etkinlik dilinde. */
 export function sendPartySizeQuestion(to: string, token: string, maxParty: number, lang: Lang) {
   const tx = text(lang);

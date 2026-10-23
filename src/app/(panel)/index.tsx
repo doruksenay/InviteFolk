@@ -14,7 +14,7 @@ import { Screen } from '@/ui/Screen';
 import { color } from '@/ui/tokens';
 
 export default function MyEvents() {
-  const { profile } = useSession();
+  const { profile, session } = useSession();
   const { t } = useI18n();
   const { width } = useWindowDimensions();
   const [showArchived, setShowArchived] = useState(false);
@@ -104,7 +104,7 @@ export default function MyEvents() {
       ) : (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap }}>
           {(data ?? []).map((e) => (
-            <EventCard key={e.id} event={e} summary={e.summary} width={cardWidth} onPress={() => router.push({ pathname: '/etkinlik/[id]', params: { id: e.id } })} />
+            <EventCard key={e.id} event={e} summary={e.summary} width={cardWidth} shared={!!session && e.owner_id !== session.user.id} onPress={() => router.push({ pathname: '/etkinlik/[id]', params: { id: e.id } })} />
           ))}
         </View>
       )}

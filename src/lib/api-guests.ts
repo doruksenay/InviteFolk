@@ -28,18 +28,25 @@ export async function updateEvent(id: string, patch: EventPatch) {
   must(await supabase.from('events').update(patch).eq('id', id).select('id'));
 }
 
-/** Etkinliği siler: önce (varsa) tasarım dosyalarını özel kovadan kaldırır, sonra satırı. */
+/** Etkinliği siler (yalnızca sahibi): önce tasarım, medya ve albüm dosyalarını özel kovalardan kaldırır, sonra satırı. */
 export async function deleteEvent(id: string) {
-  const { data: auth } = await supabase.auth.getUser();
-  const uid = auth.user?.id;
-  if (uid) {
-    try {
-      const folder = `${uid}/${id}`;
-      const { data: files } = await supabase.storage.from('designs').list(folder, { limit: 100 });
-      if (files?.length) await supabase.storage.from('designs').remove(files.map((f) => `${folder}/${f.name}`));
-    } catch {
-      // Dosya temizliği başarısız olsa da etkinlik silinir; kalan dosyalar yalnızca sahibine görünür.
-    }
+  const { data: ev } = await supabase.from('events').select('owner_id').eq('id', id).maybeSingle();
+  const owner = (ev as { owner_id?: string } | null)?.owner_id;
+  if (owner) {
+    const folder = `${owner}/${id}`;
+    const clear = async (bucket: string, dir: string) => {
+      try {
+        for (let round = 0; round < 20; round++) {
+          const { data: files } = await supabase.storage.from(bucket).list(dir, { limit: 100 });
+          const names = (files ?? []).filter((f) => f.id).map((f) => `${dir}/${f.name}`);
+          if (!names.length) break;
+          await supabase.storage.from(bucket).remove(names);
+        }
+      } catch {
+        // Dosya temizliği başarısız olsa da etkinlik silinir; kalan dosyalar yalnızca yöneticilere görünür.
+      }
+    };
+    await Promise.all([clear('designs', folder), clear('media', folder), clear('album', `${folder}/album`)]);
   }
   must(await supabase.from('events').delete().eq('id', id).select('id'));
 }
@@ -90,7 +97,7 @@ export async function listContactsNotIn(eventId: string): Promise<Contact[]> {
   return all.filter((c) => !taken.has(c.id));
 }
 
-export type ContactPatch = Partial<Pick<Contact, 'name' | 'phone' | 'email' | 'side' | 'group_label' | 'max_party' | 'notes'>>;
+export type ContactPatch = Partial<Pick<Contact, 'name' | 'phone' | 'email' | 'side' | 'group_label' | 'max_party' | 'notes' | 'skill' | 'position'>>;
 
 export async function updateContact(id: string, patch: ContactPatch) {
   must(await supabase.from('contacts').update(patch).eq('id', id).select('id'));
@@ -101,14 +108,20 @@ export async function deleteContact(id: string) {
   must(await supabase.from('contacts').delete().eq('id', id).select('id'));
 }
 
-export type InvitationPatch = Partial<Pick<Invitation, 'status' | 'party_size' | 'menu' | 'note' | 'paid' | 'paid_at' | 'responded_at'>>;
+export type InvitationPatch = Partial<
+  Pick<
+    Invitation,
+    'status' | 'party_size' | 'menu' | 'note' | 'paid' | 'paid_at' | 'responded_at' | 'children' | 'companions' | 'team' | 'paid_claimed_at' | 'checked_in_at' | 'checked_in_people'
+  >
+>;
 
 export async function updateInvitation(id: string, patch: InvitationPatch) {
   must(await supabase.from('invitations').update(patch).eq('id', id).select('id'));
 }
 
 export async function setPaid(id: string, paid: boolean) {
-  await updateInvitation(id, { paid, paid_at: paid ? new Date().toISOString() : null });
+  // Onaylanınca oyuncunun "ödedim" bildirimi kapanır.
+  await updateInvitation(id, { paid, paid_at: paid ? new Date().toISOString() : null, ...(paid ? { paid_claimed_at: null } : {}) });
 }
 
 export async function setStatus(id: string, status: RsvpStatus, partySize: number | null) {
@@ -118,17 +131,26 @@ export async function setStatus(id: string, status: RsvpStatus, partySize: numbe
 // ---------------------------------------------------------------------------
 // Gönderim kanalları
 // ---------------------------------------------------------------------------
-export async function whatsappQuotaLeft(): Promise<number> {
-  return Number(must(await supabase.rpc('whatsapp_quota_left')) ?? 0);
+export type Channel = 'whatsapp' | 'email' | 'sms';
+
+/** Etkinliğin bu kanalda bugün kalan hakkı (etkinlik sahibinin paketinden; ortak yönetici için de). */
+export async function quotaLeft(eventId: string, channel: Channel): Promise<number> {
+  return Number(must(await supabase.rpc('event_quota_left', { p_event: eventId, p_channel: channel })) ?? 0);
 }
 
-export async function emailQuotaLeft(): Promise<number> {
-  return Number(must(await supabase.rpc('email_quota_left')) ?? 0);
+export async function whatsappQuotaLeft(eventId: string): Promise<number> {
+  return quotaLeft(eventId, 'whatsapp');
 }
 
-export type SendResult = { sent: number; failed: number; skipped: number; quota_left?: number };
+export async function emailQuotaLeft(eventId: string): Promise<number> {
+  return quotaLeft(eventId, 'email');
+}
 
-async function invokeSend(fn: 'send-invitations' | 'send-email', body: Record<string, unknown>, quotaDetail: string): Promise<SendResult> {
+export type SendResult = { sent: number; failed: number; skipped: number; quota_left?: number; via_sms?: number };
+export type SendKind = 'invite' | 'reminder' | 'table' | 'announcement';
+export type SendOptions = { invitationIds?: string[]; announcementId?: string; audience?: 'all' | 'yes' };
+
+async function invokeSend(fn: 'send-invitations' | 'send-email' | 'send-sms', body: Record<string, unknown>, quotaDetail: string): Promise<SendResult> {
   const { data, error } = await supabase.functions.invoke(fn, { body });
   if (error) {
     const ctx = (error as { context?: Response }).context;
@@ -139,10 +161,25 @@ async function invokeSend(fn: 'send-invitations' | 'send-email', body: Record<st
   return data as SendResult;
 }
 
-export function sendWhatsApp(eventId: string, kind: 'invite' | 'reminder', invitationIds?: string[]) {
-  return invokeSend('send-invitations', { event_id: eventId, kind, ...(invitationIds?.length ? { invitation_ids: invitationIds } : {}) }, 'whatsapp');
+function sendBody(eventId: string, kind: SendKind, opts: SendOptions | string[] | undefined) {
+  const o: SendOptions = Array.isArray(opts) ? { invitationIds: opts } : (opts ?? {});
+  return {
+    event_id: eventId,
+    kind,
+    ...(o.invitationIds?.length ? { invitation_ids: o.invitationIds } : {}),
+    ...(o.announcementId ? { announcement_id: o.announcementId } : {}),
+    ...(o.audience ? { audience: o.audience } : {}),
+  };
 }
 
-export function sendEmail(eventId: string, kind: 'invite' | 'reminder', invitationIds?: string[]) {
-  return invokeSend('send-email', { event_id: eventId, kind, ...(invitationIds?.length ? { invitation_ids: invitationIds } : {}) }, 'email');
+export function sendWhatsApp(eventId: string, kind: SendKind, opts?: SendOptions | string[]) {
+  return invokeSend('send-invitations', sendBody(eventId, kind, opts), 'whatsapp');
+}
+
+export function sendEmail(eventId: string, kind: SendKind, opts?: SendOptions | string[]) {
+  return invokeSend('send-email', sendBody(eventId, kind, opts), 'email');
+}
+
+export function sendSms(eventId: string, kind: SendKind, opts?: SendOptions | string[]) {
+  return invokeSend('send-sms', sendBody(eventId, kind, opts), 'sms');
 }

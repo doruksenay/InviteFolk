@@ -23,7 +23,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "allowBackup": false
+      "allowBackup": false,
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "single",
@@ -56,7 +59,7 @@
         "expo-image-picker",
         {
           "photosPermission": "Kendi davetiye tasarımını yüklemek için fotoğraflarına erişmek istiyoruz. / We use your photos only to upload your invitation design.",
-          "cameraPermission": false,
+          "cameraPermission": "Kapıda davetlilerin giriş karekodunu okutmak için kameraya erişmek istiyoruz. / We use the camera only to scan guests' check-in QR codes at the door.",
           "microphonePermission": false
         }
       ],
@@ -64,6 +67,31 @@
         "expo-notifications",
         {
           "color": "#6C5CE7"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Kapıda davetlilerin giriş karekodunu okutmak için kameraya erişmek istiyoruz. / We use the camera only to scan guests' check-in QR codes at the door.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false,
+          "enableBackgroundRecording": false
+        }
+      ],
+      [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": false,
+          "supportsPictureInPicture": false
         }
       ]
     ],

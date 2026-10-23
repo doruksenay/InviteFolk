@@ -73,6 +73,18 @@ export function rsvpUrl(token: string): string {
   return `${base.replace(/\/$/, '')}/r/${token}`;
 }
 
+/** Herkese açık etkinlik sayfaları: a = fotoğraf albümü, h = hediye bilgisi, k = bilgi toplama formu. */
+export function publicUrl(kind: 'a' | 'h' | 'k', slug: string): string {
+  const base = process.env.EXPO_PUBLIC_WEB_URL ?? 'http://localhost:8081';
+  return `${base.replace(/\/$/, '')}/${kind}/${slug}`;
+}
+
+/** Ortak yönetici davet linki. */
+export function joinUrl(token: string): string {
+  const base = process.env.EXPO_PUBLIC_WEB_URL ?? 'http://localhost:8081';
+  return `${base.replace(/\/$/, '')}/katil/${token}`;
+}
+
 /** Ücretsiz katman: WhatsApp'ı hazır mesajla açan link (kullanıcı "gönder"e kendisi basar). */
 export function waMeLink(phone: string | null, text: string): string {
   const d = (phone ?? '').replace(/\D/g, '');

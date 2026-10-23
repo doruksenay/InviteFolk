@@ -3,7 +3,7 @@
 
 import type { Lang } from './messages.ts';
 
-export type QueueRow = { id: number; user_id: string; kind: 'rsvp' | 'promoted' | 'reminder_done' | 'purchase'; payload: Record<string, unknown> };
+export type QueueRow = { id: number; user_id: string; kind: 'rsvp' | 'promoted' | 'reminder_done' | 'purchase' | 'cohost' | 'request'; payload: Record<string, unknown> };
 export type PushMessage = { to: string; title: string; body: string; data: Record<string, unknown>; sound: 'default'; channelId: string };
 
 const PLAN: Record<Lang, Record<string, string>> = {
@@ -39,6 +39,13 @@ export function pushText(row: QueueRow, lang: Lang): { title: string; body: stri
   }
   if (row.kind === 'promoted') {
     return { title, body: lang === 'en' ? `${guest} moved up from the waitlist to the squad` : `${guest} yedekten kadroya geçti` };
+  }
+  if (row.kind === 'cohost') {
+    const who = clip(p.guest, 60) || (lang === 'en' ? 'Your co-host' : 'Ortak yönetici');
+    return { title, body: lang === 'en' ? `${who} joined as a co-host` : `${who} ortak yönetici olarak katıldı` };
+  }
+  if (row.kind === 'request') {
+    return { title, body: lang === 'en' ? `${guest} asked to be added to the guest list` : `${guest} davetli listesine eklenmek istiyor` };
   }
   if (row.kind === 'purchase') {
     const plan = PLAN[lang][String(p.package ?? '')] ?? String(p.package ?? '');

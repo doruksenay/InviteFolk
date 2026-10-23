@@ -39,7 +39,7 @@ async function removeFile(path: string | undefined | null) {
 
 /**
  * Görseli yükler ve etkinliğe bağlar. Önceki görsel varsa silinir, yerleşim (overlay) korunur.
- * Yol her zaman <kullanıcı id>/<etkinlik id>/<rastgele>.<uzantı>.
+ * Yol her zaman <etkinlik sahibi>/<etkinlik id>/<rastgele>.<uzantı>.
  */
 export async function uploadDesign(
   eventId: string,
@@ -48,9 +48,9 @@ export async function uploadDesign(
 ): Promise<EventDesign> {
   const ext = EXT[file.mime];
   if (!ext) throw friendlyError({ message: 'invalid', code: '22023' });
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) throw friendlyError({ message: 'forbidden', code: '42501' });
-  const path = `${auth.user.id}/${eventId}/${randomName()}.${ext}`;
+  // Dosya etkinlik sahibinin klasörüne gider (ortak yönetici yüklese de); depolama politikası yetkiyi denetler.
+  const { owner_id } = must(await supabase.from('events').select('owner_id').eq('id', eventId).single()) as { owner_id: string };
+  const path = `${owner_id}/${eventId}/${randomName()}.${ext}`;
   const up = await supabase.storage.from(BUCKET).upload(path, file.data, { contentType: file.mime, upsert: false, cacheControl: '3600' });
   if (up.error) throw friendlyError(up.error);
   const design: EventDesign = { path, width: Math.round(file.width), height: Math.round(file.height), overlay };

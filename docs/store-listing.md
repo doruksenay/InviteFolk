@@ -47,8 +47,26 @@ Invitefolk; düğün, nişan, kına, doğum günü, yemek daveti, kurumsal etkin
 - Masaları sürükle, sahneyi ve dans pistini yerleştir
 - Davetlileri tek dokunuşla masalara dağıt, masa listesini salonla paylaş
 
+**Düğün için her şey tek sayfada**
+- Mühürlü zarf açılışı, fon müziği, geri sayım, fotoğraf galerisi ve video davetiye
+- Kına, nikâh ve düğün tek davetiyede: her biri için tarih ve yer
+- Takı ve hediye için IBAN kartı, masaya karekodlu kart
+- Kaç çocuk geliyor, yanında kimler var; Excel ya da PDF olarak salona gönder
+- Eşin ya da ailen ortak yönetici olarak birlikte yönetsin
+- Saat ya da yer değişti mi? Tek duyuruyla herkese haber ver
+- Kapıda karekodla karşıla, kim geldi anında gör
+- Davetliler masadaki karekodla fotoğraflarını albüme yüklesin
+- Aile gruplarına tek link at, davetliler bilgilerini kendisi yazsın
+- Basılı davetiyenin fotoğrafını çek, bilgiler kendiliğinden dolsun; davet metnini yapay zekâ yazsın
+
+**Doğum günü, yemek ve diğer davetler**
+- Tarih anketi: herkese uyan günü bul
+- "Kim ne getiriyor" listesi, aynı şey iki kez gelmesin
+
 **Halı saha ve düzenli buluşmalar**
 - Kadro ve yedek listesi, haftalık tekrar, kim ödedi takibi
+- Seviyeye göre dengeli takımlar, skor ve goller, maçın oyuncusu oylaması, gol krallığı
+- Takvime abone ol, her hafta kendiliğinden güncellensin
 
 **Gizlilik**
 Davetlilerinin bilgileri yalnızca sana görünür. Şifre yok: e-postana gelen kodla giriş yaparsın. Hesabını istediğin an uygulamadan silebilirsin.
@@ -79,8 +97,26 @@ Invitefolk is an invitation and RSVP app for every kind of gathering: weddings, 
 - Drag tables, place the stage and dance floor
 - Seat guests in one tap and share the table list with your venue
 
+**Everything for the wedding, on one page**
+- Sealed envelope opening, background music, countdown, photo gallery and video invitation
+- Henna night, ceremony and reception in one invitation, each with its own time and place
+- A gift/IBAN card for guests, plus a QR card for the tables
+- How many children are coming and who's with whom; send it to the venue as Excel or PDF
+- Plan together: add your partner or family as co-hosts
+- Time or venue changed? Tell everyone with one announcement
+- Welcome guests with QR check-in and see who has arrived
+- Guests upload their photos to a shared album from the QR code on the table
+- Share one link with family groups and let guests fill in their own details
+- Snap your printed invitation and the details fill in by themselves; let AI write your invitation text
+
+**Birthdays, dinners and more**
+- Date poll: find the day that works for everyone
+- "Who brings what" list, so nothing arrives twice
+
 **Football and regular meetups**
 - Squad and waitlist, weekly repeat, who-paid tracking
+- Balanced teams by skill, scores and goals, player of the match vote, top scorers
+- Subscribe in your calendar and it updates every week
 
 **Privacy**
 Your guests' details are visible only to you. No passwords: you sign in with a code sent to your email. Delete your account from the app at any time.
@@ -112,14 +148,16 @@ Bu sınırlar `public.plan_limits` tablosuyla aynı olmalı. Tabloyu değiştiri
 | E-posta adresi | Evet | Evet | Uygulama işlevselliği (giriş) |
 | Telefon numarası | Evet (isteğe bağlı; davetli telefonları) | Evet | Uygulama işlevselliği |
 | Kişiler | Evet (yalnızca kullanıcının seçtiği kişiler) | Evet | Uygulama işlevselliği |
-| Fotoğraflar | Evet (yalnızca yüklenen davetiye tasarımı) | Evet | Uygulama işlevselliği |
-| Diğer kullanıcı içeriği | Evet (etkinlikler, davetli listeleri, cevaplar) | Evet | Uygulama işlevselliği |
+| Fotoğraflar ve videolar | Evet (yalnızca kullanıcının seçtiği davetiye tasarımı, galeri fotoğrafları, video davetiye ve davetlilerin albüme yüklediği fotoğraflar) | Evet | Uygulama işlevselliği |
+| Diğer kullanıcı içeriği | Evet (etkinlikler, davetli listeleri, cevaplar, yüklenen müzik dosyası, duyurular) | Evet | Uygulama işlevselliği |
 | Satın alma geçmişi | Evet | Evet | Uygulama işlevselliği |
 | Kullanıcı kimliği | Evet | Evet | Uygulama işlevselliği |
 | Konum, sağlık, finans (kart), tarama geçmişi, arama geçmişi, teşhis verileri | Hayır | | |
 
 Notlar:
 - Davetli verilerini organizatör girer; Apple'ın tanımına göre bunlar "üçüncü kişiler hakkında kullanıcı içeriği"dir ve yukarıda beyan edilmiştir.
+- Kamera yalnızca kapıda giriş karekodunu okumak için kullanılır; görüntü cihazdan çıkmaz ve saklanmaz (toplanan veri değildir). Mikrofon kullanılmaz.
+- "Basılı davetiyeden doldur" seçilirse fotoğraf, metni okumak için hizmet sağlayıcı olarak yapay zekâ API'sine (Anthropic) gönderilir ve saklanmaz; SMS'ler Netgsm, e-postalar Resend, WhatsApp mesajları Meta üzerinden iletilir. Bunlar veri işleyendir, üçüncü tarafla paylaşım sayılmaz.
 - Hesap silme uygulama içinden yapılır: *Ayarlar → Hesabı sil*. Bu, App Store Yönergesi 5.1.1(v) gereğidir.
 - İnceleme notu: giriş tek kullanımlık e-posta koduyla yapılır. *App Review Information* bölümüne, inceleme ekibinin gelen kodu okuyabileceği bir demo e-posta kutusunun bilgilerini yazın. (ör. paylaşılan bir test posta kutusu).
 
@@ -128,13 +166,15 @@ Notlar:
 - **Toplanan veriler:**
   - Kişisel bilgiler: ad, e-posta, telefon.
   - Kişiler.
-  - Fotoğraflar: kullanıcının yüklediği görsel.
+  - Fotoğraflar ve videolar: kullanıcının yüklediği davetiye görseli, galeri, video; davetlilerin albüme yüklediği fotoğraflar.
+  - Ses dosyaları: organizatörün yüklediği fon müziği (isteğe bağlı).
   - Uygulama etkinliği: diğer kullanıcı içeriği.
   - Finansal bilgiler: satın alma geçmişi.
 - **Paylaşım:** Üçüncü taraflarla paylaşılmıyor. Hizmet sağlayıcılar (veri işleyenler) Google'ın tanımına göre "paylaşım" sayılmaz.
 - **Şifreleme:** Aktarım sırasında şifreleniyor: evet.
 - **Silme talebi:** Evet, uygulama içinden ve web'den (`/ayarlar`).
-- **Zorunlu / isteğe bağlı:** E-posta zorunlu; telefon, kişiler ve fotoğraflar isteğe bağlı.
+- **Zorunlu / isteğe bağlı:** E-posta zorunlu; telefon, kişiler, fotoğraf, video ve müzik isteğe bağlı.
+- **Kamera:** yalnızca karekod okumak için, cihazda işlenir; veri toplanmaz.
 - **Hedef kitle:** 18+ (organizatör). Çocuklara yönelik değil.
 
 ## Ekran görüntüsü planı

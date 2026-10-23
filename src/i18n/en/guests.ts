@@ -112,6 +112,13 @@ export const guests: typeof TR = {
     deleteContactHint: 'They’ll be removed from all your events too.',
     confirm: 'Are you sure? Tap again',
     sharedNote: 'Contact details are shared across all your events.',
+    children: 'How many of them are children?',
+    companions: 'Coming with',
+    companionsHint: 'Separate with commas: Jane Smith, Tom Smith',
+    skill: 'Skill level',
+    position: 'Position',
+    noPosition: 'Any',
+    notOwner: 'Another host added this guest, so only they can edit the name, phone and email. You can still change the reply and party size for this event.',
   },
   book: {
     title: 'My',

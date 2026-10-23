@@ -54,6 +54,11 @@ export const font = {
   black: 'Nunito_900Black',
   serif: 'InstrumentSerif_400Regular',
   serifItalic: 'InstrumentSerif_400Regular_Italic',
+  // Davetiye temalarının başlık yazıları (src/core/themes.ts → font)
+  formal: 'PlayfairDisplay_400Regular',
+  formalItalic: 'PlayfairDisplay_400Regular_Italic',
+  formalBold: 'PlayfairDisplay_700Bold',
+  script: 'GreatVibes_400Regular',
 } as const;
 
 // React Native 0.76+ (New Architecture) boxShadow dizgesini tüm platformlarda destekler.

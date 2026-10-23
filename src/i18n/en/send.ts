@@ -33,6 +33,13 @@ export const send: typeof TR = {
     noEmail: 'No guests on your list have an email address. Edit a guest to add one.',
     button: { one: 'Email {count} guest', other: 'Email {count} guests' },
   },
+  sms: {
+    title: 'SMS',
+    body: "Guests who don't use WhatsApp get their personal link by text message.",
+    quota: 'Left today: {count} texts',
+    noQuota: 'Text messages are included in the Automatic and Complete plans.',
+    button: { one: 'Text {count} guest', other: 'Text {count} guests' },
+  },
   links: {
     title: 'Copy links',
     body: 'A list of names and personal links to share anywhere.',
@@ -42,6 +49,7 @@ export const send: typeof TR = {
   plans: 'See plans',
   sending: 'Sending…',
   done: '{sent} sent',
+  doneViaSms: { one: ' ({count} by text)', other: ' ({count} by text)' },
   doneFailed: ', {failed} not delivered',
   doneSkipped: ', {skipped} skipped',
   queue: {

@@ -1,3 +1,29 @@
 import type { themes as TR } from '../tr/themes';
 
-export const themes: typeof TR = { adacayi: 'Sage', lavanta: 'Lavender', mercan: 'Coral', altin: 'Gold', gece: 'Night' };
+export const themes: typeof TR = {
+  adacayi: 'Sage',
+  lavanta: 'Lavender',
+  mercan: 'Coral',
+  altin: 'Gold',
+  gece: 'Night',
+  fildisi: 'Ivory',
+  gul: 'Dusty Rose',
+  zumrut: 'Emerald',
+  lacivert: 'Navy',
+  okaliptus: 'Eucalyptus',
+  sampanya: 'Champagne',
+  bordo: 'Burgundy',
+  beyaz: 'White',
+  pudra: 'Blush',
+  zeytin: 'Olive Branch',
+  kina_kirmizi: 'Henna',
+  mor_gece: 'Starry Night',
+  konfeti: 'Confetti',
+  limon: 'Lemonade',
+  deniz: 'Seaside',
+  pembe: 'Balloons',
+  gokkusagi: 'Rainbow',
+  kurumsal: 'Corporate',
+  saha_yesil: 'Pitch',
+  groups: { wedding: 'Wedding, engagement, henna', celebration: 'Celebration', everyday: 'Work, dinner, sports' },
+};

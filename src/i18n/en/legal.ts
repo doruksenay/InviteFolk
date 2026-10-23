@@ -31,7 +31,8 @@ export const legal: typeof TR = {
           title: '2. What data we process',
           body: [
             'Organisers: email address, name, optional phone, language preference, events created, plan and purchase records, a device token for notifications, security logs.',
-            'Guests: the name, phone and email entered by the organiser; the guest’s reply, party size, menu choice, note and answers to custom questions; the table assigned by the organiser; WhatsApp and email delivery statuses.',
+            'Guests: the name, phone and email entered by the organiser; the guest’s reply, party size, menu choice, note and answers to custom questions; the table assigned by the organiser; WhatsApp, SMS and email delivery statuses; whether the invitation was opened; check-in time at the door; number of children and companions’ names (if the organiser asks); date poll votes, “who brings what” choices, football teams, goals and votes; photos the guest uploads to the album and details entered in the guest info form.',
+            'Invitation images, gallery photos, video and music files uploaded by the organiser; gift/IBAN details the organiser marks as public. The app does not collect money; the IBAN is only displayed.',
             'We never see or store card details. Web payments are taken on iyzico’s secure page; in-app payments go through your Apple or Google account.',
             'We do no advertising tracking, do not sell data and use no third-party ad tools.',
           ],
@@ -50,7 +51,7 @@ export const legal: typeof TR = {
           id: 'paylasim',
           title: '4. Who we share it with',
           body: [
-            'Only as needed to run the service, with these providers: Supabase (database, authentication, server functions), Meta Platforms (WhatsApp Business messages), Resend (email delivery), Expo (mobile notifications), Cloudflare (web hosting), RevenueCat, Apple and Google (in-app purchases), iyzico (web payments).',
+            'Only as needed to run the service, with these providers: Supabase (database, authentication, server functions), Meta Platforms (WhatsApp Business messages), Netgsm (SMS), Resend (email delivery), Anthropic (only when the organiser uses the AI features: invitation text and reading a printed invitation photo; content is not stored), Open-Meteo (weather forecast from the event address; no personal data is sent), Expo (mobile notifications), Cloudflare (web hosting), RevenueCat, Apple and Google (in-app purchases), iyzico (web payments).',
             'Some of these providers are outside Turkey; transfers are made in line with Article 9 of the KVKK (see the KVKK Notice).',
             'We do not share data with anyone, including authorities, unless legally required.',
           ],
@@ -198,7 +199,7 @@ export const legal: typeof TR = {
           id: 'aktarim',
           title: '4. Transfers (KVKK Art. 8 and 9)',
           body: [
-            'To provide the service, data is transferred to these providers: Supabase Inc. (database and hosting; data region: [EU – Frankfurt]), Meta Platforms Ireland Ltd. (WhatsApp Business), Resend Inc. (email), 650 Industries Inc. / Expo (mobile notifications), Cloudflare Inc. (web hosting), RevenueCat Inc., Apple and Google (in-app purchases), iyzico Ödeme Hizmetleri A.Ş. (web payments, in Turkey).',
+            'To provide the service, data is transferred to these providers: Supabase Inc. (database and hosting; data region: [EU – Frankfurt]), Meta Platforms Ireland Ltd. (WhatsApp Business), Netgsm İletişim A.Ş. (SMS, in Turkey), Resend Inc. (email), Anthropic PBC (AI assistant, only when used), 650 Industries Inc. / Expo (mobile notifications), Cloudflare Inc. (web hosting), RevenueCat Inc., Apple and Google (in-app purchases), iyzico Ödeme Hizmetleri A.Ş. (web payments, in Turkey).',
             'Transfers abroad are made under KVKK Art. 9 using the standard contracts published by the Board, which are notified to the Board within the required period. [Lawyer review: confirm the transfer basis for each provider.]',
             'Data may be shared with competent public authorities where legally required.',
           ],

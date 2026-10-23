@@ -14,6 +14,12 @@ const TEXT = {
     thanksNo: 'Cevabınızı ilettik, teşekkürler. Fikriniz değişirse davetiyedeki linkten güncelleyebilirsiniz.',
     thanksParty: (n: number) => `Teşekkürler! ${n} kişi olarak kaydettik. Etkinlikten önce hatırlatacağız.`,
     detailsInInvite: 'Ayrıntılar davetiyede',
+    sms: {
+      invite: (name: string, title: string, link: string) => `${name}, ${title} için davetlisiniz. Davetiye ve cevap: ${link}`,
+      reminder: (name: string, title: string, link: string) => `${name}, ${title} davetine henüz cevap vermediniz: ${link}`,
+      table: (name: string, title: string, link: string, table: string) => `${name}, ${title} için masanız: ${table}. Davetiye: ${link}`,
+      announcement: (name: string, title: string, link: string, msg: string) => `${title}: ${msg} ${link}`,
+    },
   },
   en: {
     askParty: 'Wonderful! How many of you are coming?',
@@ -23,6 +29,12 @@ const TEXT = {
     thanksNo: "Thanks for letting us know. If your plans change, you can update your reply from the invitation link.",
     thanksParty: (n: number) => `Thank you! We've saved your reply for ${n === 1 ? '1 person' : `${n} people`}. We'll send a reminder before the event.`,
     detailsInInvite: 'Details in the invitation',
+    sms: {
+      invite: (name: string, title: string, link: string) => `${name}, you're invited to ${title}. Invitation and reply: ${link}`,
+      reminder: (name: string, title: string, link: string) => `${name}, we haven't heard from you about ${title} yet: ${link}`,
+      table: (name: string, title: string, link: string, table: string) => `${name}, your table at ${title}: ${table}. Invitation: ${link}`,
+      announcement: (name: string, title: string, link: string, msg: string) => `${title}: ${msg} ${link}`,
+    },
   },
 } as const;
 

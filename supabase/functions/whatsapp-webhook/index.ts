@@ -8,8 +8,12 @@
 // - Cevap, yalnızca davetin gönderildiği telefon numarasından geliyorsa kabul edilir (token tek başına yetmez).
 // - Aynı olay iki kez işlenmez (webhook_dedupe).
 // - Gövde boyutu sınırlı; beklenmeyen biçimler sessizce yok sayılır.
+// - Teslim edilemeyen davet/hatırlatma, etkinlikte açıksa ve sahibin SMS hakkı varsa SMS ile tekrar gönderilir
+//   (aynı davet için en fazla bir kez).
 
+import { deliverSms, smsFallbackOn } from '../_shared/delivery.ts';
 import { langOf, text } from '../_shared/messages.ts';
+import { smsConfigured } from '../_shared/sms.ts';
 import { adminClient, readBody, TOKEN } from '../_shared/supabase.ts';
 import { sendPartySizeQuestion, sendText, toWaNumber, verifySignature } from '../_shared/whatsapp.ts';
 
@@ -54,6 +58,23 @@ Deno.serve(async (req) => {
     return (data?.length ?? 0) > 0;
   };
 
+  /** WhatsApp'a ulaşılamayan davetliye (etkinlikte açıksa) SMS; aynı davete ikinci kez SMS gitmez. */
+  const smsFallback = async (invitationId: string, kind: 'invite' | 'reminder') => {
+    const { data: row } = await db
+      .from('invitations')
+      .select('id, token, contacts!inner(name, phone, email), events!inner(id, owner_id, title, theme, starts_at, venue_name, venue_address, rsvp_deadline, host_names, status, settings)')
+      .eq('id', invitationId)
+      .maybeSingle();
+    // deno-lint-ignore no-explicit-any
+    const x = row as any;
+    if (!x || x.events.status === 'archived' || !smsFallbackOn(x.events)) return;
+    const { count } = await db.from('messages').select('id', { count: 'exact', head: true }).eq('invitation_id', invitationId).eq('channel', 'sms');
+    if ((count ?? 0) > 0) return;
+    const { data: left } = await db.rpc('quota_left_for', { p_user: x.events.owner_id, p_channel: 'sms' });
+    if (Number(left ?? 0) <= 0) return;
+    await deliverSms(db, x.events, { invitation_id: x.id, token: x.token, name: x.contacts.name, phone: x.contacts.phone, email: x.contacts.email }, kind, langOf(x.events.settings));
+  };
+
   for (const entry of body?.entry ?? []) {
     for (const change of entry?.changes ?? []) {
       const value = change?.value ?? {};
@@ -66,9 +87,13 @@ Deno.serve(async (req) => {
           .from('messages')
           .update({ status, error_code: s.errors?.[0]?.code ? String(s.errors[0].code).slice(0, 20) : null })
           .eq('provider_id', s.id)
-          .select('invitation_id')
+          .select('invitation_id, kind')
           .maybeSingle();
-        if (msg?.invitation_id) await db.from('invitations').update({ delivery: status }).eq('id', msg.invitation_id);
+        if (!msg?.invitation_id) continue;
+        if (msg.kind === 'invite' || msg.kind === 'reminder') await db.from('invitations').update({ delivery: status }).eq('id', msg.invitation_id);
+        if (status === 'failed' && (msg.kind === 'invite' || msg.kind === 'reminder') && smsConfigured()) {
+          await smsFallback(msg.invitation_id, msg.kind);
+        }
       }
 
       // 2) Davetli cevapları

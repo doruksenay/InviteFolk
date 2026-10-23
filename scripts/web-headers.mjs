@@ -3,6 +3,7 @@
 //
 // CSP: betikler yalnızca kendi alan adımızdan; ağ istekleri yalnızca kendi Supabase projemize.
 // Böylece bir XSS açığı olsa bile dışarıdan betik yüklenemez ve veri başka bir sunucuya gönderilemez.
+// Kamera yalnızca kendi sayfalarımızda (kapıda karekod okuma); mikrofon ve konum kapalı.
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -17,10 +18,13 @@ const wss = origin.replace('https://', 'wss://');
 
 const csp = [
   "default-src 'self'",
-  "script-src 'self'",
+  // wasm-unsafe-eval: tarayıcıda karekod okuyucunun kendi alan adımızdan yüklenen WASM'ı derlemesi için (JS eval'e izin vermez).
+  "script-src 'self' 'wasm-unsafe-eval'",
   // react-native-web stilleri çalışma anında <style> etiketiyle ekler.
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${origin}`,
+  // Davetiye müziği ve video davetiye: Supabase'in kısa süreli imzalı linkleri.
+  `media-src 'self' blob: ${origin}`,
   "font-src 'self' data:",
   `connect-src 'self' ${origin} ${wss}`,
   "frame-src 'none'",
@@ -37,11 +41,27 @@ const headers = `/*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: no-referrer
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
 
 /r/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+
+/a/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+
+/h/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+
+/k/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+
+/katil/*
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
 

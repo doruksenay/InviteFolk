@@ -16,6 +16,7 @@ import { pdfSupported, pickDesign } from '@/ui/design/pick';
 import { Icon } from '@/ui/Icon';
 import { Body, Button, Caption, Display, DisplayAccent, EmptyState, Field, IconButton, Label, Notice, Skeleton, Surface, Title, ToggleRow } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
+import { ThemeArt } from '@/ui/theme/ThemeArt';
 import { color, font, radius, WIDE_BREAKPOINT } from '@/ui/tokens';
 
 type NoticeState = { tone: 'success' | 'info' | 'warning' | 'error'; text: string } | null;
@@ -198,8 +199,7 @@ export default function DesignScreen() {
         <Surface style={{ flexDirection: wide ? 'row' : 'column', gap: 28, alignItems: wide ? 'center' : 'flex-start', padding: wide ? 36 : 24 }}>
           <View style={{ width: wide ? 220 : '100%', height: 220, alignItems: 'center', justifyContent: 'center' }}>
             <View style={{ width: 150, height: 206, borderRadius: 18, backgroundColor: theme.bg, boxShadow: '0px 18px 40px rgba(40,30,20,0.16)', overflow: 'hidden' }}>
-              <View style={{ position: 'absolute', left: -30, top: -34, width: 120, height: 120, borderRadius: 60, backgroundColor: theme.shapeA }} />
-              <View style={{ position: 'absolute', right: 14, top: 40, width: 52, height: 82, borderTopLeftRadius: 26, borderTopRightRadius: 26, backgroundColor: theme.shapeB }} />
+              <ThemeArt theme={theme} width={150} height={130} />
               <View style={{ position: 'absolute', left: 16, right: 16, top: 140, height: 18, borderRadius: 6, borderWidth: 1.5, borderStyle: 'dashed', borderColor: color.lavender }} />
               <View style={{ position: 'absolute', left: 30, right: 30, top: 172, height: 6, borderRadius: 3, backgroundColor: theme.soft, opacity: 0.4 }} />
             </View>

@@ -1,3 +1,4 @@
+import { GreatVibes_400Regular } from '@expo-google-fonts/great-vibes';
 import { InstrumentSerif_400Regular, InstrumentSerif_400Regular_Italic } from '@expo-google-fonts/instrument-serif';
 import {
   Nunito_400Regular,
@@ -8,6 +9,7 @@ import {
   Nunito_900Black,
   useFonts,
 } from '@expo-google-fonts/nunito';
+import { PlayfairDisplay_400Regular, PlayfairDisplay_400Regular_Italic, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -38,6 +40,12 @@ function RootNavigator() {
       <Stack.Screen name="r/[token]" />
       {/* Yasal metinler: giriş gerektirmez (mağaza incelemesi, davetliler ve ziyaretçiler için) */}
       <Stack.Screen name="yasal/[doc]" />
+      {/* Herkese açık etkinlik sayfaları: fotoğraf albümü, hediye bilgisi, bilgi toplama formu */}
+      <Stack.Screen name="a/[slug]" />
+      <Stack.Screen name="h/[slug]" />
+      <Stack.Screen name="k/[slug]" />
+      {/* Ortak yönetici daveti: girişsiz açılır, kabul için giriş ister */}
+      <Stack.Screen name="katil/[token]" />
 
       <Stack.Protected guard={!session}>
         <Stack.Screen name="giris" />
@@ -81,6 +89,10 @@ export default function RootLayout() {
     Nunito_900Black,
     InstrumentSerif_400Regular,
     InstrumentSerif_400Regular_Italic,
+    PlayfairDisplay_400Regular,
+    PlayfairDisplay_400Regular_Italic,
+    PlayfairDisplay_700Bold,
+    GreatVibes_400Regular,
   });
 
   if (!fontsLoaded && !fontError) return null;

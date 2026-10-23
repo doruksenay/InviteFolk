@@ -31,6 +31,13 @@ export const send = {
     noEmail: 'Listede e-posta adresi olan davetli yok. Davetliyi düzenleyip e-posta ekleyebilirsin.',
     button: { one: '{count} kişiye e-posta gönder', other: '{count} kişiye e-posta gönder' },
   },
+  sms: {
+    title: 'SMS',
+    body: 'WhatsApp kullanmayanlara kısa mesajla kişiye özel link gider.',
+    quota: 'Bugün kalan hakkın: {count} SMS',
+    noQuota: 'SMS gönderimi Otomatik ve Tam paketlerde var.',
+    button: { one: '{count} kişiye SMS gönder', other: '{count} kişiye SMS gönder' },
+  },
   links: {
     title: 'Linkleri kopyala',
     body: 'İsim ve kişiye özel link listesi; istediğin yerden paylaş.',
@@ -40,6 +47,7 @@ export const send = {
   plans: 'Paketleri gör',
   sending: 'Gönderiliyor…',
   done: '{sent} gönderildi',
+  doneViaSms: { one: ' ({count} tanesi SMS ile)', other: ' ({count} tanesi SMS ile)' },
   doneFailed: ', {failed} ulaşmadı',
   doneSkipped: ', {skipped} atlandı',
   queue: {

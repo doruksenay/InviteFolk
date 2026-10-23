@@ -33,7 +33,8 @@ export const legal = {
           title: '2. Hangi verileri işliyoruz?',
           body: [
             'Organizatörler: e-posta adresi, ad, isteğe bağlı telefon, dil tercihi, oluşturulan etkinlikler, paket ve satın alma kayıtları, bildirim için cihaz anahtarı (push token), güvenlik kayıtları.',
-            'Davetliler: organizatörün girdiği ad, telefon ve e-posta; davetlinin verdiği katılım cevabı, kişi sayısı, menü tercihi, not ve özel soru cevapları; organizatörün atadığı masa; WhatsApp ve e-posta teslim durumları.',
+            'Davetliler: organizatörün girdiği ad, telefon ve e-posta; davetlinin verdiği katılım cevabı, kişi sayısı, menü tercihi, not ve özel soru cevapları; organizatörün atadığı masa; WhatsApp, SMS ve e-posta teslim durumları; davetiyenin açılıp açılmadığı; kapıda giriş zamanı; çocuk sayısı ve yanındakilerin adları (organizatör sorarsa); tarih anketi oyları, getir listesi seçimleri, halı sahada takım, gol ve oylar; davetlinin albüme yüklediği fotoğraflar ve bilgi toplama formuna yazdıkları.',
+            'Organizatörün yüklediği davetiye görselleri, galeri fotoğrafları, video ve müzik dosyaları; organizatörün herkese açık işaretlediği hediye/IBAN bilgisi. Uygulama para toplamaz; IBAN yalnızca gösterilir.',
             'Ödeme kartı bilgilerini görmeyiz ve saklamayız. Web ödemeleri iyzico\'nun güvenli sayfasında, uygulama içi ödemeler Apple veya Google hesabın üzerinden alınır.',
             'Reklam amaçlı izleme yapmayız, verileri satmayız, üçüncü taraf reklam araçları kullanmayız.',
           ],
@@ -52,7 +53,7 @@ export const legal = {
           id: 'paylasim',
           title: '4. Kimlerle paylaşıyoruz?',
           body: [
-            'Hizmeti sunmak için aşağıdaki hizmet sağlayıcılarla, yalnızca gereken ölçüde: Supabase (veritabanı, kimlik doğrulama, sunucu fonksiyonları), Meta Platforms (WhatsApp Business mesajları), Resend (e-posta gönderimi), Expo (mobil bildirimler), Cloudflare (web barındırma), RevenueCat, Apple ve Google (uygulama içi satın alma), iyzico (web ödemesi).',
+            'Hizmeti sunmak için aşağıdaki hizmet sağlayıcılarla, yalnızca gereken ölçüde: Supabase (veritabanı, kimlik doğrulama, sunucu fonksiyonları), Meta Platforms (WhatsApp Business mesajları), Netgsm (SMS), Resend (e-posta gönderimi), Anthropic (yalnızca organizatör yapay zekâ özelliğini kullandığında: davet metni ve basılı davetiye fotoğrafından bilgi okuma; içerik saklanmaz), Open-Meteo (etkinlik adresine göre hava tahmini; kişisel veri gönderilmez), Expo (mobil bildirimler), Cloudflare (web barındırma), RevenueCat, Apple ve Google (uygulama içi satın alma), iyzico (web ödemesi).',
             'Bu sağlayıcıların bir kısmı yurt dışındadır; aktarımlar KVKK\'nın 9. maddesine uygun şekilde yapılır (ayrıntı: KVKK Aydınlatma Metni).',
             'Yasal zorunluluk olmadıkça verileri resmi makamlar dahil kimseyle paylaşmayız.',
           ],
@@ -204,7 +205,7 @@ export const legal = {
           id: 'aktarim',
           title: '4. Aktarım (KVKK md. 8 ve 9)',
           body: [
-            'Hizmetin sunulması için veriler şu hizmet sağlayıcılarına aktarılır: Supabase Inc. (veritabanı ve barındırma; veri bölgesi: [AB – Frankfurt]), Meta Platforms Ireland Ltd. (WhatsApp Business), Resend Inc. (e-posta), 650 Industries Inc. / Expo (mobil bildirim), Cloudflare Inc. (web barındırma), RevenueCat Inc., Apple ve Google (uygulama içi satın alma), iyzico Ödeme Hizmetleri A.Ş. (web ödemesi, yurt içi).',
+            'Hizmetin sunulması için veriler şu hizmet sağlayıcılarına aktarılır: Supabase Inc. (veritabanı ve barındırma; veri bölgesi: [AB – Frankfurt]), Meta Platforms Ireland Ltd. (WhatsApp Business), Netgsm İletişim A.Ş. (SMS, yurt içi), Resend Inc. (e-posta), Anthropic PBC (yapay zekâ yardımcısı, yalnızca kullanıldığında), 650 Industries Inc. / Expo (mobil bildirim), Cloudflare Inc. (web barındırma), RevenueCat Inc., Apple ve Google (uygulama içi satın alma), iyzico Ödeme Hizmetleri A.Ş. (web ödemesi, yurt içi).',
             'Yurt dışına aktarımlar KVKK md. 9 kapsamında Kurul\'un ilan ettiği standart sözleşmeler ile yapılır ve standart sözleşmeler süresi içinde Kurul\'a bildirilir. [Avukat kontrolü: sağlayıcı bazında aktarım dayanağını doğrulayın.]',
             'Yasal zorunluluk halinde yetkili kamu kurum ve kuruluşlarına aktarım yapılabilir.',
           ],

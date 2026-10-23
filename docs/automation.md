@@ -7,6 +7,8 @@ Bu belge sunucu tarafındaki otomatik işleri anlatır:
 - Otomatik hatırlatma
 - Halı saha için haftalık tekrar
 - Organizatöre telefon bildirimi
+- SMS yedeği ve duyurular
+- Yapay zekâ yardımcısı, hava durumu, takvim aboneliği, albüm yükleme
 
 ## Fonksiyonlar
 
@@ -15,17 +17,26 @@ Bu belge sunucu tarafındaki otomatik işleri anlatır:
 | `send-invitations` | Uygulama (giriş yapmış organizatör) | Davetlilere WhatsApp şablonu gönderir: davet, hatırlatma ve `table` ("masanız") |
 | `send-email` | Uygulama (giriş yapmış organizatör) | Aynı işi e-postayla yapar (Resend) |
 | `scheduled` | Zamanlayıcı (her 10 dakikada) | Haftalık tekrar, otomatik hatırlatma ve bildirim kuyruğunu telefonlara iletme |
-| `whatsapp-webhook` | Meta | Teslim durumlarını ve davetli cevaplarını işler |
+| `whatsapp-webhook` | Meta | Teslim durumlarını ve davetli cevaplarını işler; ulaşmayan davet/hatırlatma için (açıksa) bir kez SMS yedeği |
+| `send-sms` | Uygulama (organizatör) | SMS ile davet, hatırlatma ya da duyuru (Netgsm) |
+| `cohost-invite` | Uygulama (etkinlik sahibi) | Ortak yönetici davetini oluşturur ve `/katil/<anahtar>` linkini e-postalar |
+| `ai-assist` | Uygulama (giriş yapmış kullanıcı) | `write`: davet metni; `extract`: basılı davetiye fotoğrafından alanlar. Günlük hak `plan_limits.ai_per_day` |
+| `album-upload` | Davetli (girişsiz) | Albüm kodu ile tek kullanımlık imzalı yükleme linki verir, yüklemeyi onaylar, herkese açık albümü listeler |
+| `weather` | Davetli sayfası | Etkinlik 14 gün içindeyse Open-Meteo tahmini (3 saat önbellek, anahtar gerekmez) |
+| `calendar` | Takvim uygulaması | Davet anahtarıyla ICS; haftalık maçlarda `RRULE:FREQ=WEEKLY`, programdaki törenler ayrı etkinlik |
 
 `send-invitations` ve `send-email` aynı sözleşmeyle çalışır:
 
 ```
-POST { event_id, invitation_ids?: uuid[], kind?: 'invite' | 'reminder' | 'table' }
-→ 200 { sent, failed, skipped, quota_left }
-→ 402 { error: 'quota_exceeded', detail: 'whatsapp' | 'email' }
+POST { event_id, invitation_ids?: uuid[], kind?: 'invite' | 'reminder' | 'table' | 'announcement',
+       announcement_id?: uuid (duyuruda zorunlu, son 24 saatte yazılmış), audience?: 'all' | 'yes' }
+→ 200 { sent, failed, skipped, quota_left, via_sms? }
+→ 402 { error: 'quota_exceeded', detail: 'whatsapp' | 'email' | 'sms' }
 ```
 
-Her iki fonksiyon da güvenlik kurallarını aynı şekilde uygular:
+`send-sms` de aynı sözleşmeyi kullanır. Duyuruda metin istemciden alınmaz: uygulama duyuruyu önce `event_announcements` tablosuna yazar (günde 10; silmek sınırı sıfırlamaz) ve gönderimde yalnızca `announcement_id` verir. Fonksiyon metni kayıttan okur; her duyuru her kanaldan bir kez gönderilir (`409 already_sent`). Ortak yöneticinin gönderimleri etkinlik sahibinin günlük hakkından düşer.
+
+Üç fonksiyon da güvenlik kurallarını aynı şekilde uygular:
 
 - Etkinlik ve davetler kullanıcının kendi yetkisiyle okunur (RLS), yani başkasının etkinliğine gönderim yapılamaz.
 - Günlük hak `plan_limits` tablosundan gelir.
@@ -39,6 +50,12 @@ Her iki fonksiyon da güvenlik kurallarını aynı şekilde uygular:
 | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN` | WhatsApp için | README'deki WhatsApp kurulumuna bakın |
 | `WHATSAPP_INVITE_TEMPLATE` | hayır | Varsayılan `davet_lcv` |
 | `WHATSAPP_TABLE_TEMPLATE` | hayır | Varsayılan `davet_masa` |
+| `WHATSAPP_ANNOUNCE_TEMPLATE` | hayır | Varsayılan `davet_duyuru` |
+| `NETGSM_USERCODE`, `NETGSM_PASSWORD`, `NETGSM_HEADER` | SMS için | Netgsm abone numarası, API şifresi ve onaylı gönderici adı |
+| `NETGSM_URL` | hayır | Varsayılan `https://api.netgsm.com.tr/sms/rest/v2/send` |
+| `ANTHROPIC_API_KEY` | yapay zekâ için | console.anthropic.com → API Keys. Yoksa yapay zekâ düğmeleri "şu an kullanılamıyor" der |
+| `AI_MODEL` | hayır | Varsayılan `claude-sonnet-5-5` |
+| `ANTHROPIC_VERSION` | hayır | Varsayılan `2023-06-01` |
 | `WHATSAPP_TEMPLATE_LANG` / `WHATSAPP_TEMPLATE_LANG_EN` | hayır | Varsayılan `tr` / `en` |
 | `RESEND_API_KEY` | e-posta için | resend.com → API Keys (yalnızca "Sending access") |
 | `EMAIL_FROM` | e-posta için | `Invitefolk <hello@invitefolk.app>`; alan adı Resend'de doğrulanmış olmalı (SPF, DKIM) |
@@ -71,6 +88,36 @@ Değişkenler: `{{1}}` davetli adı, `{{2}}` etkinlik adı, `{{3}}` tarih ve yer
 Değişkenler: `{{1}}` davetli adı, `{{2}}` etkinlik adı, `{{3}}` masa adı (ör. "Masa 7"). Düğme yok.
 
 > "Masanız" mesajı yalnızca katılacağını bildirmiş ve masası atanmış davetlilere gider. Davetin teslim durumunu değiştirmez.
+
+### `davet_duyuru`: duyuru
+
+| Dil | Gövde |
+|---|---|
+| tr | `Merhaba {{1}}, {{2}} hakkında bir duyuru var: {{3}} Ayrıntılar: {{4}}` |
+| en | `Hello {{1}}, there is an update about {{2}}: {{3}} Details: {{4}}` |
+
+Değişkenler: `{{1}}` davetli adı, `{{2}}` etkinlik adı, `{{3}}` duyuru metni (satır sonları " · " olur), `{{4}}` davetlinin kişisel linki. Düğme yok. Teslim durumunu değiştirmez. "Kime" seçeneği: gelmeyeceğini söyleyenler hariç herkes ya da yalnızca gelenler.
+
+## SMS (Netgsm)
+
+- Kullanım: WhatsApp'a ulaşılamayan davet ve hatırlatmaların yedeği (davetiye sayfası ayarlarında "SMS gönder" açıksa), ayrıca gönderim panelinden ve duyurulardan doğrudan SMS.
+- Günlük hak `plan_limits.sms_per_day` (Otomatik 100, Tam 300). Yedek SMS de bu haktan düşer; her davet için en fazla bir kez. Hak, gönderim kaydı açılırken veritabanında atomik düşülür (`private.count_message`); kayıt açılamazsa mesaj gönderilmez.
+- Yalnızca Türkiye cep numaralarına (+90 5xx) SMS gider; yurt dışı numaralar atlanır (SMS-pompalama dolandırıcılığına karşı).
+- Metinler `supabase/functions/_shared/messages.ts` içinde, etkinlik dilinde; Türkçe karakterler korunur (uzun mesajlar birden fazla SMS sayılır).
+- Davet SMS'i ticari ileti değildir (kişinin davet edildiği etkinlik bilgisi), bu yüzden `iysfilter` `0` gönderilir. Kampanya/pazarlama için kullanılmamalıdır.
+- `_shared/sms.ts` Netgsm REST v2 (`POST /sms/rest/v2/send`, Basic auth) biçimini kullanır; canlıya çıkmadan Netgsm'in güncel dokümanıyla ve bir test numarasıyla doğrulayın.
+
+## Yapay zekâ
+
+- `write`: tür, başlık, ev sahipleri, ton (sıcak/resmî/eğlenceli/kısa) ve isteğe bağlı ipucuyla 400 karakteri aşmayan davet metni. Yalnızca etkinlik başlığı ve ev sahibi adları gider; davetli bilgisi gönderilmez.
+- `extract`: basılı davetiyenin fotoğrafı (JPEG, uzun kenar ≤ 2000 px, ≤ 5 MB) modele gönderilir, JSON olarak başlık, ev sahipleri, tarih, saat, mekân, adres ve metin döner; görsel saklanmaz. Uygulama yalnızca okunan alanları doldurur, kullanıcı kontrol eder.
+- Günlük hak (`ai_per_day`) her başarılı çağrıdan önce veritabanında düşülür (`ai_take`), böylece paralel isteklerle aşılamaz.
+
+## Albüm, takvim ve hava durumu
+
+- `album` kovası özeldir. Davetli `/a/<kod>` sayfasında fotoğraf seçer; tarayıcıda JPEG'e küçültülür, `album-upload` kota ve hız sınırını kontrol edip tek kullanımlık imzalı yükleme linki verir, yükleme bitince `confirm` ile albüme eklenir. Yarım kalan yüklemeler `scheduled` tarafından temizlenir.
+- `calendar?token=<davet anahtarı>` takvim uygulamalarına `webcal://` ile eklenir; haftalık maçta her hafta kendiliğinden güncellenir.
+- `weather` yalnızca etkinliğin adresi ve tarihi belli, tarih 14 gün içindeyse çalışır; konum adresten Open-Meteo'nun ücretsiz geocoding servisiyle bulunur ve 3 saat önbelleğe alınır.
 
 ## E-posta
 

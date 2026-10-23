@@ -35,6 +35,11 @@ export function friendlyError(err: DbError | Error | unknown): Error {
     const label = dict(currentLang()).errors.quotaWhat[what] ?? '';
     return new Error(t('errors.quota', { what: label }));
   }
+  if (msg.includes('plan_feature')) {
+    const what = (e.details ?? '') as keyof ReturnType<typeof dict>['errors']['planFeatureWhat'];
+    return new Error(t('errors.planFeature', { what: dict(currentLang()).errors.planFeatureWhat[what] ?? '' }));
+  }
+  if (msg.includes('ai_unavailable')) return new Error(t('errors.aiUnavailable'));
   if (msg.includes('rate_limited')) return new Error(t('errors.rateLimited'));
   if (msg.includes('forbidden') || e.code === '42501' || e.code === 'PGRST301') return new Error(t('errors.forbidden'));
   if (msg.includes('not_found') || e.code === 'P0002') return new Error(t('errors.notFound'));
@@ -84,7 +89,7 @@ export async function getEvent(id: string): Promise<{ event: EventRow; summary: 
   const event = must(await supabase.from('events').select('*').eq('id', id).single()) as EventRow;
   const summary = (await supabase.from('event_summaries').select('*').eq('event_id', id).maybeSingle()).data as EventSummary | null;
   const invitations = must(
-    await supabase.from('invitations').select('*, contacts!inner(name, phone, email, side, group_label, max_party)').eq('event_id', id).order('created_at', { ascending: true }),
+    await supabase.from('invitations').select('*, contacts!inner(name, phone, email, side, group_label, max_party, skill, position)').eq('event_id', id).order('created_at', { ascending: true }),
   ) as InvitationWithContact[];
   return { event, summary, invitations };
 }
@@ -165,6 +170,7 @@ export async function respondInvitation(
   menu?: string | null,
   note?: string | null,
   answers?: Record<string, string> | null,
+  extra?: { children?: number | null; companions?: string[] | null },
 ) {
   return must(
     await supabase.rpc('respond_invitation', {
@@ -174,6 +180,8 @@ export async function respondInvitation(
       p_menu: menu ?? null,
       p_note: note ?? null,
       p_answers: answers ?? null,
+      p_children: extra?.children ?? null,
+      p_companions: extra?.companions ?? null,
     }),
   ) as PublicInvitation;
 }

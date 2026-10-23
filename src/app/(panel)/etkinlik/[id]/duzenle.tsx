@@ -8,6 +8,7 @@ import type { CustomQuestion, EventRow, EventSettings } from '@/core/types';
 import { eventLang, type Lang, useI18n } from '@/i18n';
 import { useQuery } from '@/lib/api';
 import { deleteEvent, getEventRow, updateEvent } from '@/lib/api-guests';
+import { useSession } from '@/lib/session';
 import { OptionChip } from '@/ui/guests/common';
 import { cleanQuestions, MenuEditor, QuestionsEditor } from '@/ui/eventForm/Editors';
 import { isDate, splitIso, toIso } from '@/ui/eventForm/dates';
@@ -45,6 +46,9 @@ const DAYS_BEFORE = [1, 2, 3, 5, 7];
 
 function Form({ event }: { event: EventRow }) {
   const { t, lang: uiLang } = useI18n();
+  const { session } = useSession();
+  // Arşivleme ve silme yalnızca sahibe açık (veritabanı da yalnızca sahibe izin verir); ortak yönetici bu kutuları görmez.
+  const isOwner = !!session && event.owner_id === session.user.id;
   const { width } = useWindowDimensions();
   const wide = width >= 900;
   const half = width >= 640 ? '48.5%' : '100%';
@@ -246,35 +250,39 @@ function Form({ event }: { event: EventRow }) {
       </View>
 
       <View style={{ flexDirection: wide ? 'row' : 'column', gap: 20, alignItems: 'flex-start' }}>
-        <Surface style={{ flex: wide ? 1 : undefined, width: wide ? undefined : '100%', gap: 12 }}>
-          <Title>{archived ? t('wizard.editor.unarchiveTitle') : t('wizard.editor.archiveTitle')}</Title>
-          <Body>{archived ? t('wizard.editor.unarchiveBody') : t('wizard.editor.archiveBody')}</Body>
-          <Button label={archived ? t('wizard.editor.unarchive') : t('wizard.editor.archive')} icon="archive" variant="secondary" onPress={toggleArchive} style={{ alignSelf: 'flex-start' }} />
-        </Surface>
-        <Surface style={{ flex: wide ? 1 : undefined, width: wide ? undefined : '100%', gap: 12, backgroundColor: '#FFF8F6' }}>
-          <Title color={color.coralInk}>{t('wizard.editor.deleteTitle')}</Title>
-          <Body>{t('wizard.editor.deleteBody')}</Body>
-          <Label>{t('settings.confirmPrompt', { word })}</Label>
-          <TextInput
-            value={confirm}
-            onChangeText={setConfirm}
-            autoCapitalize="characters"
-            autoCorrect={false}
-            accessibilityLabel={t('settings.confirmPrompt', { word })}
-            placeholder={word}
-            placeholderTextColor={color.faint}
-            style={{ height: 50, borderRadius: radius.md, backgroundColor: '#FFFFFF', paddingHorizontal: 16, fontFamily: font.semibold, fontSize: 16, letterSpacing: 2, color: color.ink, boxShadow: `inset 0 0 0 1px ${color.hairline}` }}
-          />
-          <Button
-            label={t('wizard.editor.delete')}
-            icon="trash"
-            variant="danger"
-            loading={deleting}
-            disabled={confirm.trim().toLocaleUpperCase(uiLang === 'tr' ? 'tr-TR' : 'en-GB') !== word}
-            onPress={remove}
-            style={{ alignSelf: 'flex-start' }}
-          />
-        </Surface>
+        {isOwner && (
+          <Surface style={{ flex: wide ? 1 : undefined, width: wide ? undefined : '100%', gap: 12 }}>
+            <Title>{archived ? t('wizard.editor.unarchiveTitle') : t('wizard.editor.archiveTitle')}</Title>
+            <Body>{archived ? t('wizard.editor.unarchiveBody') : t('wizard.editor.archiveBody')}</Body>
+            <Button label={archived ? t('wizard.editor.unarchive') : t('wizard.editor.archive')} icon="archive" variant="secondary" onPress={toggleArchive} style={{ alignSelf: 'flex-start' }} />
+          </Surface>
+        )}
+        {isOwner && (
+          <Surface style={{ flex: wide ? 1 : undefined, width: wide ? undefined : '100%', gap: 12, backgroundColor: '#FFF8F6' }}>
+            <Title color={color.coralInk}>{t('wizard.editor.deleteTitle')}</Title>
+            <Body>{t('wizard.editor.deleteBody')}</Body>
+            <Label>{t('settings.confirmPrompt', { word })}</Label>
+            <TextInput
+              value={confirm}
+              onChangeText={setConfirm}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              accessibilityLabel={t('settings.confirmPrompt', { word })}
+              placeholder={word}
+              placeholderTextColor={color.faint}
+              style={{ height: 50, borderRadius: radius.md, backgroundColor: '#FFFFFF', paddingHorizontal: 16, fontFamily: font.semibold, fontSize: 16, letterSpacing: 2, color: color.ink, boxShadow: `inset 0 0 0 1px ${color.hairline}` }}
+            />
+            <Button
+              label={t('wizard.editor.delete')}
+              icon="trash"
+              variant="danger"
+              loading={deleting}
+              disabled={confirm.trim().toLocaleUpperCase(uiLang === 'tr' ? 'tr-TR' : 'en-GB') !== word}
+              onPress={remove}
+              style={{ alignSelf: 'flex-start' }}
+            />
+          </Surface>
+        )}
       </View>
     </Screen>
   );
