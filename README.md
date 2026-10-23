@@ -125,6 +125,7 @@ npx eas-cli@latest submit -p android
 
 - Ad: **Invitefolk**. Slogan: "Events feel better together." / "Plan. Invite. Celebrate."
 - Renkler: Deep Violet `#6C5CE7`, Coral `#FF6B6B`, Golden Yellow `#FBBF24`, Mint Green `#22C55E`, Soft Off-White `#FFF9F4` (`src/ui/tokens.ts`). Mercan, sarı ve yeşil üstünde beyaz yazı okunmadığı için yazı taşıyan zeminlerde koyu tonlar kullanılır.
+- Yazı: Nunito (yuvarlak hatlı sans). Başlıklar ExtraBold; başlıktaki vurgulu kelime yalnızca renkle ayrılır. Serif (Instrument Serif) yalnızca davetiye temalarında kullanılır: davetli sayfası, kart önizlemeleri, basılı masa kartları.
 - Kaynak görseller `assets/brand/` içinde (logo, uygulama ikonu, koyu tanıtım görseli, marka kimliği). Uygulama ikonları `assets/images/` içinde bunlardan üretildi.
 - Kimlikler: paket `com.invitefolk.app`, bağlantı şeması `invitefolk://`, mağaza ürünleri `invitefolk_temel`, `invitefolk_otomatik`, `invitefolk_tam`. Alan adı örnekleri `invitefolk.app` olarak yazıldı; aldığınız alan adıyla değiştirin.
 

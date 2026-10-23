@@ -20,7 +20,7 @@ const OBJECT_STYLE: Record<string, { bg: string; fg: string; dashed?: string }> 
   dj: { bg: '#3E3B45', fg: '#FFFFFF' },
   cake: { bg: color.coralTint, fg: color.coralInk },
   photo: { bg: color.sageTint, fg: color.sageInk, dashed: color.sage },
-  entrance: { bg: color.sage, fg: '#FFFFFF' },
+  entrance: { bg: color.sageInk, fg: '#FFFFFF' },
 };
 
 export type Highlight = 'none' | 'fits' | 'full';
@@ -114,10 +114,10 @@ export const HallItemView = memo(function HallItemView({ item, scale, load, sele
 
   const objStyle = OBJECT_STYLE[item.kind];
   const round = isTable ? item.shape === 'round' : item.kind === 'cake';
-  // Masa numarası büyük serif; uzun adlar (ör. "Gelin & Damat") gövdeye sığacak kadar küçülür.
+  // Masa numarası büyük ve kalın; uzun adlar (ör. "Gelin & Damat") gövdeye sığacak kadar küçülür.
   const shown = isTable ? shortLabel(item.label) : item.label;
-  const fitWidth = (body.w * scale * 0.86) / Math.max(1, shown.length * 0.52);
-  const fontMain = Math.max(9, Math.min(26, 34 * scale, fitWidth));
+  const fitWidth = (body.w * scale * 0.86) / Math.max(1, shown.length * 0.62);
+  const fontMain = Math.max(9, Math.min(22, 28 * scale, fitWidth));
   const fontObj = Math.max(9, Math.min(15, 22 * scale, (body.w * scale * 0.9) / Math.max(1, item.label.length * 0.62)));
   const fontSub = Math.max(8, 13 * scale * 1.4);
 
@@ -176,7 +176,7 @@ export const HallItemView = memo(function HallItemView({ item, scale, load, sele
         }}>
         {isTable ? (
           <>
-            <Text numberOfLines={1} style={{ fontFamily: font.serif, fontSize: fontMain, lineHeight: fontMain * 1.05, color: color.ink }}>
+            <Text numberOfLines={1} style={{ fontFamily: font.display, fontSize: fontMain, lineHeight: fontMain * 1.05, color: color.ink }}>
               {shown}
             </Text>
             {load && scale >= 0.22 && (
@@ -191,6 +191,8 @@ export const HallItemView = memo(function HallItemView({ item, scale, load, sele
             style={{
               fontFamily: font.bold,
               fontSize: fontObj,
+              lineHeight: Math.round(fontObj * 1.15),
+              includeFontPadding: false,
               letterSpacing: item.kind === 'stage' || item.kind === 'entrance' ? 2 * scale * 2 : 0.2,
               textTransform: item.kind === 'stage' || item.kind === 'entrance' ? 'uppercase' : 'none',
               color: objStyle?.fg ?? color.ink,

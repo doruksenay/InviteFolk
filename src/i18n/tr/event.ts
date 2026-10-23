@@ -17,6 +17,7 @@ export const event = {
     squad: 'kadroda',
     waitlist: 'yedekte',
     paid: 'ödedi',
+    pendingPlayers: 'kişi cevap bekliyor',
   },
   feeLine: 'Toplanan {collected} / {expected}',
   menuSummary: 'Menü seçimleri',

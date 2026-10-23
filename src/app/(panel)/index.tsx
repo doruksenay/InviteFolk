@@ -9,7 +9,7 @@ import { OptionChip } from '@/ui/guests/common';
 import { useSession } from '@/lib/session';
 import { BrandBar } from '@/ui/BrandBar';
 import { EventCard } from '@/ui/EventCard';
-import { Body, Button, Display, DisplayItalic, EmptyState, Notice, Skeleton, Surface } from '@/ui/primitives';
+import { Body, Button, Display, DisplayAccent, EmptyState, Notice, Skeleton, Surface } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { color } from '@/ui/tokens';
 
@@ -44,7 +44,7 @@ export default function MyEvents() {
           <Display size={width >= 720 ? 56 : 44}>
             {t('home.hello')}
             {firstName ? ', ' : ''}
-            <DisplayItalic style={{ color: color.lavender }}>{firstName ?? ''}</DisplayItalic>
+            <DisplayAccent style={{ color: color.lavender }}>{firstName ?? ''}</DisplayAccent>
           </Display>
           <Body>
             {active.length

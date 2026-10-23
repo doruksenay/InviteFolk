@@ -9,7 +9,7 @@ export const billing = {
   currentForever: 'Süresiz',
   usage: '{events} / {maxEvents} etkinlik · {contacts} / {maxContacts} kişi',
   free: 'Ücretsiz',
-  freePrice: '0 ₺',
+  freePrice: '₺0',
   perYear: 'tek seferlik · 1 yıl',
   popular: 'En çok tercih edilen',
   yourPlan: 'Paketin',

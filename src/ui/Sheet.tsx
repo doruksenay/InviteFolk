@@ -3,7 +3,7 @@ import { Modal, Pressable, ScrollView, useWindowDimensions, View } from 'react-n
 
 import { useI18n } from '@/i18n';
 import { Icon } from '@/ui/Icon';
-import { Caption, Display, DisplayItalic } from '@/ui/primitives';
+import { Caption, Display, DisplayAccent } from '@/ui/primitives';
 import { color } from '@/ui/tokens';
 
 /**
@@ -62,7 +62,7 @@ export function Sheet({
                   {italic ? (
                     <>
                       {' '}
-                      <DisplayItalic style={{ color: accent }}>{italic}</DisplayItalic>
+                      <DisplayAccent style={{ color: accent }}>{italic}</DisplayAccent>
                     </>
                   ) : null}
                 </Display>

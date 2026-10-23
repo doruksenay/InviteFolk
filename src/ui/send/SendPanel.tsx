@@ -247,7 +247,7 @@ function WaQueueSheet({ open, onClose, event, targets, kind }: { open: boolean; 
         </View>
       ) : (
         <View style={{ gap: 14 }}>
-          <Text style={{ fontFamily: font.serif, fontSize: 32, lineHeight: 36, color: color.ink }}>{cur.contacts.name}</Text>
+          <Text style={{ fontFamily: font.display, fontSize: 25, lineHeight: 28, color: color.ink }}>{cur.contacts.name}</Text>
           <Caption>{cur.contacts.phone}</Caption>
           <View style={{ gap: 6, padding: 14, borderRadius: radius.lg, backgroundColor: '#E7F5EC' }}>
             <Caption>{t('send.queue.preview')}</Caption>

@@ -4,7 +4,7 @@ import { ActivityIndicator, Linking, Platform, Pressable, ScrollView, StyleSheet
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { eventCopy, getEventType } from '@/core/event-types';
-import { formatDayMonth, formatWhen, rsvpUrl } from '@/core/format';
+import { formatDayMonth, formatTry, formatWhen, rsvpUrl } from '@/core/format';
 import { getTheme, type InvitationTheme } from '@/core/themes';
 import type { EventSettings, PublicInvitation } from '@/core/types';
 import { eventLang, LANG_NAMES, LANGS, type Lang, LOCALE_TAG, makeT, type TFn, useI18n } from '@/i18n';
@@ -158,7 +158,7 @@ export default function GuestRsvp() {
     <EventExtras
       theme={theme}
       t={t}
-      fee={typeof settings.fee === 'number' && settings.fee > 0 ? new Intl.NumberFormat(locale, { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(settings.fee) : null}
+      fee={typeof settings.fee === 'number' && settings.fee > 0 ? formatTry(settings.fee, locale) : null}
       giftNote={typeof settings.gift_note === 'string' && settings.gift_note.trim() ? settings.gift_note.trim() : null}
       calEvent={calEvent}
       mapQuery={where || null}

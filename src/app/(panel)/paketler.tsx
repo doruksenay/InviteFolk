@@ -10,7 +10,7 @@ import { getPlanCatalog, type PaidPlan, PAID_PLANS, type PlanLimits, startWebChe
 import { getStorePrices, IN_APP_PURCHASES, purchasePlan, storeAvailability } from '@/lib/purchases';
 import { useSession } from '@/lib/session';
 import { Icon } from '@/ui/Icon';
-import { Body, Button, Caption, Display, DisplayItalic, IconButton, Notice, Pill, Skeleton, Surface, Title } from '@/ui/primitives';
+import { Body, Button, Caption, Display, DisplayAccent, IconButton, Notice, Pill, Skeleton, Surface, Title } from '@/ui/primitives';
 import { RichText } from '@/ui/RichText';
 import { Screen } from '@/ui/Screen';
 import { color, font, radius, shadow } from '@/ui/tokens';
@@ -159,8 +159,8 @@ export default function PlansScreen() {
       <View
         key={p}
         style={{
-          flexGrow: 1,
-          flexBasis: wide ? 0 : '100%',
+          flexGrow: wide ? 1 : 0,
+          flexBasis: wide ? 0 : 'auto',
           minWidth: wide ? 220 : undefined,
           backgroundColor: a.bg,
           borderRadius: radius.xl,
@@ -184,7 +184,7 @@ export default function PlansScreen() {
         </View>
 
         <View style={{ gap: 2 }}>
-          <Text style={{ fontFamily: font.serif, fontSize: 48, lineHeight: 52, color: a.ink }}>{p === 'free' ? t('billing.freePrice') : priceFor(p)}</Text>
+          <Text style={{ fontFamily: font.display, fontSize: 37, lineHeight: 41, color: a.ink }}>{p === 'free' ? t('billing.freePrice') : priceFor(p)}</Text>
           {p !== 'free' && <Caption color={dark ? 'rgba(255,255,255,0.7)' : color.muted}>{t('billing.perYear')}</Caption>}
         </View>
         <Text style={{ fontFamily: font.medium, fontSize: 14, lineHeight: 20, color: dark ? 'rgba(255,255,255,0.85)' : color.inkSoft }}>{t(`billing.planBlurb.${p}`)}</Text>
@@ -227,7 +227,7 @@ export default function PlansScreen() {
 
       <View style={{ gap: 10, maxWidth: 720 }}>
         <Display size={wide ? 60 : 44}>
-          {t('billing.title')} <DisplayItalic style={{ color: color.coral }}>{t('billing.titleItalic')}</DisplayItalic>
+          {t('billing.title')} <DisplayAccent style={{ color: color.coral }}>{t('billing.titleItalic')}</DisplayAccent>
         </Display>
         <Body>{t('billing.subtitle')}</Body>
       </View>

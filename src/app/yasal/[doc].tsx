@@ -77,13 +77,13 @@ export default function LegalPage() {
 
           {!content ? (
             <View style={{ gap: 10 }}>
-              <Text style={{ fontFamily: font.serif, fontSize: 44, lineHeight: 46, color: color.ink }}>{t('legal.notFoundTitle')}</Text>
+              <Text style={{ fontFamily: font.display, fontSize: 34, lineHeight: 36, color: color.ink }}>{t('legal.notFoundTitle')}</Text>
               <Text style={{ fontFamily: font.regular, fontSize: 16, lineHeight: 25, color: color.muted }}>{t('legal.notFoundBody')}</Text>
             </View>
           ) : (
             <>
               <View style={{ gap: 10 }}>
-                <Text accessibilityRole="header" style={{ fontFamily: font.serif, fontSize: 52, lineHeight: 54, color: color.ink }}>
+                <Text accessibilityRole="header" style={{ fontFamily: font.display, fontSize: 41, lineHeight: 42, color: color.ink }}>
                   {content.title}
                 </Text>
                 <Text style={{ fontFamily: font.medium, fontSize: 13, color: color.muted }}>{t('legal.lastUpdated', { date: updated })}</Text>

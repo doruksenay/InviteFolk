@@ -27,7 +27,7 @@ import type { InvitationWithContact, SeatingItem, SeatingKind } from '@/core/typ
 import { useI18n } from '@/i18n';
 import { addSeatingItems, assignTables, deleteSeatingItems, getSeating, updateSeatingItem, useQuery } from '@/lib/api';
 import { Icon } from '@/ui/Icon';
-import { Body, Button, Caption, Display, DisplayItalic, EmptyState, IconButton, Notice, Skeleton, Surface, tapFeedback } from '@/ui/primitives';
+import { Body, Button, Caption, Display, DisplayAccent, EmptyState, IconButton, Notice, Skeleton, Surface, tapFeedback } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { Hall } from '@/ui/seating/Hall';
 import type { Highlight } from '@/ui/seating/HallItemView';
@@ -329,7 +329,7 @@ export default function SeatingScreen() {
         />
         <View style={{ gap: 2, flexShrink: 1 }}>
           <Display size={wide ? 46 : 36}>
-            {t('seating.title')} <DisplayItalic style={{ color: color.lavender }}>{t('seating.titleAccent')}</DisplayItalic>
+            {t('seating.title')} <DisplayAccent style={{ color: color.lavender }}>{t('seating.titleAccent')}</DisplayAccent>
           </Display>
           <Caption numberOfLines={1}>
             {event.title}
@@ -425,7 +425,7 @@ export default function SeatingScreen() {
                   backgroundColor: c === 10 ? color.ink : color.surfaceSoft,
                   transform: [{ scale: pressed ? 0.95 : 1 }],
                 })}>
-                <Text style={{ fontFamily: font.serif, fontSize: 28, lineHeight: 30, color: c === 10 ? '#FFFFFF' : color.ink }}>{c}</Text>
+                <Text style={{ fontFamily: font.display, fontSize: 22, lineHeight: 23, color: c === 10 ? '#FFFFFF' : color.ink }}>{c}</Text>
                 <Text style={{ fontFamily: font.semibold, fontSize: 10, color: c === 10 ? 'rgba(255,255,255,0.75)' : color.muted }}>{t('seating.tableMenu.people')}</Text>
               </Pressable>
             ))}
@@ -474,7 +474,7 @@ export default function SeatingScreen() {
           <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', padding: 20 }}>
             <Surface style={{ alignItems: 'center', gap: 10, maxWidth: 420, boxShadow: '0px 18px 50px rgba(40,30,20,0.12)' }}>
               <Display size={32} center>
-                {t('seating.empty.title')} <DisplayItalic style={{ color: color.coral }}>{t('seating.empty.titleAccent')}</DisplayItalic>
+                {t('seating.empty.title')} <DisplayAccent style={{ color: color.coral }}>{t('seating.empty.titleAccent')}</DisplayAccent>
               </Display>
               <Body center>{t('seating.empty.body')}</Body>
               <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap', justifyContent: 'center', marginTop: 4 }}>
@@ -577,7 +577,7 @@ function Stat({ value, label, sub, bg, ink }: { value: string; label: string; su
   return (
     <View style={{ flexGrow: 1, flexBasis: 150, backgroundColor: bg, borderRadius: radius.lg, paddingVertical: 14, paddingHorizontal: 16, gap: 2 }}>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-        <Text style={{ fontFamily: font.serif, fontSize: 32, lineHeight: 36, color: ink }}>{value}</Text>
+        <Text style={{ fontFamily: font.display, fontSize: 25, lineHeight: 28, color: ink }}>{value}</Text>
         <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink }}>{label}</Text>
       </View>
       <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink, opacity: 0.85 }}>{sub}</Text>

@@ -10,7 +10,7 @@ import { deleteContact, listMyContacts } from '@/lib/api-guests';
 import { SearchField } from '@/ui/guests/common';
 import { GuestEditSheet } from '@/ui/guests/GuestEditSheet';
 import { Icon } from '@/ui/Icon';
-import { Avatar, Body, Button, Caption, Display, DisplayItalic, EmptyState, IconButton, Notice, Skeleton, Surface } from '@/ui/primitives';
+import { Avatar, Body, Button, Caption, Display, DisplayAccent, EmptyState, IconButton, Notice, Skeleton, Surface } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { color, font } from '@/ui/tokens';
 
@@ -55,7 +55,7 @@ export default function ContactBook() {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
         <IconButton icon="arrowLeft" label={t('guests.book.back')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
         <Display size={wide ? 52 : 40}>
-          {t('guests.book.title')} <DisplayItalic style={{ color: color.lavender }}>{t('guests.book.titleAccent')}</DisplayItalic>
+          {t('guests.book.title')} <DisplayAccent style={{ color: color.lavender }}>{t('guests.book.titleAccent')}</DisplayAccent>
         </Display>
       </View>
       <Body style={{ maxWidth: 620 }}>{t('guests.book.subtitle')}</Body>

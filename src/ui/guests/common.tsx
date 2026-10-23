@@ -150,7 +150,7 @@ export function NumberStepper({ value, min, max, onChange, label }: { value: num
   return (
     <View accessibilityLabel={`${label}: ${value}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: color.surfaceSoft, borderRadius: radius.pill, padding: 4, alignSelf: 'flex-start' }}>
       {btn('minus', value - 1)}
-      <Text style={{ fontFamily: font.serif, fontSize: 26, lineHeight: 30, color: color.ink, minWidth: 30, textAlign: 'center' }}>{value}</Text>
+      <Text style={{ fontFamily: font.display, fontSize: 20, lineHeight: 23, color: color.ink, minWidth: 30, textAlign: 'center' }}>{value}</Text>
       {btn('plus', value + 1)}
     </View>
   );

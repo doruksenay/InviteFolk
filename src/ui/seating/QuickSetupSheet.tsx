@@ -3,7 +3,7 @@ import { Modal, Pressable, ScrollView, Text, TextInput, useWindowDimensions, Vie
 
 import { buildQuickLayout, type QuickSetup } from '@/core/seating';
 import { useI18n } from '@/i18n';
-import { Button, Caption, Display, DisplayItalic, Label } from '@/ui/primitives';
+import { Button, Caption, Display, DisplayAccent, Label } from '@/ui/primitives';
 import { color, font, radius } from '@/ui/tokens';
 
 import { Chip } from './Panels';
@@ -66,7 +66,7 @@ function Sheet({ busy, defaultPeople, hasItems, isWedding, onClose, onSubmit }: 
           <ScrollView contentContainerStyle={{ padding: 28, gap: 20 }} keyboardShouldPersistTaps="handled">
             <View style={{ gap: 6 }}>
               <Display size={38}>
-                {t('seating.quick.title')} <DisplayItalic style={{ color: color.lavender }}>{t('seating.quick.titleAccent')}</DisplayItalic>
+                {t('seating.quick.title')} <DisplayAccent style={{ color: color.lavender }}>{t('seating.quick.titleAccent')}</DisplayAccent>
               </Display>
               <Caption>{t('seating.quick.intro')}</Caption>
             </View>
@@ -78,7 +78,7 @@ function Sheet({ busy, defaultPeople, hasItems, isWedding, onClose, onSubmit }: 
                 onChangeText={setPeople}
                 keyboardType="number-pad"
                 accessibilityLabel={t('seating.quick.peopleA11y')}
-                style={{ height: 64, borderRadius: radius.lg, backgroundColor: color.surfaceSoft, paddingHorizontal: 20, fontFamily: font.serif, fontSize: 36, color: color.ink }}
+                style={{ height: 64, borderRadius: radius.lg, backgroundColor: color.surfaceSoft, paddingHorizontal: 20, fontFamily: font.display, fontSize: 28, color: color.ink }}
               />
               <Caption>{t('seating.quick.peopleHint')}</Caption>
             </View>
@@ -105,7 +105,7 @@ function Sheet({ busy, defaultPeople, hasItems, isWedding, onClose, onSubmit }: 
             </View>
 
             <View style={{ backgroundColor: color.lavenderTint, borderRadius: radius.lg, padding: 16, flexDirection: 'row', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-              <Text style={{ fontFamily: font.serif, fontSize: 34, lineHeight: 38, color: color.lavenderInk }}>{tableCount}</Text>
+              <Text style={{ fontFamily: font.display, fontSize: 27, lineHeight: 30, color: color.lavenderInk }}>{tableCount}</Text>
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: color.lavenderInk }}>
                 {t('seating.quick.summary', { count: tableCount, chairs: tableCount * capacity })}
               </Text>

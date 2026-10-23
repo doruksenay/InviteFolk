@@ -8,7 +8,7 @@ import { useI18n } from '@/i18n';
 import { useSession } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 import { Icon } from '@/ui/Icon';
-import { Body, Button, Caption, Display, DisplayItalic, Notice, Skeleton, Surface } from '@/ui/primitives';
+import { Body, Button, Caption, Display, DisplayAccent, Notice, Skeleton, Surface } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { color, font, radius } from '@/ui/tokens';
 
@@ -88,7 +88,7 @@ export function MfaGate() {
           <Text style={{ fontFamily: font.bold, fontSize: 12, letterSpacing: 1.4, color: color.lavenderInk, textTransform: 'uppercase' }}>{t('settings.mfa.kicker')}</Text>
         </View>
         <Display size={44}>
-          {t('settings.mfa.title')} <DisplayItalic style={{ color: color.lavender }}>{t('settings.mfa.titleItalic')}</DisplayItalic>
+          {t('settings.mfa.title')} <DisplayAccent style={{ color: color.lavender }}>{t('settings.mfa.titleItalic')}</DisplayAccent>
         </Display>
       </View>
 

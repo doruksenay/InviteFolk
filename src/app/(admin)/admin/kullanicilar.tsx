@@ -9,7 +9,7 @@ import { type AdminUserRow, adminSearchUsers, adminSetPlan, adminSetSuspended } 
 import { useSession } from '@/lib/session';
 import { BrandBar } from '@/ui/BrandBar';
 import { Icon } from '@/ui/Icon';
-import { Avatar, Body, Button, Caption, Display, DisplayItalic, Label, Notice, Pill, Surface } from '@/ui/primitives';
+import { Avatar, Body, Button, Caption, Display, DisplayAccent, Label, Notice, Pill, Surface } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { Sheet } from '@/ui/Sheet';
 import { color, font, radius } from '@/ui/tokens';
@@ -101,7 +101,7 @@ export default function AdminUsers() {
       <Button label={t('admin.usersPage.back')} variant="ghost" icon="arrowLeft" onPress={() => router.replace('/admin')} style={{ alignSelf: 'flex-start', marginLeft: -12 }} />
       <View style={{ gap: 8 }}>
         <Display size={48}>
-          {t('admin.usersPage.title')} <DisplayItalic style={{ color: color.lavender }}>{t('admin.usersPage.titleItalic')}</DisplayItalic>
+          {t('admin.usersPage.title')} <DisplayAccent style={{ color: color.lavender }}>{t('admin.usersPage.titleItalic')}</DisplayAccent>
         </Display>
         <Body>{t('admin.usersPage.subtitle')}</Body>
       </View>

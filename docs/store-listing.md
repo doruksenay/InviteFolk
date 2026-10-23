@@ -139,7 +139,16 @@ Notlar:
 
 ## Ekran görüntüsü planı
 
-App Store boyutları: 6,9" iPhone (1320×2868) ve 13" iPad (2064×2752). Google Play: telefon 1080×1920 ve üstü. Her görüntüde üstte kısa bir serif başlık, altta uygulama ekranı; sıcak kırık beyaz zemin.
+Hazır görseller ayrı bir paket olarak teslim edildi (`invitefolk-magaza-gorselleri.zip`, TR ve EN):
+
+| Klasör | Boyut | Nereye |
+|---|---|---|
+| `iphone-6.9/` | 1320×2868 | App Store Connect → 6,9" iPhone (daha küçük iPhone boyutları buradan otomatik türetilir) |
+| `ipad-13/` | 2064×2752 | App Store Connect → 13" iPad (uygulama iPad'i desteklediği için zorunlu) |
+| `play-phone/` | 1080×1920 | Google Play → Telefon ekran görüntüleri |
+| `play-feature-graphic.png` | 1024×500 | Google Play → Öne çıkan görsel |
+
+Düzen: üstte marka yazısıyla (Nunito ExtraBold) başlık, vurgulu kelime marka renginde; altında kısa açıklama ve cihaz çerçevesinde uygulama ekranı; kırık beyaz zemin üzerinde yumuşak marka renkleri. Ekranlardaki kişiler ve etkinlikler örnek veridir.
 
 | # | Başlık (TR / EN) | Ekran |
 |---|---|---|
@@ -147,10 +156,10 @@ App Store boyutları: 6,9" iPhone (1320×2868) ve 13" iPad (2064×2752). Google 
 | 2 | Davetiyen, senin tarzında / Your invitation, your style | Yeni etkinlik: tür ve tema, canlı önizleme |
 | 3 | Cevaplar kendiliğinden gelir / Replies arrive by themselves | Davetlinin sayfası (mobil) |
 | 4 | Kim geliyor, anında gör / See who's coming, live | Davetli listesi ve sayaçlar |
-| 5 | Salonu birkaç saniyede kur / Set up the room in seconds | Oturma planı |
+| 5 | Salonu saniyeler içinde kur / Set up the room in seconds | Oturma planı |
 | 6 | Kendi tasarımını yükle / Upload your own design | Davetiye tasarımı düzenleyicisi |
 | 7 | Halı sahada kadro hazır / Your squad, sorted | Halı saha kadro ve yedek |
 
-Kaynak ekranlar `npx expo start` ile gerçek cihazda ya da web derlemesinde, örnek veriyle (Ayşe & Mehmet) çekilmelidir.
+Görseller web derlemesinin örnek veriyle (Ayşe & Mehmet, Perşembe maçı) çekilmiş ekranlarından üretildi. Uygulama değiştikçe yenilenmeli; mağaza incelemesi ekranların uygulamayla uyuşmasını bekler.
 EOF
 echo ok

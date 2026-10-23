@@ -14,7 +14,7 @@ import { GuestDesignCard } from '@/ui/design/GuestDesignCard';
 import { OverlayEditor } from '@/ui/design/OverlayEditor';
 import { pdfSupported, pickDesign } from '@/ui/design/pick';
 import { Icon } from '@/ui/Icon';
-import { Body, Button, Caption, Display, DisplayItalic, EmptyState, Field, IconButton, Label, Notice, Skeleton, Surface, Title, ToggleRow } from '@/ui/primitives';
+import { Body, Button, Caption, Display, DisplayAccent, EmptyState, Field, IconButton, Label, Notice, Skeleton, Surface, Title, ToggleRow } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { color, font, radius, WIDE_BREAKPOINT } from '@/ui/tokens';
 
@@ -171,7 +171,7 @@ export default function DesignScreen() {
       <IconButton icon="arrowLeft" label={t('design.back')} onPress={back} />
       <View style={{ flexShrink: 1, gap: 2 }}>
         <Display size={wide ? 46 : 36}>
-          {t('design.title')} <DisplayItalic style={{ color: color.coral }}>{t('design.titleItalic')}</DisplayItalic>
+          {t('design.title')} <DisplayAccent style={{ color: color.coral }}>{t('design.titleItalic')}</DisplayAccent>
         </Display>
         <Caption numberOfLines={1}>{event.title}</Caption>
       </View>

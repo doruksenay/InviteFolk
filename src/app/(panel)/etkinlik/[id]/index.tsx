@@ -116,7 +116,7 @@ export default function EventDetail() {
     const st = tone === 'neutral' ? { bg: color.surface, ink: color.ink } : statusTokens[tone];
     return (
       <View key={label} style={{ flexGrow: 1, flexBasis: wide ? 0 : '45%', backgroundColor: st.bg, borderRadius: radius.xl, padding: 20, gap: 6, boxShadow: tone === 'neutral' ? shadow.card : 'none' }}>
-        <Text style={{ fontFamily: font.serif, fontSize: 40, lineHeight: 42, color: st.ink }}>{value}</Text>
+        <Text style={{ fontFamily: font.display, fontSize: 31, lineHeight: 33, color: st.ink }}>{value}</Text>
         <Text style={{ fontFamily: font.semibold, fontSize: 14, color: st.ink }}>{label}</Text>
         {sub ? <Text style={{ fontFamily: font.medium, fontSize: 12, color: st.ink, opacity: 0.8 }}>{sub}</Text> : null}
       </View>
@@ -175,7 +175,7 @@ export default function EventDetail() {
           <>
             {stat(t('event.stats.squad'), `${formatNumber(counts.yes, locale)}/${roster}`, 'yes')}
             {stat(t('event.stats.waitlist'), formatNumber(counts.waitlist, locale), 'maybe')}
-            {stat(t('event.stats.pending'), formatNumber(counts.pending, locale), 'pending')}
+            {stat(t('event.stats.pendingPlayers'), formatNumber(counts.pending, locale), 'pending')}
             {fee
               ? stat(t('event.stats.paid'), `${counts.paid}/${counts.yes}`, 'neutral', t('event.feeLine', { collected: formatTry(counts.paid * fee, locale), expected: formatTry(counts.yes * fee, locale) }))
               : stat(t('event.stats.declined'), formatNumber(counts.no, locale), 'no')}
@@ -261,12 +261,12 @@ export default function EventDetail() {
 
           {invitations.length === 0 ? (
             <View style={{ paddingVertical: 40, alignItems: 'center', gap: 8, borderRadius: radius.lg, backgroundColor: color.surfaceSoft }}>
-              <Text style={{ fontFamily: font.serif, fontSize: 28, color: color.ink }}>{t('event.list.emptyTitle')}</Text>
+              <Text style={{ fontFamily: font.display, fontSize: 22, color: color.ink }}>{t('event.list.emptyTitle')}</Text>
               <Body center>{t('event.list.emptyBody')}</Body>
             </View>
           ) : filtered.length === 0 ? (
             <View style={{ paddingVertical: 32, alignItems: 'center', gap: 6, borderRadius: radius.lg, backgroundColor: color.surfaceSoft }}>
-              <Text style={{ fontFamily: font.serif, fontSize: 26, color: color.ink }}>{t('event.list.emptyFilterTitle')}</Text>
+              <Text style={{ fontFamily: font.display, fontSize: 20, color: color.ink }}>{t('event.list.emptyFilterTitle')}</Text>
               <Body center>{t('event.list.emptyFilterBody')}</Body>
             </View>
           ) : (
@@ -281,7 +281,7 @@ export default function EventDetail() {
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1, minWidth: 200 }}>
                     {filter === 'waitlist' ? (
                       <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: color.lavenderTint, alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontFamily: font.serif, fontSize: 22, color: color.lavenderInk }}>{idx + 1}</Text>
+                        <Text style={{ fontFamily: font.display, fontSize: 17, color: color.lavenderInk }}>{idx + 1}</Text>
                       </View>
                     ) : (
                       <Avatar text={initials(inv.contacts.name)} index={idx} />

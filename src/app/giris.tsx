@@ -4,7 +4,7 @@ import { Image, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { useI18n } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import logoFull from '../../assets/images/logo-full.png';
-import { Body, Button, Caption, Display, DisplayItalic, Field, Notice, Surface } from '@/ui/primitives';
+import { Body, Button, Caption, Display, DisplayAccent, Field, Notice, Surface } from '@/ui/primitives';
 import { RichText } from '@/ui/RichText';
 import { Screen } from '@/ui/Screen';
 import { color } from '@/ui/tokens';
@@ -52,7 +52,7 @@ export default function SignIn() {
         <View style={{ gap: 10 }}>
           <Display size={52}>
             {t('auth.headline')}
-            <DisplayItalic style={{ color: color.lavender }}>{t('auth.headlineAccent')}</DisplayItalic>
+            <DisplayAccent style={{ color: color.lavender }}>{t('auth.headlineAccent')}</DisplayAccent>
           </Display>
           <Body>{t('auth.intro')}</Body>
         </View>

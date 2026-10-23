@@ -89,5 +89,10 @@ export function initials(name: string): string {
 }
 
 export function formatTry(n: number, locale = 'tr-TR'): string {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
+  // "₺" her dilde aynı görünsün (en-GB varsayılanı "TRY 1,500" yazar). Eski motorlarda narrowSymbol yoksa varsayılana düşer.
+  try {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: 'TRY', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(n);
+  } catch {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
+  }
 }

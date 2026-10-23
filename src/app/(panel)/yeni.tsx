@@ -13,7 +13,7 @@ import { LangPicker, ThemePicker } from '@/ui/eventForm/Pickers';
 import { GuestAdder } from '@/ui/guests/GuestAdder';
 import { Icon } from '@/ui/Icon';
 import { InvitationCard } from '@/ui/InvitationCard';
-import { Body, Button, Caption, Display, DisplayItalic, Field, IconButton, Label, Notice, Pill, Surface, tapFeedback, Title, ToggleRow } from '@/ui/primitives';
+import { Body, Button, Caption, Display, DisplayAccent, Field, IconButton, Label, Notice, Pill, Surface, tapFeedback, Title, ToggleRow } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { SendPanel } from '@/ui/send/SendPanel';
 import { Stepper } from '@/ui/Stepper';
@@ -362,7 +362,7 @@ export default function NewEvent() {
             <Pill label={t('wizard.stepPill', { n: step + 1, total: STEPS.length })} bg={color.lavenderTint} fg={color.lavenderInk} />
             <Display size={wide ? 64 : 46}>
               {t(STEP_COPY[step].title)}
-              <DisplayItalic style={{ color: color.lavender }}>{t(STEP_COPY[step].accent)}</DisplayItalic>
+              <DisplayAccent style={{ color: color.lavender }}>{t(STEP_COPY[step].accent)}</DisplayAccent>
             </Display>
             <Body style={{ maxWidth: 540, fontSize: 17, lineHeight: 27 }}>{t(STEP_COPY[step].body)}</Body>
           </View>

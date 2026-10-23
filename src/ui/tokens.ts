@@ -1,5 +1,5 @@
 // Tasarım tokenları: "Yeni etkinlik" ekranında onaylanan dil, Invitefolk renkleriyle.
-// Sıcak kırık beyaz zemin, sert kenarlık yok, yumuşak gölge, tek sans + ölçülü serif.
+// Sıcak kırık beyaz zemin, sert kenarlık yok, yumuşak gölge, tek yuvarlak sans.
 
 // Invitefolk marka paleti (assets/brand/invitefolk-brand-identity.png):
 // Deep Violet #6C5CE7 · Coral #FF6B6B · Golden Yellow #FBBF24 · Mint Green #22C55E · Soft Off-White #FFF9F4
@@ -43,11 +43,15 @@ export const radius = { sm: 12, md: 16, lg: 22, xl: 28, pill: 999 } as const;
 
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 } as const;
 
+// Marka yazısı: yuvarlak hatlı, samimi sans (Nunito). Başlıklar ExtraBold, vurgu renkle yapılır.
+// Serif yalnızca davetiye temalarında (davetli sayfası, kart önizlemeleri, basılı masa kartları).
 export const font = {
-  regular: 'PlusJakartaSans_400Regular',
-  medium: 'PlusJakartaSans_500Medium',
-  semibold: 'PlusJakartaSans_600SemiBold',
-  bold: 'PlusJakartaSans_700Bold',
+  regular: 'Nunito_400Regular',
+  medium: 'Nunito_500Medium',
+  semibold: 'Nunito_600SemiBold',
+  bold: 'Nunito_700Bold',
+  display: 'Nunito_800ExtraBold',
+  black: 'Nunito_900Black',
   serif: 'InstrumentSerif_400Regular',
   serifItalic: 'InstrumentSerif_400Regular_Italic',
 } as const;

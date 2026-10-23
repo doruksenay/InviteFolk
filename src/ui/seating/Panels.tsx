@@ -106,7 +106,7 @@ function Stepper({ value, min, max, onChange, label }: { value: number; min: num
   return (
     <View accessibilityLabel={`${label}: ${value}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: color.surfaceSoft, borderRadius: radius.pill, padding: 4, alignSelf: 'flex-start' }}>
       {btn('minus', value - 1, t('seating.inspector.decrease', { label }))}
-      <Text style={{ fontFamily: font.serif, fontSize: 28, lineHeight: 32, color: color.ink, minWidth: 34, textAlign: 'center' }}>{value}</Text>
+      <Text style={{ fontFamily: font.display, fontSize: 22, lineHeight: 25, color: color.ink, minWidth: 34, textAlign: 'center' }}>{value}</Text>
       {btn('plus', value + 1, t('seating.inspector.increase', { label }))}
     </View>
   );
@@ -131,9 +131,9 @@ function LabelInput({ value, onCommit, readOnly }: { value: string; onCommit: (v
       maxLength={40}
       accessibilityLabel={t('seating.inspector.nameA11y')}
       style={{
-        fontFamily: font.serif,
-        fontSize: 34,
-        lineHeight: 40,
+        fontFamily: font.display,
+        fontSize: 26,
+        lineHeight: 32,
         color: color.ink,
         paddingVertical: 2,
         paddingHorizontal: 0,

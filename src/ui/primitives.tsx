@@ -28,21 +28,28 @@ export function tapFeedback() {
 }
 
 // ---------------------------------------------------------------------------
-// Tipografi: tek sans (Plus Jakarta Sans), serif yalnızca büyük başlıklarda.
+// Tipografi: marka yazısı Nunito. Büyük başlıklar ExtraBold; vurgulanan kelime yalnızca renkle ayrılır
+// (kimlik sayfasındaki "Plan. Invite. Celebrate." gibi).
 // ---------------------------------------------------------------------------
 type TProps = TextProps & { color?: string; center?: boolean };
 
+/**
+ * Büyük başlık. `size` eski ölçekle verilir (dar serif için); geniş ve kalın marka yazısında
+ * aynı satır uzunluğunu korumak için ~%72'si kullanılır.
+ */
 export function Display({ style, color: c, center, size = 56, ...rest }: TProps & { size?: number }) {
+  const s = Math.round(size * 0.72);
   return (
     <Text
       {...rest}
-      style={[{ fontFamily: font.serif, fontSize: size, lineHeight: size * 1.02, letterSpacing: -0.4, color: c ?? color.ink, textAlign: center ? 'center' : undefined }, style]}
+      style={[{ fontFamily: font.display, fontSize: s, lineHeight: Math.round(s * 1.16), letterSpacing: -0.02 * s, color: c ?? color.ink, textAlign: center ? 'center' : undefined }, style]}
     />
   );
 }
 
-export function DisplayItalic(props: TProps) {
-  return <Text {...props} style={[{ fontFamily: font.serifItalic }, props.style]} />;
+/** Başlık içinde renkle vurgulanan kelime(ler). */
+export function DisplayAccent(props: TProps) {
+  return <Text {...props} style={[{ fontFamily: font.display }, props.style]} />;
 }
 
 export function Title({ style, color: c, center, ...rest }: TProps) {
@@ -231,7 +238,7 @@ export function Notice({ tone, text }: { tone: 'success' | 'info' | 'warning' | 
 }
 
 const styles = StyleSheet.create({
-  title: { fontFamily: font.semibold, fontSize: 17, lineHeight: 24 },
+  title: { fontFamily: font.bold, fontSize: 17, lineHeight: 24 },
   body: { fontFamily: font.regular, fontSize: 15, lineHeight: 23 },
   label: { fontFamily: font.semibold, fontSize: 14, lineHeight: 20 },
   caption: { fontFamily: font.regular, fontSize: 13, lineHeight: 19 },

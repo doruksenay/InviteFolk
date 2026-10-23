@@ -19,6 +19,7 @@ export const event: typeof TR = {
     squad: 'in the squad',
     waitlist: 'on the waitlist',
     paid: 'paid',
+    pendingPlayers: 'awaiting reply',
   },
   feeLine: 'Collected {collected} of {expected}',
   menuSummary: 'Menu choices',

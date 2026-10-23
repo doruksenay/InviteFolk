@@ -12,7 +12,7 @@ import { OptionChip } from '@/ui/guests/common';
 import { cleanQuestions, MenuEditor, QuestionsEditor } from '@/ui/eventForm/Editors';
 import { isDate, splitIso, toIso } from '@/ui/eventForm/dates';
 import { LangPicker, ThemePicker } from '@/ui/eventForm/Pickers';
-import { Body, Button, Caption, Display, DisplayItalic, Field, IconButton, Label, Notice, Skeleton, Surface, Title, ToggleRow } from '@/ui/primitives';
+import { Body, Button, Caption, Display, DisplayAccent, Field, IconButton, Label, Notice, Skeleton, Surface, Title, ToggleRow } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { color, font, radius } from '@/ui/tokens';
 
@@ -167,7 +167,7 @@ function Form({ event }: { event: EventRow }) {
         <View style={{ flex: 1, gap: 2 }}>
           <Caption>{typeName}</Caption>
           <Display size={wide ? 48 : 36}>
-            {t('wizard.editor.title')} <DisplayItalic style={{ color: color.lavender }}>{t('wizard.editor.titleAccent')}</DisplayItalic>
+            {t('wizard.editor.title')} <DisplayAccent style={{ color: color.lavender }}>{t('wizard.editor.titleAccent')}</DisplayAccent>
           </Display>
         </View>
       </View>

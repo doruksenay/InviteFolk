@@ -7,7 +7,7 @@ import { useI18n } from '@/i18n';
 import { adminRecentEvents, adminRecentUsers, adminStats, useQuery } from '@/lib/api';
 import { BrandBar } from '@/ui/BrandBar';
 import { Icon } from '@/ui/Icon';
-import { Avatar, Body, Button, Caption, Display, DisplayItalic, Notice, Pill, Skeleton, Surface, Title } from '@/ui/primitives';
+import { Avatar, Body, Button, Caption, Display, DisplayAccent, Notice, Pill, Skeleton, Surface, Title } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { color, font, radius } from '@/ui/tokens';
 
@@ -30,7 +30,7 @@ export default function AdminHome() {
   const card = (label: string, value: string, sub: string, bg: string, ink: string) => (
     <View key={label} style={{ flexGrow: 1, flexBasis: wide ? 0 : '45%', minWidth: 150, backgroundColor: bg, borderRadius: radius.xl, padding: 20, gap: 4 }}>
       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink }}>{label}</Text>
-      <Text style={{ fontFamily: font.serif, fontSize: 42, lineHeight: 44, color: ink }}>{value}</Text>
+      <Text style={{ fontFamily: font.display, fontSize: 33, lineHeight: 34, color: ink }}>{value}</Text>
       <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink, opacity: 0.85 }}>{sub}</Text>
     </View>
   );
@@ -41,7 +41,7 @@ export default function AdminHome() {
       <View style={{ flexDirection: wide ? 'row' : 'column', alignItems: wide ? 'flex-end' : 'flex-start', justifyContent: 'space-between', gap: 16 }}>
         <View style={{ gap: 8, flexShrink: 1 }}>
           <Display size={wide ? 56 : 42}>
-            {t('admin.titleA')} <DisplayItalic style={{ color: color.lavender }}>{t('admin.titleB')}</DisplayItalic>
+            {t('admin.titleA')} <DisplayAccent style={{ color: color.lavender }}>{t('admin.titleB')}</DisplayAccent>
           </Display>
           <Body>{t('admin.subtitle')}</Body>
         </View>

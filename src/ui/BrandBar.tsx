@@ -19,7 +19,7 @@ const FOLK = ['#6C5CE7', '#FF6B6B', '#FBBF24', '#22C55E'];
 /** Yazı logosu: "Invite" mürekkep, "folk" harf harf marka renkleri (assets/brand/invitefolk-brand-identity.png). */
 export function Wordmark({ size = 20 }: { size?: number }) {
   return (
-    <Text accessibilityRole="header" accessibilityLabel="Invitefolk" style={{ fontFamily: font.bold, fontSize: size, letterSpacing: -0.4, color: color.ink }}>
+    <Text accessibilityRole="header" accessibilityLabel="Invitefolk" style={{ fontFamily: font.black, fontSize: size, letterSpacing: -0.03 * size, color: color.ink }}>
       Invite
       {'folk'.split('').map((ch, i) => (
         <Text key={i} style={{ color: FOLK[i] }}>

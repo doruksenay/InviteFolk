@@ -7,7 +7,7 @@ import { deleteMyAccount, setProfileLocale } from '@/lib/api';
 import { setNotifyRsvp } from '@/lib/api-billing';
 import { useSession } from '@/lib/session';
 import { Icon } from '@/ui/Icon';
-import { Body, Button, Caption, Display, DisplayItalic, IconButton, Label, Notice, Pill, Surface, Title, ToggleRow } from '@/ui/primitives';
+import { Body, Button, Caption, Display, DisplayAccent, IconButton, Label, Notice, Pill, Surface, Title, ToggleRow } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { color, font, radius } from '@/ui/tokens';
 
@@ -73,7 +73,7 @@ export default function SettingsScreen() {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
         <IconButton icon="arrowLeft" label={t('settings.back')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
         <Display size={wide ? 52 : 40}>
-          {t('settings.title')} <DisplayItalic style={{ color: color.lavender }}>{t('settings.titleItalic')}</DisplayItalic>
+          {t('settings.title')} <DisplayAccent style={{ color: color.lavender }}>{t('settings.titleItalic')}</DisplayAccent>
         </Display>
       </View>
 
@@ -103,7 +103,7 @@ export default function SettingsScreen() {
                       boxShadow: on ? `inset 0 0 0 2px ${color.lavender}` : 'none',
                       transform: [{ scale: pressed ? 0.98 : 1 }],
                     })}>
-                    <Text style={{ fontFamily: font.serif, fontSize: 26, color: on ? color.lavenderInk : color.ink }}>{LANG_NAMES[l]}</Text>
+                    <Text style={{ fontFamily: font.display, fontSize: 20, color: on ? color.lavenderInk : color.ink }}>{LANG_NAMES[l]}</Text>
                   </Pressable>
                 );
               })}
