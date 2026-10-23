@@ -10,8 +10,15 @@ permissions:
   contents: read
 
 jobs:
+  ortam:
+    uses: ./.github/workflows/ortam.yml
+    secrets: inherit
+    with:
+      create: false
+
   apk:
     name: APK (EAS, preview)
+    needs: ortam
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -40,9 +47,9 @@ jobs:
 
       - name: Uygulama adresleri (derlemeye gömülür; gizli değildir)
         env:
-          SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
-          SUPABASE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
-          WEB_URL: ${{ vars.WEB_URL }}
+          SUPABASE_URL: https://${{ needs.ortam.outputs.ref }}.supabase.co
+          SUPABASE_KEY: ${{ needs.ortam.outputs.publishable_key }}
+          WEB_URL: ${{ needs.ortam.outputs.web_url }}
         run: |
           jq --arg u "$SUPABASE_URL" --arg k "$SUPABASE_KEY" --arg w "$WEB_URL" \
             '.build.preview.env = { "EXPO_PUBLIC_SUPABASE_URL": $u, "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": $k, "EXPO_PUBLIC_WEB_URL": $w }' \

@@ -1,0 +1,184 @@
+# Ortamı hazırlar ve bilgilerini verir (diğer iş akışları kullanır; tek başına çalışmaz).
+# Yalnızca iki API anahtarıyla her şeyi kendisi bulur ya da oluşturur:
+#   - Supabase projesi (yoksa Frankfurt'ta açılır, hazır olana kadar beklenir)
+#   - Supabase giriş ayarları (Gmail SMTP, 6 haneli kod e-postası, site adresi, iki adımlı doğrulama)
+#   - Cloudflare Pages projesi ve adresi
+# Tekrar çalıştırmak güvenlidir: var olan proje kullanılır, ayarlar aynı değerlerle yeniden yazılır.
+name: Ortam
+
+on:
+  workflow_call:
+    inputs:
+      create:
+        description: Proje yoksa oluştur ve ayarları yaz
+        type: boolean
+        default: true
+    outputs:
+      ref:
+        value: ${{ jobs.ortam.outputs.ref }}
+      publishable_key:
+        value: ${{ jobs.ortam.outputs.publishable_key }}
+      web_url:
+        value: ${{ jobs.ortam.outputs.web_url }}
+      cf_account:
+        value: ${{ jobs.ortam.outputs.cf_account }}
+      pages_project:
+        value: ${{ jobs.ortam.outputs.pages_project }}
+
+permissions:
+  contents: read
+
+jobs:
+  ortam:
+    name: Ortam
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      ref: ${{ steps.supa.outputs.ref }}
+      publishable_key: ${{ steps.key.outputs.key }}
+      web_url: ${{ steps.pages.outputs.web_url }}
+      cf_account: ${{ steps.pages.outputs.account }}
+      pages_project: ${{ steps.pages.outputs.project }}
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      PROJECT_NAME: ${{ vars.SUPABASE_PROJECT_NAME || 'invitefolk' }}
+      PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT || format('invitefolk-{0}', github.repository_owner) }}
+      API: https://api.supabase.com/v1
+    steps:
+      - name: Anahtarlar tamam mı?
+        run: |
+          missing=""
+          [ -n "$SUPABASE_ACCESS_TOKEN" ] || missing="$missing SUPABASE_ACCESS_TOKEN"
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || missing="$missing CLOUDFLARE_API_TOKEN"
+          if [ -n "$missing" ]; then
+            echo "::error::GitHub → Settings → Secrets and variables → Actions → eksik secret:$missing (bkz. docs/canliya-alma.md)"
+            exit 1
+          fi
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: latest
+
+      - name: Supabase projesi
+        id: supa
+        env:
+          CREATE: ${{ inputs.create }}
+          REF_OVERRIDE: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: |
+          set -euo pipefail
+          auth=(-H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json")
+          find_ref() { curl -fsS "${auth[@]}" "$API/projects" | jq -r --arg n "$PROJECT_NAME" 'first(.[] | select(.name == $n) | (.ref // .id)) // empty'; }
+          ref="${REF_OVERRIDE:-$(find_ref)}"
+          if [ -z "$ref" ]; then
+            if [ "$CREATE" != "true" ]; then echo "::error::Supabase projesi yok; önce 'Yayınla'yı çalıştırın."; exit 1; fi
+            org=$(curl -fsS "${auth[@]}" "$API/organizations" | jq -r '.[0].id // empty')
+            [ -n "$org" ] || { echo "::error::Supabase hesabında organizasyon yok (supabase.com'da bir kez giriş yapıp organizasyon oluşturun)."; exit 1; }
+            # Veritabanı şifresi bir kez üretilir ve hiçbir yerde saklanmaz: CLI geçici giriş rolüyle bağlanır.
+            pw=$(openssl rand -hex 24); echo "::add-mask::$pw"
+            echo "Proje oluşturuluyor: $PROJECT_NAME (eu-central-1)"
+            supabase projects create "$PROJECT_NAME" --org-id "$org" --db-password "$pw" --region eu-central-1
+            ref=$(find_ref)
+          fi
+          [ -n "$ref" ] || { echo "::error::Supabase projesi bulunamadı."; exit 1; }
+          # Hazır olana kadar bekle (yeni projede 1–3 dakika). Durdurulmuşsa uyandır.
+          for _ in $(seq 1 60); do
+            st=$(curl -fsS "${auth[@]}" "$API/projects/$ref" | jq -r '.status')
+            echo "durum: $st"
+            [ "$st" = "ACTIVE_HEALTHY" ] && break
+            if [ "$st" = "INACTIVE" ] || [ "$st" = "PAUSED" ]; then
+              curl -fsS -X POST "${auth[@]}" "$API/projects/$ref/restore" > /dev/null || true
+            fi
+            sleep 10
+          done
+          [ "$st" = "ACTIVE_HEALTHY" ] || { echo "::error::Supabase projesi hazır olmadı ($st)."; exit 1; }
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
+      - name: Uygulama anahtarı (publishable)
+        id: key
+        env:
+          REF: ${{ steps.supa.outputs.ref }}
+        run: |
+          set -euo pipefail
+          key=$(curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" "$API/projects/$REF/api-keys?reveal=false" \
+            | jq -r 'first(.[] | select(.type == "publishable") | .api_key) // first(.[] | select(.name == "anon") | .api_key) // empty')
+          [ -n "$key" ] || { echo "::error::Publishable key bulunamadı."; exit 1; }
+          echo "key=$key" >> "$GITHUB_OUTPUT"
+
+      - name: Cloudflare Pages
+        id: pages
+        env:
+          ACCOUNT_OVERRIDE: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          WEB_URL_OVERRIDE: ${{ vars.WEB_URL }}
+        run: |
+          set -euo pipefail
+          cf=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json")
+          CF=https://api.cloudflare.com/client/v4
+          acc="${ACCOUNT_OVERRIDE:-$(curl -fsS "${cf[@]}" "$CF/accounts" | jq -r '.result[0].id // empty')}"
+          [ -n "$acc" ] || { echo "::error::Cloudflare hesabı bulunamadı (token'ın 'Cloudflare Pages: Edit' izni olmalı)."; exit 1; }
+          project=$(echo "$PAGES_PROJECT" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-\n' '-' | cut -c1-58)
+          res=$(curl -sS "${cf[@]}" "$CF/accounts/$acc/pages/projects/$project")
+          if [ "$(echo "$res" | jq -r '.success')" != "true" ]; then
+            echo "Pages projesi oluşturuluyor: $project"
+            res=$(curl -fsS -X POST "${cf[@]}" "$CF/accounts/$acc/pages/projects" \
+              -d "$(jq -n --arg n "$project" '{name: $n, production_branch: "main"}')")
+          fi
+          sub=$(echo "$res" | jq -r '.result.subdomain // empty')
+          [ -n "$sub" ] || { echo "::error::Pages adresi alınamadı: $(echo "$res" | jq -c '.errors')"; exit 1; }
+          {
+            echo "account=$acc"
+            echo "project=$project"
+            echo "web_url=${WEB_URL_OVERRIDE:-https://$sub}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Giriş ayarları (e-posta kodu, SMTP, iki adımlı doğrulama)
+        if: inputs.create
+        env:
+          REF: ${{ steps.supa.outputs.ref }}
+          WEB_URL: ${{ steps.pages.outputs.web_url }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_HOST: ${{ vars.SMTP_HOST || 'smtp.gmail.com' }}
+          SMTP_PORT: ${{ vars.SMTP_PORT || '465' }}
+        run: |
+          set -euo pipefail
+          read -r -d '' BODY_TR <<'HTML' || true
+          <h2 style="font-family:Helvetica,Arial,sans-serif;color:#1F1B2E">Invitefolk giriş kodun</h2>
+          <p style="font-family:Helvetica,Arial,sans-serif;color:#3A3548">Uygulamaya şu kodu yaz / Enter this code in the app:</p>
+          <p style="font-family:Helvetica,Arial,sans-serif;font-size:30px;font-weight:700;letter-spacing:8px;color:#6C5CE7">{{ .Token }}</p>
+          <p style="font-family:Helvetica,Arial,sans-serif;color:#6E6A72;font-size:13px">Bu kodu sen istemediysen e-postayı yok sayabilirsin. / If you didn't ask for this code, ignore this email.</p>
+          HTML
+          cfg=$(jq -n --arg site "$WEB_URL" --arg body "$BODY_TR" '{
+            site_url: $site,
+            uri_allow_list: ($site + "/**,invitefolk://**"),
+            external_email_enabled: true,
+            mailer_autoconfirm: false,
+            mailer_otp_length: 6,
+            mailer_otp_exp: 900,
+            mailer_subjects_magic_link: "Invitefolk giriş kodun: {{ .Token }}",
+            mailer_templates_magic_link_content: $body,
+            mailer_subjects_confirmation: "Invitefolk giriş kodun: {{ .Token }}",
+            mailer_templates_confirmation_content: $body,
+            mfa_totp_enroll_enabled: true,
+            mfa_totp_verify_enabled: true
+          }')
+          if [ -n "$SMTP_USER" ] && [ -n "$SMTP_PASSWORD" ]; then
+            cfg=$(echo "$cfg" | jq --arg u "$SMTP_USER" --arg p "$SMTP_PASSWORD" --arg h "$SMTP_HOST" --arg port "$SMTP_PORT" \
+              '. + {smtp_admin_email: $u, smtp_user: $u, smtp_pass: $p, smtp_host: $h, smtp_port: $port, smtp_sender_name: "Invitefolk", smtp_max_frequency: 30, rate_limit_email_sent: 30}')
+          else
+            echo "::warning::SMTP_USER/SMTP_PASSWORD yok: giriş kodu e-postaları yalnızca Supabase ekibindeki adreslere ve saatte 2 tane gider."
+          fi
+          curl -fsS -X PATCH -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
+            "$API/projects/$REF/config/auth" -d "$cfg" > /dev/null
+          echo "Giriş ayarları yazıldı."
+
+      - name: Özet
+        env:
+          REF: ${{ steps.supa.outputs.ref }}
+          WEB_URL: ${{ steps.pages.outputs.web_url }}
+        run: |
+          {
+            echo "### Ortam"
+            echo "- Supabase: \`$REF\` (https://supabase.com/dashboard/project/$REF)"
+            echo "- Web: $WEB_URL"
+          } >> "$GITHUB_STEP_SUMMARY"

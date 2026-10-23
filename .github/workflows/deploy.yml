@@ -1,5 +1,7 @@
-# main'e her push'ta (ya da Actions sekmesinden elle): kontrol → Supabase (veritabanı + fonksiyonlar + sırlar) → web (Cloudflare Pages).
-# Tamamen ücretsiz katmanlarla çalışır. Kurulum ve gereken sırlar: docs/canliya-alma.md
+# main'e her push'ta (ya da Actions sekmesinden elle):
+#   kontrol → ortam (Supabase projesi + giriş ayarları + Cloudflare Pages; yoksa oluşturur)
+#           → Supabase (migration'lar, sırlar, fonksiyonlar, zamanlayıcı, yönetici) → web (Cloudflare Pages)
+# Tamamen ücretsiz katmanlarla çalışır. Gereken tek şey dört secret: docs/canliya-alma.md
 name: Yayınla
 
 on:
@@ -19,35 +21,34 @@ jobs:
   kontrol:
     uses: ./.github/workflows/ci.yml
 
+  ortam:
+    needs: kontrol
+    uses: ./.github/workflows/ortam.yml
+    secrets: inherit
+    with:
+      create: true
+
   supabase:
     name: Supabase
-    needs: kontrol
+    needs: ortam
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      # Boşsa CLI kendi geçici giriş rolüyle bağlanır (veritabanı şifresi gerekmez).
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+      REF: ${{ needs.ortam.outputs.ref }}
+      WEB_URL: ${{ needs.ortam.outputs.web_url }}
+      API: https://api.supabase.com/v1
     steps:
       - uses: actions/checkout@v6
-
-      - name: Ayarlar tamam mı?
-        run: |
-          missing=""
-          [ -n "$SUPABASE_ACCESS_TOKEN" ] || missing="$missing SUPABASE_ACCESS_TOKEN(secret)"
-          [ -n "$SUPABASE_DB_PASSWORD" ] || missing="$missing SUPABASE_DB_PASSWORD(secret)"
-          [ -n "$SUPABASE_PROJECT_REF" ] || missing="$missing SUPABASE_PROJECT_REF(variable)"
-          if [ -n "$missing" ]; then
-            echo "::error::Eksik GitHub ayarı:$missing — bkz. docs/canliya-alma.md"
-            exit 1
-          fi
 
       - uses: supabase/setup-cli@v3
         with:
           version: latest
 
       - name: Projeye bağlan
-        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        run: supabase link --project-ref "$REF"
 
       - name: Veritabanı (migration'lar)
         run: supabase db push --yes
@@ -55,8 +56,6 @@ jobs:
       - name: Sunucu sırları
         # Yalnızca dolu olanlar yazılır; boş bırakılan özellik (SMS, yapay zekâ, otomatik WhatsApp…) kapalı kalır.
         env:
-          WEB_URL: ${{ vars.WEB_URL }}
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           EMAIL_FROM: ${{ vars.EMAIL_FROM }}
           WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
@@ -77,46 +76,68 @@ jobs:
           put() { if [ -n "$2" ]; then printf '%s=%s\n' "$1" "$2" >> "$f"; fi; }
           put APP_WEB_URL "$WEB_URL"
           put ALLOWED_ORIGINS "$WEB_URL"
-          for k in CRON_SECRET RESEND_API_KEY EMAIL_FROM WHATSAPP_TOKEN WHATSAPP_PHONE_NUMBER_ID WHATSAPP_APP_SECRET \
+          for k in RESEND_API_KEY EMAIL_FROM WHATSAPP_TOKEN WHATSAPP_PHONE_NUMBER_ID WHATSAPP_APP_SECRET \
                    WHATSAPP_VERIFY_TOKEN ANTHROPIC_API_KEY NETGSM_USERCODE NETGSM_PASSWORD NETGSM_HEADER \
                    IYZICO_API_KEY IYZICO_SECRET_KEY IYZICO_BASE_URL; do
             put "$k" "${!k}"
           done
-          if [ -s "$f" ]; then
-            supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" --env-file "$f"
-          fi
+          supabase secrets set --project-ref "$REF" --env-file "$f"
           rm -f "$f"
 
       - name: Sunucu fonksiyonları
         # JWT ayarları supabase/config.toml'dan okunur (webhook ve davetli fonksiyonları girişsiz çalışır).
-        run: supabase functions deploy --use-api --project-ref "$SUPABASE_PROJECT_REF"
+        run: supabase functions deploy --use-api --project-ref "$REF"
+
+      - name: Zamanlayıcı (10 dakikada bir; yoksa kurulur)
+        run: |
+          set -euo pipefail
+          q() { curl -fsS -X POST -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
+                  "$API/projects/$REF/database/query" -d "$(jq -n --arg s "$1" '{query: $s}')"; }
+          has_job=$(q "select count(*)::int as n from pg_extension where extname = 'pg_cron'" | jq -r '.[0].n')
+          if [ "$has_job" = "1" ]; then
+            has_job=$(q "select count(*)::int as n from cron.job where jobname = 'davet-scheduled'" | jq -r '.[0].n')
+          else
+            has_job=0
+          fi
+          has_secret=$(supabase secrets list --project-ref "$REF" -o json | jq -r '[.[] | select(.name == "CRON_SECRET")] | length')
+          if [ "$has_job" = "1" ] && [ "$has_secret" = "1" ]; then
+            echo "Zamanlayıcı zaten kurulu."
+            exit 0
+          fi
+          # Gizli değer burada üretilir; yalnızca fonksiyonun sırrına ve veritabanı kasasına (Vault) yazılır.
+          secret=$(openssl rand -hex 32); echo "::add-mask::$secret"
+          umask 077; f=$(mktemp); printf 'CRON_SECRET=%s\n' "$secret" > "$f"
+          supabase secrets set --project-ref "$REF" --env-file "$f"; rm -f "$f"
+          sql=$(sed -e "s|<CRON_SECRET>|$secret|" -e "s|<PROJE_REF>|$REF|" scripts/zamanlayici.sql)
+          q "$sql" > /dev/null
+          echo "Zamanlayıcı kuruldu."
+
+      - name: Yönetici (ADMIN_EMAIL ya da SMTP_USER, ilk girişten sonra)
+        env:
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL || secrets.SMTP_USER }}
+        run: |
+          set -euo pipefail
+          [ -n "$ADMIN_EMAIL" ] || { echo "Yönetici e-postası tanımlı değil, atlandı."; exit 0; }
+          email=$(printf '%s' "$ADMIN_EMAIL" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9@._+-')
+          sql="update public.profiles set role = 'admin' where role <> 'admin' and id = (select id from auth.users where lower(email) = '$email') returning id"
+          n=$(curl -fsS -X POST -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
+                "$API/projects/$REF/database/query" -d "$(jq -n --arg s "$sql" '{query: $s}')" | jq 'length')
+          if [ "$n" = "1" ]; then echo "Yönetici yetkisi verildi."; else echo "Değişiklik yok (henüz giriş yapılmadı ya da zaten yönetici)."; fi
 
   web:
     name: Web (Cloudflare Pages)
-    needs: supabase
+    needs: [ortam, supabase]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-      PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT || 'invitefolk' }}
-      EXPO_PUBLIC_SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
-      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
-      EXPO_PUBLIC_WEB_URL: ${{ vars.WEB_URL }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ needs.ortam.outputs.cf_account }}
+      PAGES_PROJECT: ${{ needs.ortam.outputs.pages_project }}
+      EXPO_PUBLIC_SUPABASE_URL: https://${{ needs.ortam.outputs.ref }}.supabase.co
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ needs.ortam.outputs.publishable_key }}
+      EXPO_PUBLIC_WEB_URL: ${{ needs.ortam.outputs.web_url }}
     steps:
       - uses: actions/checkout@v6
-
-      - name: Ayarlar tamam mı?
-        run: |
-          missing=""
-          [ -n "$CLOUDFLARE_API_TOKEN" ] || missing="$missing CLOUDFLARE_API_TOKEN(secret)"
-          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || missing="$missing CLOUDFLARE_ACCOUNT_ID(variable)"
-          [ -n "$EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY" ] || missing="$missing SUPABASE_PUBLISHABLE_KEY(variable)"
-          [ -n "$EXPO_PUBLIC_WEB_URL" ] || missing="$missing WEB_URL(variable)"
-          if [ -n "$missing" ]; then
-            echo "::error::Eksik GitHub ayarı:$missing — bkz. docs/canliya-alma.md"
-            exit 1
-          fi
 
       - uses: actions/setup-node@v6
         with:
@@ -127,9 +148,6 @@ jobs:
 
       - name: Web derlemesi (+ güvenlik başlıkları)
         run: npm run build:web
-
-      - name: Cloudflare Pages projesi (yoksa oluştur)
-        run: npx --yes wrangler@4 pages project create "$PAGES_PROJECT" --production-branch main || true
 
       - name: Yayınla
         run: npx --yes wrangler@4 pages deploy dist --project-name "$PAGES_PROJECT" --branch main --commit-dirty=true
