@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
   if (!ev || ev.status === 'archived') return new Response('not_found', { status: 404 });
 
   const link = APP() ? `${APP()}/r/${token}` : '';
-  const hours = ev.type === 'saha' ? 1 : 4;
+  const hours = ev.type === 'saha' ? 1 : ev.type === 'basket' ? 1.5 : ev.type === 'voleybol' ? 2 : 4;
   const now = stamp(new Date());
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Invitefolk//Invitations//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', `X-WR-CALNAME:${esc(ev.title)}`, 'REFRESH-INTERVAL;VALUE=DURATION:PT12H'];
 

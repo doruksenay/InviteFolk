@@ -2,9 +2,10 @@ import { useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, Text, TextInput, useWindowDimensions, View } from 'react-native';
 
+import { SPORTS, type SportConfig, sportOf } from '@/core/event-types';
 import { formatShortDate } from '@/core/format';
 import { balanceTeams, type Player, shuffleTeams, type Team, teamTotals } from '@/core/teams';
-import type { InvitationWithContact, MatchRow, PlayerPosition } from '@/core/types';
+import type { EventRow, InvitationWithContact, MatchRow, PlayerPosition } from '@/core/types';
 import { type TKey, useI18n } from '@/i18n';
 import { getEvent, useQuery } from '@/lib/api';
 import { updateContact } from '@/lib/api-guests';
@@ -16,7 +17,6 @@ import { Button, Caption, EmptyState, Notice, Surface, Title } from '@/ui/primit
 import { Screen } from '@/ui/Screen';
 import { color, font, radius } from '@/ui/tokens';
 
-const POSITIONS: PlayerPosition[] = ['kaleci', 'defans', 'orta', 'forvet'];
 
 export default function TeamsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -24,16 +24,23 @@ export default function TeamsScreen() {
   const matches = useQuery(() => listMatches(id).catch(() => [] as MatchRow[]), [id]);
   if (q.loading && !q.data) return <ToolLoading />;
   if (q.error || !q.data) return <ToolError />;
-  return <Teams key={q.data.event.updated_at} eventId={q.data.event.id} title={q.data.event.title} invitations={q.data.invitations} matches={matches.data ?? []} reload={q.reload} reloadMatches={matches.reload} />;
+  const sport = sportOf(q.data.event.type) ?? SPORTS.futbol;
+  return <Teams key={q.data.event.updated_at} event={q.data.event} sport={sport} invitations={q.data.invitations} matches={matches.data ?? []} reload={q.reload} reloadMatches={matches.reload} />;
 }
 
-function Teams({ eventId, title, invitations, matches, reload, reloadMatches }: { eventId: string; title: string; invitations: InvitationWithContact[]; matches: MatchRow[]; reload: () => void; reloadMatches: () => void }) {
+function Teams({ event, sport, invitations, matches, reload, reloadMatches }: { event: EventRow; sport: SportConfig; invitations: InvitationWithContact[]; matches: MatchRow[]; reload: () => void; reloadMatches: () => void }) {
+  const eventId = event.id;
+  const title = event.title;
+  const POSITIONS = sport.positions;
   const { t } = useI18n();
   const { width } = useWindowDimensions();
   const wide = width >= 900;
   const squad = useMemo(() => invitations.filter((i) => i.status === 'yes').sort((a, b) => a.contacts.name.localeCompare(b.contacts.name, 'tr')), [invitations]);
   const [skills, setSkills] = useState<Record<string, number>>(() => Object.fromEntries(squad.map((i) => [i.id, i.contacts.skill ?? 3])));
-  const [positions, setPositions] = useState<Record<string, PlayerPosition | null>>(() => Object.fromEntries(squad.map((i) => [i.id, i.contacts.position ?? null])));
+  // Kişinin kayıtlı mevkisi başka bir spora aitse (ör. futbolda kaleci, basketbol maçında) boş sayılır.
+  const [positions, setPositions] = useState<Record<string, PlayerPosition | null>>(() =>
+    Object.fromEntries(squad.map((i) => [i.id, i.contacts.position && sport.positions.includes(i.contacts.position) ? i.contacts.position : null])),
+  );
   const [teams, setTeams] = useState<Record<string, Team | null>>(() => Object.fromEntries(squad.map((i) => [i.id, i.team])));
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ tone: 'success' | 'error' | 'info'; text: string } | null>(null);
@@ -160,7 +167,7 @@ function Teams({ eventId, title, invitations, matches, reload, reloadMatches }: 
       ) : (
         <>
           <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-            <Button label={t('tools.teams.balance')} icon="sparkle" onPress={() => setTeams(balanceTeams(players))} />
+            <Button label={t('tools.teams.balance')} icon="sparkle" onPress={() => setTeams(balanceTeams(players, Math.random, sport.spread))} />
             <Button label={t('tools.teams.shuffle')} variant="secondary" onPress={() => setTeams(shuffleTeams(players))} />
             <Button label={t('tools.teams.clear')} variant="ghost" onPress={() => setTeams(Object.fromEntries(squad.map((i) => [i.id, null])))} />
             <View style={{ flex: 1 }} />
@@ -185,7 +192,7 @@ function Teams({ eventId, title, invitations, matches, reload, reloadMatches }: 
         <Surface style={{ gap: 6, backgroundColor: color.goldTint }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Icon name="trophy" size={18} color={color.goldInk} />
-            <Title color={color.goldInk}>{t('tools.teams.leaders')}</Title>
+            <Title color={color.goldInk}>{t(`tools.teams.leaders.${sport.key}`)}</Title>
           </View>
           {leaders.map((l, i) => (
             <Text key={l.name + i} style={{ fontFamily: font.semibold, fontSize: 14, color: color.goldInk }}>{`${i + 1}. ${l.name} · ${l.goals}`}</Text>
@@ -196,24 +203,24 @@ function Teams({ eventId, title, invitations, matches, reload, reloadMatches }: 
       {matches.length === 0 ? (
         <Caption>{t('tools.teams.noMatches')}</Caption>
       ) : (
-        <MatchList matches={matches} byId={byId} onSaved={reloadMatches} onError={(text) => setMsg({ tone: 'error', text })} />
+        <MatchList sport={sport} matches={matches} byId={byId} onSaved={reloadMatches} onError={(text) => setMsg({ tone: 'error', text })} />
       )}
     </Screen>
   );
 }
 
-function MatchList({ matches, onSaved, onError }: { matches: MatchRow[]; byId: Map<string, InvitationWithContact>; onSaved: () => void; onError: (m: string) => void }) {
+function MatchList({ sport, matches, onSaved, onError }: { sport: SportConfig; matches: MatchRow[]; byId: Map<string, InvitationWithContact>; onSaved: () => void; onError: (m: string) => void }) {
   const votes = useQuery(() => mvpVotes(matches.map((m) => m.id)).catch(() => []), [matches.map((m) => m.id).join(',')]);
   return (
     <View style={{ gap: 12 }}>
       {matches.map((m) => (
-        <MatchCard key={m.id} match={m} votes={(votes.data ?? []).filter((v) => v.match_id === m.id)} onSaved={onSaved} onError={onError} />
+        <MatchCard key={m.id} sport={sport} match={m} votes={(votes.data ?? []).filter((v) => v.match_id === m.id)} onSaved={onSaved} onError={onError} />
       ))}
     </View>
   );
 }
 
-function MatchCard({ match, votes, onSaved, onError }: { match: MatchRow; votes: { target_id: string }[]; onSaved: () => void; onError: (m: string) => void }) {
+function MatchCard({ sport, match, votes, onSaved, onError }: { sport: SportConfig; match: MatchRow; votes: { target_id: string }[]; onSaved: () => void; onError: (m: string) => void }) {
   const { t, locale } = useI18n();
   const [open, setOpen] = useState(false);
   const [goals, setGoals] = useState<Record<string, number>>(match.goals ?? {});
@@ -231,7 +238,7 @@ function MatchCard({ match, votes, onSaved, onError }: { match: MatchRow; votes:
     setBusy(true);
     try {
       const clean = Object.fromEntries(Object.entries(goals).filter(([, v]) => v > 0));
-      const num = (s: string) => (s.trim() === '' ? null : Math.max(0, Math.min(99, parseInt(s, 10) || 0)));
+      const num = (s: string) => (s.trim() === '' ? null : Math.max(0, Math.min(300, parseInt(s, 10) || 0)));
       await updateMatch(match.id, { goals: clean, score_a: num(a), score_b: num(b) });
       setOpen(false);
       onSaved();
@@ -245,12 +252,12 @@ function MatchCard({ match, votes, onSaved, onError }: { match: MatchRow; votes:
   const scoreInput = (v: string, set: (s: string) => void, label: string) => (
     <TextInput
       value={v}
-      onChangeText={(s) => set(s.replace(/\D/g, '').slice(0, 2))}
+      onChangeText={(s) => set(s.replace(/\D/g, '').slice(0, sport.key === 'basket' ? 3 : 2))}
       keyboardType="number-pad"
       accessibilityLabel={label}
       placeholder="–"
       placeholderTextColor={color.faint}
-      style={{ width: 56, height: 48, borderRadius: radius.md, backgroundColor: color.surfaceSoft, textAlign: 'center', fontFamily: font.display, fontSize: 22, color: color.ink }}
+      style={{ width: sport.key === 'basket' ? 72 : 56, height: 48, borderRadius: radius.md, backgroundColor: color.surfaceSoft, textAlign: 'center', fontFamily: font.display, fontSize: 22, color: color.ink }}
     />
   );
 
@@ -267,12 +274,12 @@ function MatchCard({ match, votes, onSaved, onError }: { match: MatchRow; votes:
       {open && (
         <View style={{ gap: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Caption>{t('tools.teams.score')}</Caption>
+            <Caption>{`${t('tools.teams.score')} (${t(`tools.teams.scoreHint.${sport.key}`)})`}</Caption>
             {scoreInput(a, setA, t('tools.teams.teamA'))}
             <Text style={{ fontFamily: font.display, fontSize: 22, color: color.muted }}>:</Text>
             {scoreInput(b, setB, t('tools.teams.teamB'))}
           </View>
-          <Caption>{t('tools.teams.goals')}</Caption>
+          <Caption>{t(`tools.teams.goals.${sport.key}`)}</Caption>
           {match.players.map((p) => (
             <View key={p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 14, color: color.ink }} numberOfLines={1}>
@@ -280,7 +287,19 @@ function MatchCard({ match, votes, onSaved, onError }: { match: MatchRow; votes:
                 {p.team ? ` · ${p.team === 1 ? 'A' : 'B'}` : ''}
                 {tally.get(p.id) ? ` · ★${tally.get(p.id)}` : ''}
               </Text>
-              <NumberStepper value={goals[p.id] ?? 0} min={0} max={30} onChange={(v) => setGoals((g) => ({ ...g, [p.id]: v }))} label={`${p.name} ${t('tools.teams.goals')}`} />
+              {sport.key === 'basket' ? (
+                <TextInput
+                  value={goals[p.id] ? String(goals[p.id]) : ''}
+                  onChangeText={(v) => setGoals((g) => ({ ...g, [p.id]: Math.min(200, parseInt(v.replace(/\D/g, '') || '0', 10)) }))}
+                  keyboardType="number-pad"
+                  placeholder="0"
+                  placeholderTextColor={color.faint}
+                  accessibilityLabel={`${p.name} ${t(`tools.teams.goals.${sport.key}`)}`}
+                  style={{ width: 64, height: 40, borderRadius: radius.md, backgroundColor: color.surfaceSoft, textAlign: 'center', fontFamily: font.bold, fontSize: 16, color: color.ink }}
+                />
+              ) : (
+                <NumberStepper value={goals[p.id] ?? 0} min={0} max={50} onChange={(v) => setGoals((g) => ({ ...g, [p.id]: v }))} label={`${p.name} ${t(`tools.teams.goals.${sport.key}`)}`} />
+              )}
             </View>
           ))}
           <Button label={t('tools.teams.saveMatch')} icon="check" loading={busy} onPress={save} style={{ alignSelf: 'flex-start' }} />

@@ -318,6 +318,58 @@ const MOTIFS: Record<InvitationTheme['motif'], Draw> = {
     );
   },
 
+  // Basketbol sahası (parke): derzler, çizgiler, pota ve top
+  court: (t) => {
+    const planks: ReactElement[] = [];
+    for (let i = 0; i < 18; i++) planks.push(<Rect key={i} x={i * 20} y={0} width={20} height={240} fill={i % 2 ? t.shapeA : t.shapeB} />);
+    const L = 'rgba(255,255,255,0.9)';
+    const sw = 2.4;
+    return (
+      <G>
+        {planks}
+        <Rect x={14} y={14} width={332} height={212} stroke={L} strokeWidth={sw} fill="none" />
+        <Line x1={180} y1={14} x2={180} y2={226} stroke={L} strokeWidth={sw} />
+        <Circle cx={180} cy={120} r={30} stroke={L} strokeWidth={sw} fill="none" />
+        <Rect x={14} y={88} width={72} height={64} stroke={L} strokeWidth={sw} fill="rgba(255,255,255,0.14)" />
+        <Rect x={274} y={88} width={72} height={64} stroke={L} strokeWidth={sw} fill="rgba(255,255,255,0.14)" />
+        <Path d="M86 92 A28 28 0 0 1 86 148" stroke={L} strokeWidth={sw} fill="none" />
+        <Path d="M274 92 A28 28 0 0 0 274 148" stroke={L} strokeWidth={sw} fill="none" />
+        <Path d="M14 34 H44 A92 92 0 0 1 44 206 H14" stroke={L} strokeWidth={sw} fill="none" />
+        <Path d="M346 34 H316 A92 92 0 0 0 316 206 H346" stroke={L} strokeWidth={sw} fill="none" />
+        <Line x1={22} y1={108} x2={22} y2={132} stroke={L} strokeWidth={3} />
+        <Circle cx={29} cy={120} r={6} stroke={t.palette[0]} strokeWidth={2.4} fill="none" />
+        <Circle cx={238} cy={156} r={15} fill={t.palette[0]} />
+        <Path d="M223 156 H253 M238 141 V171 M227.5 145.5 C233 151 233 161 227.5 166.5 M248.5 145.5 C243 151 243 161 248.5 166.5" stroke="#3A2414" strokeWidth={1.4} fill="none" />
+      </G>
+    );
+  },
+
+  // Voleybol sahası: zemin, hücum çizgileri, file ve top
+  net: (t) => {
+    const L = 'rgba(255,255,255,0.9)';
+    const sw = 2.4;
+    const mesh: ReactElement[] = [];
+    for (let y = 10; y <= 230; y += 10) mesh.push(<Line key={`h${y}`} x1={172} y1={y} x2={188} y2={y} stroke="#FFFFFF" strokeWidth={0.8} opacity={0.75} />);
+    for (let x = 172; x <= 188; x += 8) mesh.push(<Line key={`v${x}`} x1={x} y1={6} x2={x} y2={234} stroke="#FFFFFF" strokeWidth={0.8} opacity={0.75} />);
+    return (
+      <G>
+        <Rect x={0} y={0} width={360} height={240} fill={t.shapeB} />
+        <Rect x={30} y={22} width={300} height={196} fill={t.shapeA} />
+        <Rect x={30} y={22} width={300} height={196} stroke={L} strokeWidth={sw} fill="none" />
+        <Line x1={120} y1={22} x2={120} y2={218} stroke={L} strokeWidth={sw} />
+        <Line x1={240} y1={22} x2={240} y2={218} stroke={L} strokeWidth={sw} />
+        <Rect x={172} y={6} width={16} height={228} fill="rgba(20,38,61,0.35)" />
+        {mesh}
+        <Rect x={170} y={4} width={20} height={6} rx={2} fill="#FFFFFF" />
+        <Circle cx={180} cy={4} r={4} fill={t.palette[0]} />
+        <Circle cx={180} cy={236} r={4} fill={t.palette[0]} />
+        <Circle cx={262} cy={78} r={16} fill="#FFFFFF" />
+        <Path d="M262 62 C255 72 255 84 262 94 M246.5 74 C256 76 266 74 277 69 M250 89 C258 84 268 84 276 88" stroke={t.palette[0]} strokeWidth={3} fill="none" />
+        <Circle cx={262} cy={78} r={16} stroke="#1F5598" strokeWidth={1.4} fill="none" />
+      </G>
+    );
+  },
+
   // Balonlar
   balloons: (t) => {
     const b = (cx: number, cy: number, c: string, k: string, s = 1) => (

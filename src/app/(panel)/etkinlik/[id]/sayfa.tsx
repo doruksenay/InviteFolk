@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Text, TextInput, useWindowDimensions, View } from 'react-native';
 
-import { eventCopy, getEventType } from '@/core/event-types';
+import { eventCopy, getEventType, sportOf } from '@/core/event-types';
 import { formatWhen, publicUrl } from '@/core/format';
 import { formatIban, ibanValid, normalizeIban } from '@/core/iban';
 import { getTheme } from '@/core/themes';
@@ -59,7 +59,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
   const theme = getTheme(event.theme);
   const evLang = eventLang(event.settings);
   const et = makeT(evLang);
-  const saha = event.type === 'saha';
+  const saha = !!sportOf(event.type);
   const L = limits?.limits ?? null;
   const isOwner = limits?.is_owner ?? true;
   const locked = (plan: string) => t('tools.locked', { plan });
@@ -89,7 +89,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
   const [err, setErr] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
 
-  const claims = useQuery(() => (cfg.key !== 'saha' ? getSignupClaims(event.id).catch(() => []) : Promise.resolve([])), [event.id]);
+  const claims = useQuery(() => (!saha ? getSignupClaims(event.id).catch(() => []) : Promise.resolve([])), [event.id]);
   const tallies = useMemo(() => {
     const out: Record<string, { yes: number; maybe: number }> = {};
     for (const o of s0.poll?.options ?? []) out[o.id] = { yes: 0, maybe: 0 };
@@ -286,7 +286,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
       )}
 
       {/* Tarih anketi (düğün ve kınada tarih baştan bellidir) */}
-      {(!['saha', 'dugun', 'kina'].includes(event.type) || pollOn) && (
+      {((!saha && !['dugun', 'kina'].includes(event.type)) || pollOn) && (
         <Surface style={{ gap: 12 }}>
           <SectionHead title={t('tools.page.poll.title')} hint={t('tools.page.poll.hint')} />
           {pollOn ? (

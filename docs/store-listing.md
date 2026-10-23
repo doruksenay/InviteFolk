@@ -19,7 +19,7 @@ Karakter sınırları App Store'a göre verilmiştir (Google Play kısa açıkla
 
 **TR:** Düğünden halı saha maçına her davet için: davetiyeni hazırla, WhatsApp'tan gönder, kim geliyor anında gör. Oturma planı da hazır.
 
-**EN:** From weddings to Thursday football: design your invitation, send it on WhatsApp and see who's coming in real time. Seating plan included.
+**EN:** From weddings to weekly football, basketball or volleyball: design your invitation, send it on WhatsApp and see who's coming in real time. Seating plan included.
 
 ## Açıklama
 
@@ -63,9 +63,9 @@ Invitefolk; düğün, nişan, kına, doğum günü, yemek daveti, kurumsal etkin
 - Tarih anketi: herkese uyan günü bul
 - "Kim ne getiriyor" listesi, aynı şey iki kez gelmesin
 
-**Halı saha ve düzenli buluşmalar**
+**Halı saha, basketbol, voleybol ve düzenli buluşmalar**
 - Kadro ve yedek listesi, haftalık tekrar, kim ödedi takibi
-- Seviyeye göre dengeli takımlar, skor ve goller, maçın oyuncusu oylaması, gol krallığı
+- Seviye ve mevkiye göre dengeli takımlar, skor, gol/sayı krallığı, maçın oyuncusu oylaması
 - Takvime abone ol, her hafta kendiliğinden güncellensin
 
 **Gizlilik**
@@ -113,9 +113,9 @@ Invitefolk is an invitation and RSVP app for every kind of gathering: weddings, 
 - Date poll: find the day that works for everyone
 - "Who brings what" list, so nothing arrives twice
 
-**Football and regular meetups**
+**Football, basketball, volleyball and regular meetups**
 - Squad and waitlist, weekly repeat, who-paid tracking
-- Balanced teams by skill, scores and goals, player of the match vote, top scorers
+- Balanced teams by skill and position, scores, top scorers, player of the match vote
 - Subscribe in your calendar and it updates every week
 
 **Privacy**

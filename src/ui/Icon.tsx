@@ -135,6 +135,20 @@ export function Icon({ name, size = 22, color = '#1F1B2E', strokeWidth = 1.7 }: 
                 <Path d="M12 8l3 2.2-1.1 3.6h-3.8L9 10.2z" {...p} />
               </>
             );
+          case 'basketball':
+            return (
+              <>
+                <Circle cx={12} cy={12} r={9} {...p} />
+                <Path d="M3 12h18M12 3v18M5.6 5.6c2.6 2.4 2.6 10.4 0 12.8M18.4 5.6c-2.6 2.4-2.6 10.4 0 12.8" {...p} />
+              </>
+            );
+          case 'volleyball':
+            return (
+              <>
+                <Circle cx={12} cy={12} r={9} {...p} />
+                <Path d="M12 12V3.5M12 12l7.4 4.2M12 12l-7.4 4.2M8 4.5c3 3 4.5 6.5 4 7.5M20.5 11c-4 1-7.5.5-8.5 1M7 19.5c1-4 3.5-6.5 5-7.5" {...p} />
+              </>
+            );
           case 'sparkle':
             return <Path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6" {...p} />;
           case 'check':

@@ -67,7 +67,10 @@ export type Contact = {
   created_at: string;
 };
 
-export type PlayerPosition = 'kaleci' | 'defans' | 'orta' | 'forvet';
+export type PlayerPosition =
+  | 'kaleci' | 'defans' | 'orta' | 'forvet' // futbol
+  | 'oyun_kurucu' | 'kanat' | 'pivot' // basketbol
+  | 'pasor' | 'smacor' | 'orta_oyuncu' | 'libero'; // voleybol
 
 export type Invitation = {
   id: string;

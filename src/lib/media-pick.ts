@@ -53,7 +53,7 @@ export async function pickAudio(): Promise<PickedFile | null> {
   return { data: await file.arrayBuffer(), mime: ext === 'mp3' ? 'audio/mpeg' : ext === 'aac' ? 'audio/aac' : 'audio/mp4', ext, name: a.name ?? '', size: file.size };
 }
 
-/** Video (mp4, mov), en fazla 60 MB. */
+/** Video (mp4, mov), en fazla 50 MB. */
 export async function pickVideo(): Promise<(PickedFile & { width: number; height: number }) | null> {
   const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['videos'], quality: 1, videoMaxDuration: 180 });
   if (res.canceled || !res.assets?.length) return null;

@@ -28,7 +28,7 @@ export const billing: typeof TR = {
     design: 'Upload your own invitation design',
     import: 'Bulk import guests from Excel/CSV',
     rsvp: 'Guest page and live RSVP tracking',
-    page: '24 templates, envelope opening, countdown, programme, gift/IBAN card',
+    page: '26 templates, envelope opening, countdown, programme, gift/IBAN card',
     gallery: { one: '{count} gallery photo', other: '{count} gallery photos' },
     music: 'Background music',
     video: 'Video invitation',

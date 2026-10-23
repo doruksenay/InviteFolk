@@ -1,4 +1,5 @@
 import * as Clipboard from 'expo-clipboard';
+import { sportOf } from '@/core/event-types';
 import { type ReactNode, useEffect, useState } from 'react';
 import { Linking, Pressable, Text, View } from 'react-native';
 
@@ -149,9 +150,10 @@ export function formatIban(iban: string) {
 
 export function GiftCard({ theme, gift, type, t }: { theme: InvitationTheme; gift: NonNullable<GuestSettings['gift']>; type: string; t: TFn }) {
   const [copied, setCopied] = useState(false);
-  const kickerKey = (['dugun', 'nisan', 'kina', 'saha'].includes(type) ? type : 'other') as 'dugun';
+  const sport = !!sportOf(type);
+  const kickerKey = (sport ? 'saha' : ['dugun', 'nisan', 'kina'].includes(type) ? type : 'other') as 'dugun';
   return (
-    <SectionCard theme={theme} kicker={t(`guest.gift.kicker.${kickerKey}`)} icon={type === 'saha' ? 'creditCard' : 'gift'}>
+    <SectionCard theme={theme} kicker={t(`guest.gift.kicker.${kickerKey}`)} icon={sport ? 'creditCard' : 'gift'}>
       {gift.note ? <Text style={[themeProse(theme, 20), { color: theme.ink }]}>{gift.note}</Text> : null}
       <View style={{ gap: 6, padding: 14, borderRadius: 16, backgroundColor: theme.dark ? 'rgba(255,255,255,0.06)' : theme.bg }}>
         <Row label={t('guest.gift.holder')} value={gift.holder} theme={theme} />

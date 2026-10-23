@@ -48,6 +48,8 @@ const THEME: Record<string, { bg: string; ink: string; soft: string; accent: str
   gokkusagi: { bg: '#FFF9F4', ink: '#1F1B2E', soft: '#5B566A', accent: '#5A49D6', button: '#1F1B2E', buttonInk: '#FFFFFF', shape: '#6C5CE7' },
   kurumsal: { bg: '#F4F5F7', ink: '#1E2430', soft: '#586174', accent: '#3D4A63', button: '#1E2430', buttonInk: '#FFFFFF', shape: '#4E5A72' },
   saha_yesil: { bg: '#EEF6EF', ink: '#183223', soft: '#4A6555', accent: '#2A6B3C', button: '#183223', buttonInk: '#FFFFFF', shape: '#3F8F55' },
+  parke: { bg: '#FBF3EA', ink: '#3A2414', soft: '#6E5240', accent: '#A84D17', button: '#3A2414', buttonInk: '#FFFFFF', shape: '#D9A066' },
+  file: { bg: '#EEF4FB', ink: '#14263D', soft: '#4A5E78', accent: '#1F5598', button: '#14263D', buttonInk: '#FFFFFF', shape: '#2F6DB5' },
 };
 
 const COPY = {

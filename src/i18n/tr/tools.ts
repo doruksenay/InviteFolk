@@ -11,7 +11,7 @@ export const tools = {
     checkin: { title: 'Kapıda giriş', body: 'Karekodla karşıla, kimin geldiğini anında gör' },
     album: { title: 'Fotoğraf albümü', body: 'Davetliler masadaki karekodla fotoğraf yüklesin' },
     collector: { title: 'Bilgi toplama linki', body: 'Davetliler telefonunu kendisi yazsın' },
-    teams: { title: 'Takımlar ve maçlar', body: 'Dengeli takım kur, gol ve maçın oyuncusu' },
+    teams: { title: 'Takımlar ve maçlar', body: 'Dengeli takım kur, skor ve maçın oyuncusu' },
   },
 
   // --- Davetiye sayfası düzenleyici
@@ -89,7 +89,7 @@ export const tools = {
       galleryAdd: 'Fotoğraf ekle',
       galleryRemove: 'Fotoğrafı kaldır',
       video: 'Video davetiye',
-      videoHint: 'Davetiye görseli yerine video (mp4, en fazla 60 MB). Sessiz başlar, davetli sesi açabilir.',
+      videoHint: 'Davetiye görseli yerine video (mp4, en fazla 50 MB). Sessiz başlar, davetli sesi açabilir.',
       videoPick: 'Video seç',
       videoRemove: 'Videoyu kaldır',
       uploading: 'Yükleniyor…',
@@ -295,11 +295,11 @@ export const tools = {
     party: { one: '{count} kişi', other: '{count} kişi' },
   },
 
-  // --- Halı saha
+  // --- Takım sporları (halı saha, basketbol, voleybol)
   teams: {
     title: 'Takımlar ve',
     titleAccent: 'maçlar',
-    subtitle: 'Kadrodakileri seviyelerine göre iki dengeli takıma böl; maçtan sonra golleri yaz, oyuncular maçın oyuncusunu seçsin.',
+    subtitle: 'Kadrodakileri seviyelerine ve mevkilerine göre iki dengeli takıma böl; maçtan sonra skoru yaz, oyuncular maçın oyuncusunu seçsin.',
     balance: 'Dengeli dağıt',
     shuffle: 'Karıştır',
     clear: 'Takımları temizle',
@@ -311,18 +311,23 @@ export const tools = {
     total: 'Seviye toplamı {n}',
     skill: 'Seviye',
     position: 'Mevki',
-    positions: { kaleci: 'Kaleci', defans: 'Defans', orta: 'Orta saha', forvet: 'Forvet' },
+    positions: {
+      kaleci: 'Kaleci', defans: 'Defans', orta: 'Orta saha', forvet: 'Forvet',
+      oyun_kurucu: 'Oyun kurucu', kanat: 'Kanat', pivot: 'Pivot',
+      pasor: 'Pasör', smacor: 'Smaçör', orta_oyuncu: 'Orta oyuncu', libero: 'Libero',
+    },
     noSquad: 'Kadroda kimse yok. “Geliyorum” diyenler burada görünür.',
     matches: 'Maçlar',
     record: 'Maçı kaydet',
     recordHint: 'Haftalık maçlar saat geçince kendiliğinden kaydedilir.',
     noMatches: 'Henüz kayıtlı maç yok.',
     score: 'Skor',
-    goals: 'Goller',
+    goals: { futbol: 'Goller', basket: 'Sayılar', voleybol: 'Sayılar' },
+    scoreHint: { futbol: 'Gol', basket: 'Sayı', voleybol: 'Set' },
     saveMatch: 'Kaydet',
     mvp: 'Maçın oyuncusu: {name} ({count} oy)',
     noVotes: 'Henüz oy yok',
-    leaders: 'Gol krallığı',
+    leaders: { futbol: 'Gol krallığı', basket: 'Sayı krallığı', voleybol: 'Sayı liderleri' },
     paidClaims: { one: '{count} oyuncu "ödedim" dedi', other: '{count} oyuncu "ödedim" dedi' },
   },
 

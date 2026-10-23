@@ -199,7 +199,7 @@ alter table public.profiles
   add constraint profiles_phone_len check (char_length(phone) <= 20);
 
 alter table public.events
-  add constraint events_type_known check (type in ('dugun', 'nisan', 'kina', 'dogum', 'yemek', 'kurumsal', 'saha', 'diger')),
+  add constraint events_type_known check (type in ('dugun', 'nisan', 'kina', 'dogum', 'yemek', 'kurumsal', 'saha', 'basket', 'voleybol', 'diger')),
   add constraint events_theme_known check (theme in ('adacayi', 'lavanta', 'mercan', 'altin', 'gece')),
   add constraint events_title_len check (char_length(title) between 1 and 120),
   add constraint events_host_len check (char_length(host_names) <= 160),

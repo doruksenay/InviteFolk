@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sportOf } from '@/core/event-types';
 import { View } from 'react-native';
 
 import { formatShortDate, formatWhen } from '@/core/format';
@@ -29,7 +30,7 @@ export function ExportSheet({ open, onClose, event, invitations }: { open: boole
   const [busy, setBusy] = useState<'xlsx' | 'csv' | 'pdf' | null>(null);
   const [msg, setMsg] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
   const s = (event.settings ?? {}) as EventSettings;
-  const saha = event.type === 'saha';
+  const saha = !!sportOf(event.type);
   const fee = typeof s.fee === 'number' && s.fee > 0;
 
   const columns = (tables: Record<string, string>): Col[] => {

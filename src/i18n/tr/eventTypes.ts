@@ -10,7 +10,7 @@ export type EventTypeCopy = {
 
 const RSVP = { yes: 'Katılacağım', no: 'Katılamayacağım', askParty: 'Ne güzel! Kaç kişi geleceksiniz?' };
 
-export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'dogum' | 'yemek' | 'kurumsal' | 'saha' | 'diger', EventTypeCopy> = {
+export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'dogum' | 'yemek' | 'kurumsal' | 'saha' | 'basket' | 'voleybol' | 'diger', EventTypeCopy> = {
   dugun: {
     name: 'Düğün',
     description: 'Davetiye, katılım ve masa planı tek yerde.',
@@ -94,6 +94,30 @@ export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'dogum' | 'yemek' |
       { title: 'Kim ödedi', detail: 'Saha ücretini kişi kişi takip et.' },
     ],
     sample: { greet: 'Selam [Davetli adı],', kicker: 'Perşembe maçı', title: 'Halı saha\n21.00', line: 'Kadroda yerin hazır, eksik kalmayalım.', when: 'Her perşembe · 21.00–22.00', where: '[Saha adı], Ataşehir', deadline: 'Çarşamba 18.00', host: 'B', wa: 'Burak seni perşembe maçına çağırıyor.' },
+  },
+  basket: {
+    name: 'Basketbol maçı',
+    description: 'Kadro, yedek listesi, haftalık tekrar ve dengeli takımlar.',
+    rsvp: { yes: 'Geliyorum', no: 'Bu hafta yokum', askParty: 'Süper! Yedek listesine de yazayım mı?' },
+    menu: null,
+    features: [
+      { title: 'Kadro ve yedek listesi', detail: 'Kadro dolunca yedekler sıraya girer.' },
+      { title: 'Dengeli takımlar', detail: 'Seviye ve mevkiye (oyun kurucu, kanat, pivot) göre iki takım.' },
+      { title: 'Skor ve sayı krallığı', detail: 'Maç sonucu, sayılar ve maçın oyuncusu oylaması.' },
+    ],
+    sample: { greet: 'Selam [Davetli adı],', kicker: 'Salı basketi', title: 'Basketbol\n20.30', line: 'Beşe beş oynuyoruz, kadroda yerin hazır.', when: 'Her salı · 20.30–22.00', where: '[Salon adı], Kadıköy', deadline: 'Pazartesi 18.00', host: 'E', wa: 'Ege seni salı basketine çağırıyor.' },
+  },
+  voleybol: {
+    name: 'Voleybol maçı',
+    description: 'Kadro, yedek listesi, haftalık tekrar ve dengeli takımlar.',
+    rsvp: { yes: 'Geliyorum', no: 'Bu hafta yokum', askParty: 'Süper! Yedek listesine de yazayım mı?' },
+    menu: null,
+    features: [
+      { title: 'Kadro ve yedek listesi', detail: 'Kadro dolunca yedekler sıraya girer.' },
+      { title: 'Dengeli takımlar', detail: 'Seviye ve mevkiye (pasör, smaçör, orta oyuncu, libero) göre iki takım.' },
+      { title: 'Set skoru ve maçın oyuncusu', detail: 'Maç sonucu, sayılar ve oylama.' },
+    ],
+    sample: { greet: 'Selam [Davetli adı],', kicker: 'Pazar voleybolu', title: 'Voleybol\n11.00', line: 'Altıya altı oynuyoruz, kadroda yerin hazır.', when: 'Her pazar · 11.00–13.00', where: '[Salon adı], Beşiktaş', deadline: 'Cumartesi 18.00', host: 'D', wa: 'Deniz seni pazar voleyboluna çağırıyor.' },
   },
   diger: {
     name: 'Başka bir şey',

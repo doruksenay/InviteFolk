@@ -1,0 +1,28 @@
+// ozellikler.mjs kurulumunu tekrar kullanır: push anahtarı devri.
+import { PGlite } from '@electric-sql/pglite';
+import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto';
+import { readFileSync } from 'node:fs';
+const db = new PGlite({ extensions: { pgcrypto } });
+const setup = readFileSync(new URL('./ozellikler.mjs', import.meta.url), 'utf8').match(/await db\.exec\(`([\s\S]*?)`\);/)[1];
+await db.exec(setup);
+for (const f of process.argv.slice(2)) await db.exec(readFileSync(f, 'utf8'));
+const U1 = '11111111-1111-1111-1111-111111111111', U2 = '22222222-2222-2222-2222-222222222222';
+await db.exec(`insert into auth.users (id, email) values ('${U1}','a@x.com'),('${U2}','d@x.com')`);
+let pass = 0, fail = 0; const ok = (c, m) => { c ? pass++ : fail++; console.log(c ? '  ✓' : '  ✗', m); };
+const as = async (uid, q) => { await db.exec(`set role ${uid ? 'authenticated' : 'anon'}; select set_config('request.jwt.claim.sub', '${uid ?? ''}', false); select set_config('request.jwt.claims', '${JSON.stringify({ sub: uid })}', false);`); try { return await db.query(q); } finally { await db.exec('reset role'); } };
+const denied = async (uid, q) => { try { await as(uid, q); return false; } catch (e) { return e.message; } };
+const T = 'ExponentPushToken[abcDEF123_-]';
+await as(U1, `select public.register_push_token('${T}', 'ios')`);
+ok((await db.query(`select user_id from public.push_tokens`)).rows[0].user_id === U1, 'U1 anahtarı kaydetti');
+await as(U2, `select public.register_push_token('${T}', 'ios')`);
+const rows = (await db.query(`select user_id from public.push_tokens`)).rows;
+ok(rows.length === 1 && rows[0].user_id === U2, 'aynı telefonda yeni hesap anahtarı devraldı (eski hesabın bildirimi gelmez)');
+ok(await denied(U1, `select public.register_push_token('javascript:alert(1)', 'ios')`), 'geçersiz anahtar biçimi reddedilir');
+ok(await denied(null, `select public.register_push_token('${T}', 'ios')`), 'girişsiz kayıt olmaz');
+await as(U1, `select public.unregister_push_token('${T}')`);
+ok((await db.query(`select count(*)::int n from public.push_tokens`)).rows[0].n === 1, 'başkasının anahtarı silinemez');
+await as(U2, `select public.unregister_push_token('${T}')`);
+ok((await db.query(`select count(*)::int n from public.push_tokens`)).rows[0].n === 0, 'kendi anahtarını siler');
+for (let i = 0; i < 12; i++) await as(U1, `select public.register_push_token('ExponentPushToken[t${i}]', 'android')`);
+ok((await db.query(`select count(*)::int n from public.push_tokens where user_id='${U1}'`)).rows[0].n === 10, 'hesap başına en fazla 10 cihaz');
+console.log(`SONUÇ: ${pass} geçti, ${fail} kaldı`); process.exit(fail ? 1 : 0);

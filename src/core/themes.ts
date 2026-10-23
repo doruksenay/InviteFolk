@@ -6,12 +6,12 @@ export type ThemeKey =
   | 'adacayi' | 'lavanta' | 'mercan' | 'altin' | 'gece'
   | 'fildisi' | 'gul' | 'zumrut' | 'lacivert' | 'okaliptus' | 'sampanya' | 'bordo' | 'beyaz' | 'pudra' | 'zeytin'
   | 'kina_kirmizi' | 'mor_gece'
-  | 'konfeti' | 'limon' | 'deniz' | 'pembe' | 'gokkusagi' | 'kurumsal' | 'saha_yesil';
+  | 'konfeti' | 'limon' | 'deniz' | 'pembe' | 'gokkusagi' | 'kurumsal' | 'saha_yesil' | 'parke' | 'file';
 
 /** Görsel alandaki desen. */
 export type Motif =
   | 'arch' | 'botanical' | 'frame' | 'deco' | 'confetti' | 'waves' | 'stars' | 'sun' | 'rainbow' | 'petals'
-  | 'ottoman' | 'minimal' | 'pitch' | 'balloons';
+  | 'ottoman' | 'minimal' | 'pitch' | 'balloons' | 'court' | 'net';
 
 /** Başlık yazısı: serif (Instrument Serif), formal (Playfair Display), script (Great Vibes), sans (Nunito). */
 export type ThemeFont = 'serif' | 'formal' | 'script' | 'sans';
@@ -72,6 +72,8 @@ const DEFS: Record<ThemeKey, Def> = {
   // İş, yemek, spor
   kurumsal: { bg: '#F4F5F7', shapeA: '#4E5A72', shapeB: '#A9B4C8', shapeC: '#E3E6EE', ink: '#1E2430', soft: '#586174', key_: '#3D4A63', dark: false, motif: 'deco', font: 'sans', group: 'everyday', palette: ['#4E5A72', '#A9B4C8'] },
   saha_yesil: { bg: '#EEF6EF', shapeA: '#3F8F55', shapeB: '#358049', shapeC: '#D4EAD9', ink: '#183223', soft: '#4A6555', key_: '#2A6B3C', dark: false, motif: 'pitch', font: 'sans', group: 'everyday', palette: ['#3F8F55', '#358049'] },
+  parke: { bg: '#FBF3EA', shapeA: '#D9A066', shapeB: '#CF955A', shapeC: '#F4DFC6', ink: '#3A2414', soft: '#6E5240', key_: '#A84D17', dark: false, motif: 'court', font: 'sans', group: 'everyday', palette: ['#E8772E', '#2F4B7C'] },
+  file: { bg: '#EEF4FB', shapeA: '#2F6DB5', shapeB: '#2A63A6', shapeC: '#D6E4F5', ink: '#14263D', soft: '#4A5E78', key_: '#1F5598', dark: false, motif: 'net', font: 'sans', group: 'everyday', palette: ['#F2C230', '#2F6DB5'] },
 };
 
 export const THEMES = Object.fromEntries(
@@ -82,7 +84,7 @@ export const THEMES = Object.fromEntries(
 export const THEME_ORDER: ThemeKey[] = [
   'fildisi', 'adacayi', 'gul', 'okaliptus', 'pudra', 'sampanya', 'beyaz', 'zeytin', 'bordo', 'zumrut', 'lacivert', 'lavanta', 'mor_gece', 'kina_kirmizi',
   'konfeti', 'gokkusagi', 'pembe', 'limon', 'deniz', 'mercan', 'altin',
-  'kurumsal', 'gece', 'saha_yesil',
+  'kurumsal', 'gece', 'saha_yesil', 'parke', 'file',
 ];
 
 export function getTheme(key: string | null | undefined): InvitationTheme {

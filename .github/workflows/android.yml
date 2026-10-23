@@ -1,0 +1,55 @@
+# Elle çalıştırılır (Actions → Android test sürümü → Run workflow): EAS'ta kurulabilir APK üretir.
+# Ücretsiz EAS planı ayda sınırlı sayıda derleme verir ve kuyruk uzun olabilir; derleme bitince
+# indirme linki expo.dev'de (ve EAS'ın e-postasında) görünür. Kurulum: docs/canliya-alma.md
+name: Android test sürümü
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    name: APK (EAS, preview)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Ayarlar tamam mı?
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error::EXPO_TOKEN (secret) eksik — bkz. docs/canliya-alma.md"
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: expo/expo-github-action@v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Uygulama adresleri (derlemeye gömülür; gizli değildir)
+        env:
+          SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+          SUPABASE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+          WEB_URL: ${{ vars.WEB_URL }}
+        run: |
+          jq --arg u "$SUPABASE_URL" --arg k "$SUPABASE_KEY" --arg w "$WEB_URL" \
+            '.build.preview.env = { "EXPO_PUBLIC_SUPABASE_URL": $u, "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": $k, "EXPO_PUBLIC_WEB_URL": $w }' \
+            eas.json > eas.tmp.json && mv eas.tmp.json eas.json
+
+      - name: EAS projesine bağla (ilk seferde oluşturur)
+        run: eas init --non-interactive --force
+
+      - name: Derlemeyi başlat
+        run: eas build --platform android --profile preview --non-interactive --no-wait

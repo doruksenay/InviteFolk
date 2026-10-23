@@ -1,0 +1,51 @@
+# Her push ve pull request'te: tip kontrolü, lint, veritabanı testleri (gerçek Postgres, PGlite) ve
+# sunucu fonksiyonlarının tip kontrolü. Hiçbir sır gerektirmez; Supabase'e bağlanmaz.
+name: Kontrol
+
+on:
+  push:
+    branches-ignore: [main] # main'e push'ta aynı kontrol "Yayınla" iş akışının ilk adımı olarak çalışır
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  kontrol:
+    name: Kontrol
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Bağımlılıklar
+        run: npm ci
+
+      - name: Tip kontrolü
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Veritabanı testleri (tüm migration'lar + güvenlik senaryoları)
+        run: npm run test:db
+
+      - uses: denoland/setup-deno@v2.0.5
+        with:
+          deno-version: v2.x
+
+      - name: Sunucu fonksiyonları (deno check)
+        run: |
+          set -e
+          for dir in supabase/functions/*/; do
+            name=$(basename "$dir")
+            [ "$name" = "_shared" ] && continue
+            echo "→ $name"
+            deno check -q "$dir/index.ts"
+          done

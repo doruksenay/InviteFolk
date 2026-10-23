@@ -27,12 +27,12 @@ create unique index invitations_checkin_code_uq on public.invitations (checkin_c
 -- Organizatör girişi (karekod ya da listeden) ve takım dağılımı kendi davetlerinde (RLS) yazılır.
 grant update (checked_in_at, checked_in_people, team, paid_claimed_at) on public.invitations to authenticated;
 
--- Halı saha: oyuncu seviyesi ve mevkisi (yalnızca organizatör görür; takım dengelemek için)
+-- Takım sporları (halı saha, basketbol, voleybol): oyuncu seviyesi ve mevkisi (yalnızca organizatör görür; takım dengelemek için)
 alter table public.contacts
   add column skill smallint,
   add column position text,
   add constraint contacts_skill_range check (skill between 1 and 5),
-  add constraint contacts_position_known check (position in ('kaleci', 'defans', 'orta', 'forvet'));
+  add constraint contacts_position_known check (position in ('kaleci', 'defans', 'orta', 'forvet', 'oyun_kurucu', 'kanat', 'pivot', 'pasor', 'smacor', 'orta_oyuncu', 'libero'));
 grant insert (skill, position) on public.contacts to authenticated;
 grant update (skill, position) on public.contacts to authenticated;
 
@@ -385,8 +385,8 @@ create table public.matches (
   played_at timestamptz not null,
   players jsonb not null default '[]'::jsonb check (jsonb_typeof(players) = 'array' and pg_column_size(players) <= 16384),
   goals jsonb not null default '{}'::jsonb check (jsonb_typeof(goals) = 'object' and pg_column_size(goals) <= 4096),
-  score_a smallint check (score_a between 0 and 99),
-  score_b smallint check (score_b between 0 and 99),
+  score_a smallint check (score_a between 0 and 300),
+  score_b smallint check (score_b between 0 and 300),
   created_at timestamptz not null default now(),
   unique (event_id, played_at)
 );
@@ -408,7 +408,7 @@ declare
   v jsonb;
 begin
   for k, v in select key, value from jsonb_each(new.goals) loop
-    if jsonb_typeof(v) <> 'number' or (v #>> '{}')::numeric not between 0 and 50
+    if jsonb_typeof(v) <> 'number' or (v #>> '{}')::numeric not between 0 and 200
        or not (new.players @> jsonb_build_array(jsonb_build_object('id', k))) then
       raise exception 'invalid_input' using errcode = '22023', detail = 'goals';
     end if;
@@ -469,7 +469,7 @@ begin
     raise exception 'forbidden' using errcode = '42501';
   end if;
   select * into v_ev from public.events where id = p_event;
-  if v_ev.type <> 'saha' or v_ev.starts_at is null or v_ev.starts_at > now() + interval '1 hour' then
+  if v_ev.type not in ('saha', 'basket', 'voleybol') or v_ev.starts_at is null or v_ev.starts_at > now() + interval '1 hour' then
     raise exception 'invalid_input' using errcode = '22023';
   end if;
   return private.snapshot_match(p_event, v_ev.starts_at);
@@ -565,7 +565,7 @@ begin
     limit 1000
     for update
   loop
-    if r.type = 'saha' then
+    if r.type in ('saha', 'basket', 'voleybol') then
       perform private.snapshot_match(r.id, r.starts_at);
     end if;
     v_weeks := floor(extract(epoch from (now() - r.starts_at)) / 604800)::int + 1;
@@ -699,7 +699,7 @@ begin
   end if;
 
   -- Halı saha: davetlinin oynadığı son maç (oylama) ve sezon sıralaması (yalnızca oynamış olanlara)
-  if v_ev.type = 'saha' then
+  if v_ev.type in ('saha', 'basket', 'voleybol') then
     select jsonb_build_object(
              'id', m.id, 'played_at', m.played_at, 'score_a', m.score_a, 'score_b', m.score_b,
              'players', (select jsonb_agg(jsonb_build_object('id', p ->> 'id', 'name', p ->> 'name', 'team', p -> 'team'))
@@ -793,7 +793,7 @@ begin
     'checkin_code', case when coalesce((s ->> 'checkin')::boolean, false) and v_lim.checkin and v_inv.status = 'yes'
                          then v_inv.checkin_code end,
     'checked_in', v_inv.checked_in_at is not null,
-    'team', case when v_ev.type = 'saha' and v_inv.status = 'yes' then v_inv.team end,
+    'team', case when v_ev.type in ('saha', 'basket', 'voleybol') and v_inv.status = 'yes' then v_inv.team end,
     'paid', v_inv.paid,
     'paid_claimed', v_inv.paid_claimed_at is not null,
     'poll', v_poll,

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
+import { SPORTS, sportOf } from '@/core/event-types';
 import type { InvitationTheme } from '@/core/themes';
 import type { PollVote, PublicInvitation } from '@/core/types';
 import type { TFn } from '@/i18n';
@@ -171,6 +172,7 @@ export function SahaCards({ theme, inv, token, t, onUpdate, onError }: Props) {
   const [busy, setBusy] = useState(false);
   const fee = typeof inv.event.settings.fee === 'number' && inv.event.settings.fee > 0;
   const match = inv.last_match;
+  const sport = sportOf(inv.event.type) ?? SPORTS.futbol;
   const run = async (fn: () => Promise<PublicInvitation>) => {
     setBusy(true);
     try {
@@ -246,13 +248,13 @@ export function SahaCards({ theme, inv, token, t, onUpdate, onError }: Props) {
       ) : null}
 
       {inv.leaders?.length ? (
-        <SectionCard theme={theme} kicker={t('guest.saha.leadersKicker')} icon="ball">
+        <SectionCard theme={theme} kicker={t(`guest.saha.leadersKicker.${sport.key}`)} icon={sport.key === 'basket' ? 'basketball' : sport.key === 'voleybol' ? 'volleyball' : 'ball'}>
           {inv.leaders.map((l, i) => (
             <View key={l.name + i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Text style={{ width: 22, fontFamily: font.bold, fontSize: 15, color: theme.key_ }}>{i + 1}</Text>
               <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: theme.ink }}>{l.name}</Text>
               <Text style={{ fontFamily: font.medium, fontSize: 13, color: theme.soft }}>
-                {[l.goals ? t('guest.saha.goals', { count: l.goals }) : null, l.mvps ? t('guest.saha.mvps', { count: l.mvps }) : null].filter(Boolean).join(' · ')}
+                {[l.goals ? t(`guest.saha.goals.${sport.key}`, { count: l.goals }) : null, l.mvps ? t('guest.saha.mvps', { count: l.mvps }) : null].filter(Boolean).join(' · ')}
               </Text>
             </View>
           ))}

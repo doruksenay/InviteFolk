@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sportOf } from '@/core/event-types';
 import { Text, View } from 'react-native';
 
 import { normalizePhone } from '@/core/format';
@@ -99,6 +100,7 @@ function Form({
   const statuses: RsvpStatus[] = roster ? [...STATUSES, 'waitlist'] : STATUSES;
   const questions = settings.questions ?? [];
   const type = event?.type ?? (contact.side ? 'dugun' : 'diger');
+  const sport = sportOf(type);
 
   const save = async () => {
     setErr(null);
@@ -117,7 +119,7 @@ function Form({
         group_label: group.trim().slice(0, 40) || null,
         max_party: Math.min(20, Math.max(1, maxParty)),
         notes: notes.trim().slice(0, 1000) || null,
-        ...(type === 'saha' ? { skill, position } : {}),
+        ...(sport ? { skill, position } : {}),
       });
       if (invitation) {
         const changedStatus = status !== invitation.status;
@@ -128,7 +130,7 @@ function Form({
           paid,
           paid_at: paid ? (invitation.paid_at ?? new Date().toISOString()) : null,
           ...(paid ? { paid_claimed_at: null } : {}),
-          ...(type !== 'saha'
+          ...(!sport
             ? {
                 children: status === 'yes' ? Math.min(children, Math.max(1, party)) : 0,
                 companions: companions
@@ -189,7 +191,7 @@ function Form({
           <Label>{t('guests.adder.maxParty')}</Label>
           <NumberStepper label={t('guests.adder.maxParty')} value={maxParty} min={1} max={20} onChange={setMaxParty} />
         </View>
-        {type === 'saha' && (
+        {sport && (
           <View style={{ gap: 8 }}>
             <Label>{t('guests.edit.skill')}</Label>
             <View style={{ flexDirection: 'row', gap: 6 }}>
@@ -200,7 +202,7 @@ function Form({
             <Label>{t('guests.edit.position')}</Label>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
               <OptionChip small label={t('guests.edit.noPosition')} on={!position} onPress={() => setPosition(null)} />
-              {(['kaleci', 'defans', 'orta', 'forvet'] as PlayerPosition[]).map((p) => (
+              {sport.positions.map((p) => (
                 <OptionChip key={p} small label={t(`tools.teams.positions.${p}` as TKey)} on={position === p} onPress={() => setPosition(p)} />
               ))}
             </View>
@@ -227,13 +229,13 @@ function Form({
               <NumberStepper label={t('guests.edit.partySize')} value={Math.min(party, maxParty)} min={1} max={maxParty} onChange={setParty} />
             </View>
           )}
-          {type !== 'saha' && status === 'yes' && party > 1 && (settings.ask_children || children > 0) && (
+          {!sport && status === 'yes' && party > 1 && (settings.ask_children || children > 0) && (
             <View style={{ gap: 8 }}>
               <Caption>{t('guests.edit.children')}</Caption>
               <NumberStepper label={t('guests.edit.children')} value={Math.min(children, party)} min={0} max={Math.min(party, maxParty)} onChange={setChildren} />
             </View>
           )}
-          {type !== 'saha' && status === 'yes' && party > 1 && (settings.ask_names || companions.trim() !== '') && (
+          {!sport && status === 'yes' && party > 1 && (settings.ask_names || companions.trim() !== '') && (
             <Field label={t('guests.edit.companions')} hint={t('guests.edit.companionsHint')} value={companions} onChangeText={setCompanions} maxLength={600} />
           )}
           {settings.menu && settings.menu.length > 0 && (

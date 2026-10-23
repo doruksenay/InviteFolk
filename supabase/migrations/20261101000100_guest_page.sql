@@ -365,7 +365,7 @@ alter table public.messages add constraint messages_kind_check
 -- 7. Medya kovası (müzik, video, galeri). Özel; davetliye imzalı linkle verilir.
 -- ---------------------------------------------------------------------------
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('media', 'media', false, 62914560,
+values ('media', 'media', false, 52428800,
         array['audio/mpeg', 'audio/mp4', 'audio/aac', 'audio/x-m4a', 'video/mp4', 'video/quicktime', 'video/webm',
               'image/png', 'image/jpeg', 'image/webp'])
 on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;

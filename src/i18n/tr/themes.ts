@@ -23,5 +23,7 @@ export const themes = {
   gokkusagi: 'Gökkuşağı',
   kurumsal: 'Kurumsal',
   saha_yesil: 'Saha',
+  parke: 'Parke',
+  file: 'File',
   groups: { wedding: 'Düğün, nişan, kına', celebration: 'Kutlama', everyday: 'İş, yemek, spor' },
 };

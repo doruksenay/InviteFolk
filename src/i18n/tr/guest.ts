@@ -89,8 +89,12 @@ export const guest = {
     mvpLeader: 'Önde: {name}',
     mvpWinner: 'Maçın oyuncusu: {name}',
     score: 'Skor {a} – {b}',
-    leadersKicker: 'GOL KRALLIĞI',
-    goals: { one: '{count} gol', other: '{count} gol' },
+    leadersKicker: { futbol: 'GOL KRALLIĞI', basket: 'SAYI KRALLIĞI', voleybol: 'SAYI LİDERLERİ' },
+    goals: {
+      futbol: { one: '{count} gol', other: '{count} gol' },
+      basket: { one: '{count} sayı', other: '{count} sayı' },
+      voleybol: { one: '{count} sayı', other: '{count} sayı' },
+    },
     mvps: { one: '{count} kez maçın oyuncusu', other: '{count} kez maçın oyuncusu' },
   },
 };

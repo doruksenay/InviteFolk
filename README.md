@@ -2,7 +2,7 @@
 
 > Events feel better together. — Plan. Invite. Celebrate.
 
-Invitefolk; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, halı saha maçı ve benzeri her tür etkinlik için davetiye ve katılım (LCV) uygulamasıdır. iOS, Android ve web tek kod tabanından çalışır; arayüz Türkçe ve İngilizce'dir.
+Invitefolk; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, halı saha, basketbol ve voleybol maçı ve benzeri her tür etkinlik için davetiye ve katılım (LCV) uygulamasıdır. iOS, Android ve web tek kod tabanından çalışır; arayüz Türkçe ve İngilizce'dir.
 
 ## Neler var
 
@@ -14,7 +14,7 @@ Invitefolk; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, ha
 - Kendi davetiye tasarımı: görsel ya da PDF yükle (PDF web panelinde), isim alanını sürükle, yazı tipini/boyutunu/rengini seç; her davetli kendi adını tasarımın üstünde görür.
 - Oturma planı: masa ekle (4–14 kişi), sürükle-bırak, sahne/dans pisti/bar/DJ/pasta/foto köşesi/giriş, hızlı kurulum ("300 kişi, 10'luk masa"), otomatik yerleştirme, önizleme, masaları WhatsApp/e-posta ile bildirme, masa kartı ve isimlik çıktısı.
 - Etkinlik düzenleme: tüm bilgiler, menü seçenekleri, en fazla 3 özel soru, hediye notu, otomatik hatırlatma, arşivleme, silme.
-- Davetiye sayfası düzenleyici: 24 şablon (düğün, nişan, kına, doğum günü, yemek, kurumsal, halı saha…), mühürlü zarf açılışı, geri sayım, birden fazla tören (kına + nikâh + düğün) programı, takı/IBAN kartı (kopyalanır, masaya karekodlu kart basılır), fon müziği, fotoğraf galerisi, video davetiye, yapay zekâ ile davet metni.
+- Davetiye sayfası düzenleyici: 26 şablon (düğün, nişan, kına, doğum günü, yemek, kurumsal, halı saha, basketbol, voleybol…), mühürlü zarf açılışı, geri sayım, birden fazla tören (kına + nikâh + düğün) programı, takı/IBAN kartı (kopyalanır, masaya karekodlu kart basılır), fon müziği, fotoğraf galerisi, video davetiye, yapay zekâ ile davet metni.
 - Davetliye sorulanlar: kişi sayısının içinde kaç çocuk, yanındakilerin adları; tarih anketi (tarih belli değilse); "kim ne getiriyor" listesi (doğum günü, yemek).
 - Ortak yöneticiler: eş, aile ya da arkadaş e-postayla davet edilir ve birlikte yönetir; silme yalnızca sahibe açık.
 - Duyuru: saat/yer değişikliği davetiye sayfasının üstünde görünür; istenirse WhatsApp, e-posta ya da SMS ile de gider.
@@ -25,7 +25,7 @@ Invitefolk; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, ha
 - SMS yedeği: WhatsApp'a ulaşılamayan davet ve hatırlatmalar SMS ile gider (Netgsm).
 - Basılı davetiyeden doldurma: davetiyenin fotoğrafından başlık, tarih, saat ve yer yapay zekâ ile okunur.
 - Hava durumu: etkinliğe 14 gün kala davetli sayfasında tahmin.
-- Halı saha: kadro ve yedek listesi (kadro dolunca yedeğe, biri çıkınca ilk yedek kadroya), kişi başı ücret ve "kim ödedi" takibi (oyuncu "ödedim" der, organizatör onaylar), her hafta otomatik tekrar ve davet, seviye ve mevkiye göre dengeli takım, maç skoru ve goller, maçın oyuncusu oylaması, gol krallığı, takvime abone olma (her hafta kendiliğinden).
+- Takım sporları (halı saha, basketbol, voleybol): kadro ve yedek listesi (kadro dolunca yedeğe, biri çıkınca ilk yedek kadroya), kişi başı ücret ve "kim ödedi" takibi (oyuncu "ödedim" der, organizatör onaylar), her hafta otomatik tekrar ve davet, seviye ve mevkiye göre dengeli takım (kaleci; oyun kurucu/pivot; pasör/libero takımlara eşit dağılır), maç skoru ve gol/sayılar, maçın oyuncusu oylaması, gol krallığı, takvime abone olma (her hafta kendiliğinden).
 - Rehber: tüm etkinliklerde ortak kişi listesi.
 - Paketler: ücretsiz / Temel 500 ₺ / Otomatik 750 ₺ / Tam 1.000 ₺ (bir yıl geçerli). iOS ve Android'de mağaza içi satın alma (RevenueCat), web'de iyzico.
 - Telefon bildirimi: davetli cevap verince, yedekten kadroya geçişte, paket tanımlanınca.
@@ -33,9 +33,9 @@ Invitefolk; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, ha
 
 **Davetli (giriş ve uygulama gerekmez)**
 - Kişiye özel link (`/r/<token>`): tema ya da organizatörün tasarımı üstünde kendi adı.
-- Katılım, kişi sayısı, menü, özel sorular, not; halı sahada kadro/yedek durumu ve ücret.
+- Katılım, kişi sayısı, menü, özel sorular, not; takım sporlarında kadro/yedek durumu ve ücret.
 - Takvime ekle, haritada aç, masası belli ise "Masanız", TR · EN seçici, KVKK bağlantısı.
-- Zarf açılışı ve müzik, geri sayım, program, galeri, video, takı/IBAN kopyalama, duyurular, hava durumu, tarih anketi, getir listesi, giriş karekodu, albüme yükleme; halı sahada takımım, "ödedim", maçın oyuncusu oyu.
+- Zarf açılışı ve müzik, geri sayım, program, galeri, video, takı/IBAN kopyalama, duyurular, hava durumu, tarih anketi, getir listesi, giriş karekodu, albüme yükleme; takım sporlarında takımım, "ödedim", maçın oyuncusu oyu.
 - Herkese açık kısa sayfalar (giriş gerekmez, dizinlenmez): `/a/<kod>` albüme yükleme, `/h/<kod>` hediye bilgisi, `/k/<kod>` bilgi toplama formu, `/katil/<anahtar>` ortak yönetici daveti (giriş ister).
 
 **Yönetim paneli** (`/admin`, iki adımlı doğrulama zorunlu)
@@ -56,6 +56,15 @@ Invitefolk; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, ha
 
 Mağaza hesapları: Apple Developer yıllık 99 $, Google Play bir kerelik 25 $.
 
+## Canlıya alma (ücretsiz)
+
+GitHub Actions ile otomatik yayın: her push'ta testler, Supabase (migration, sırlar, fonksiyonlar) ve Cloudflare Pages; isteğe bağlı Android APK. Adım adım kurulum: **[docs/canliya-alma.md](docs/canliya-alma.md)**
+
+```bash
+npm run check      # tip kontrolü + lint + veritabanı testleri (CI ile aynı)
+npm run test:db    # yalnızca veritabanı testleri (PGlite; Supabase'e bağlanmaz)
+```
+
 ## Kurulum
 
 ```bash
@@ -69,7 +78,7 @@ npx expo start               # Expo Go ile telefonda dene; w: web
 ### 1. Supabase
 
 1. [supabase.com](https://supabase.com) üzerinde proje açın; URL ve publishable key'i `.env.local`'a yazın.
-2. Şemayı yükleyin (11 migration sırayla uygulanır: şema, oturma planı, güvenlik, özellikler, depolama, otomasyon, sağlamlaştırma, ortak yönetim, davetiye sayfası, araçlar, inceleme düzeltmeleri):
+2. Şemayı yükleyin (GitHub Actions bunu her yayında kendisi yapar; elle: 11 migration sırayla uygulanır: şema, oturma planı, güvenlik, özellikler, depolama, otomasyon, sağlamlaştırma, ortak yönetim, davetiye sayfası, araçlar, inceleme düzeltmeleri):
    ```bash
    npx supabase login
    npx supabase link --project-ref PROJE_REF
@@ -119,7 +128,7 @@ npx supabase functions deploy                          # tümü; JWT ayarları s
 | `ai-assist` | Davet metni yazma ve basılı davetiyeden bilgi okuma (Claude API; günlük hak paketten) |
 | `album-upload` | Davetlinin albüme tek kullanımlık imzalı linkle fotoğraf yüklemesi |
 | `weather` | Davetli sayfası için hava tahmini (Open-Meteo, 3 saat önbellek) |
-| `calendar` | Haftalık halı saha için takvim aboneliği (ICS) |
+| `calendar` | Haftalık maçlar için takvim aboneliği (ICS) |
 | `scheduled` | Haftalık tekrar, otomatik hatırlatma, telefon bildirimleri (10 dakikada bir) |
 | `iyzico-checkout`, `iyzico-callback` | Web ödemesi |
 | `revenuecat-webhook` | Mağaza satın alma ve iadeleri |
@@ -177,6 +186,8 @@ src/lib/                       Supabase istemcisi (native'de şifreli oturum), A
 src/ui/                        Tasarım dili ve bileşenler (guests, send, seating, design, ...)
 supabase/migrations/           Şema, RLS, fonksiyonlar, kotalar, depolama
 supabase/functions/            Edge Functions
+supabase/tests/                Veritabanı testleri (npm run test:db)
+.github/workflows/             CI ve yayın (Kontrol, Yayınla, Android test sürümü)
 docs/                          Otomasyon, ödeme, mağaza
 public/pdfjs/                  PDF'ten görsel üretimi (yalnızca web)
 public/zxing/                  Karekod okuyucu WASM (yalnızca web, yerleşik okuyucu yoksa)
@@ -184,7 +195,7 @@ public/zxing/                  Karekod okuyucu WASM (yalnızca web, yerleşik ok
 
 ## Güvenlik
 
-İlke: uygulama ya da web sitesi tamamen ele geçirilse bile saldırganın elinde yalnızca herkese açık anahtar ve en fazla kendi oturumu olur; asıl koruma veritabanındadır. 280 saldırı ve işlev senaryosu gerçek Postgres üzerinde test edildi. İki ayrı bağımsız güvenlik incelemesi yapıldı: ilki 5, ortak yönetim ve yeni araçlar için yapılan ikincisi 11 bulgu çıkardı; hepsi kapatılıp tekrar test edildi. Son cevap günü bilerek yalnızca bilgi amaçlıdır: geç cevaplar da kabul edilir.
+İlke: uygulama ya da web sitesi tamamen ele geçirilse bile saldırganın elinde yalnızca herkese açık anahtar ve en fazla kendi oturumu olur; asıl koruma veritabanındadır. 293 saldırı ve işlev senaryosu gerçek Postgres üzerinde test edildi. İki ayrı bağımsız güvenlik incelemesi yapıldı: ilki 5, ortak yönetim ve yeni araçlar için yapılan ikincisi 11 bulgu çıkardı; hepsi kapatılıp tekrar test edildi. Son cevap günü bilerek yalnızca bilgi amaçlıdır: geç cevaplar da kabul edilir.
 
 **Veritabanı**
 - Satır düzeyi güvenlik: herkes yalnızca kendi etkinlik, kişi, masa, davet, tasarım dosyası ve bildirim anahtarını görür.
@@ -230,4 +241,4 @@ public/zxing/                  Karekod okuyucu WASM (yalnızca web, yerleşik ok
 - App Store Connect / Play Console'da `invitefolk_temel`, `invitefolk_otomatik`, `invitefolk_tam` ürünlerini, RevenueCat'te webhook'u, iyzico'da üye işyerini kurun.
 - Gerçek telefonlarda test: oturma planında sürükleme, bildirimler, satın alma (sandbox), PDF/görsel yükleme.
 
-Halı saha "kim ödedi" alanı yalnızca takip içindir; uygulama başkası adına para toplamaz.
+Takım sporlarındaki "kim ödedi" alanı yalnızca takip içindir; uygulama başkası adına para toplamaz.

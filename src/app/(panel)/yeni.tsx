@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, type PressableStateCallbackType, Text, useWindowDimensions, View } from 'react-native';
 
-import { EVENT_TYPE_ORDER, EVENT_TYPES, eventCopy, type EventTypeKey } from '@/core/event-types';
+import { EVENT_TYPE_ORDER, EVENT_TYPES, eventCopy, type EventTypeKey, SPORTS } from '@/core/event-types';
 import { formatDayMonth, formatWhen } from '@/core/format';
 import { THEMES, type ThemeKey } from '@/core/themes';
 import type { EventRow } from '@/core/types';
@@ -98,6 +98,8 @@ export default function NewEvent() {
     tapFeedback();
     setType(k);
     if (!themeTouched) setTheme(EVENT_TYPES[k].suggestedTheme);
+    const sp = EVENT_TYPES[k].sport;
+    if (sp) setRosterSize(String(SPORTS[sp].defaultRoster));
   };
 
   const save = async () => {

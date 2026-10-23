@@ -3,7 +3,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { ActivityIndicator, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { eventCopy, getEventType } from '@/core/event-types';
+import { eventCopy, getEventType, sportOf } from '@/core/event-types';
 import { formatDayMonth, formatTry, formatWhen, rsvpUrl } from '@/core/format';
 import { getTheme, type InvitationTheme } from '@/core/themes';
 import type { GuestSettings, PublicInvitation } from '@/core/types';
@@ -128,7 +128,7 @@ export default function GuestRsvp() {
       ? {
           title: inv.event.title,
           start,
-          end: new Date(start.getTime() + (inv.event.type === 'saha' ? 1 : 3) * 3600_000),
+          end: new Date(start.getTime() + (sportOf(inv.event.type)?.hours ?? 3) * 3600_000),
           location: where || undefined,
           description: t('rsvp.calendarNote', { link: rsvpUrl(token) }),
         }
@@ -195,7 +195,7 @@ export default function GuestRsvp() {
       {media?.gallery?.length ? <Gallery theme={theme} photos={media.gallery} t={t} /> : null}
       {inv.poll ? <PollCard theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
       {inv.signup?.length ? <SignupCard theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
-      {inv.event.type === 'saha' ? <SahaCards theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
+      {sportOf(inv.event.type) ? <SahaCards theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
       {settings.gift?.iban ? <GiftCard theme={theme} gift={settings.gift} type={inv.event.type} t={t} /> : null}
       {inv.checkin_code ? <CheckinPass theme={theme} code={inv.checkin_code} checkedIn={!!inv.checked_in} t={t} /> : null}
       {settings.album_slug ? <AlbumCard theme={theme} t={t} onOpen={() => router.push({ pathname: '/a/[slug]', params: { slug: settings.album_slug! } })} /> : null}

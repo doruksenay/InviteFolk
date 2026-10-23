@@ -25,5 +25,7 @@ export const themes: typeof TR = {
   gokkusagi: 'Rainbow',
   kurumsal: 'Corporate',
   saha_yesil: 'Pitch',
+  parke: 'Hardwood',
+  file: 'Net',
   groups: { wedding: 'Wedding, engagement, henna', celebration: 'Celebration', everyday: 'Work, dinner, sports' },
 };

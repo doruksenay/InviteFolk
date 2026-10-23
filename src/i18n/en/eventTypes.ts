@@ -87,6 +87,30 @@ export const eventTypes: typeof TR = {
     ],
     sample: { greet: 'Hey [Guest name],', kicker: 'Thursday game', title: 'Five-a-side\n9 pm', line: "Your spot in the squad is ready, let's not be short.", when: 'Every Thursday · 9–10 pm', where: '[Pitch], Ataşehir', deadline: 'Wednesday 6 pm', host: 'B', wa: 'Burak is calling you to the Thursday game.' },
   },
+  basket: {
+    name: 'Basketball game',
+    description: 'Squad, waitlist, weekly repeat and balanced teams.',
+    rsvp: { yes: "I'm in", no: 'Not this week', askParty: 'Great! Shall I add you to the waitlist too?' },
+    menu: null,
+    features: [
+      { title: 'Squad and waitlist', detail: 'When the squad is full, the waitlist lines up.' },
+      { title: 'Balanced teams', detail: 'Two teams by level and position (guard, forward, centre).' },
+      { title: 'Score and top scorers', detail: 'Final score, points and a player of the game vote.' },
+    ],
+    sample: { greet: 'Hey [Guest name],', kicker: 'Tuesday hoops', title: 'Basketball\n8.30 pm', line: "Five-on-five, your spot in the squad is ready.", when: 'Every Tuesday · 8.30–10 pm', where: '[Gym], Kadıköy', deadline: 'Monday 6 pm', host: 'E', wa: 'Ege is calling you to Tuesday hoops.' },
+  },
+  voleybol: {
+    name: 'Volleyball game',
+    description: 'Squad, waitlist, weekly repeat and balanced teams.',
+    rsvp: { yes: "I'm in", no: 'Not this week', askParty: 'Great! Shall I add you to the waitlist too?' },
+    menu: null,
+    features: [
+      { title: 'Squad and waitlist', detail: 'When the squad is full, the waitlist lines up.' },
+      { title: 'Balanced teams', detail: 'Two teams by level and position (setter, hitter, middle, libero).' },
+      { title: 'Set score and player of the game', detail: 'Final score, points and a vote.' },
+    ],
+    sample: { greet: 'Hey [Guest name],', kicker: 'Sunday volleyball', title: 'Volleyball\n11 am', line: "Six-on-six, your spot in the squad is ready.", when: 'Every Sunday · 11 am–1 pm', where: '[Gym], Beşiktaş', deadline: 'Saturday 6 pm', host: 'D', wa: 'Deniz is calling you to Sunday volleyball.' },
+  },
   diger: {
     name: 'Something else',
     description: 'Graduation, party or a get-together.',

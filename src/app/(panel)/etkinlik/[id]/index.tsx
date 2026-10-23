@@ -3,7 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Linking, Pressable, Text, useWindowDimensions, View } from 'react-native';
 
-import { eventCopy, getEventType } from '@/core/event-types';
+import { eventCopy, getEventType, sportOf } from '@/core/event-types';
 import { daysUntil, formatNumber, formatTry, formatWhen, initials, rsvpUrl, waMeLink } from '@/core/format';
 import { getTheme } from '@/core/themes';
 import type { EventSettings, InvitationWithContact, RsvpStatus } from '@/core/types';
@@ -96,7 +96,7 @@ export default function EventDetail() {
   };
   const L = lim.data?.limits ?? null;
   const isOwner = lim.data?.is_owner ?? true;
-  const saha = event.type === 'saha';
+  const saha = !!sportOf(event.type);
   const go = (path: '/etkinlik/[id]/sayfa' | '/etkinlik/[id]/ekip' | '/etkinlik/[id]/giris' | '/etkinlik/[id]/album' | '/etkinlik/[id]/basvurular' | '/etkinlik/[id]/takim') => router.push({ pathname: path, params: { id: event.id } });
   const plan = (k: 'temel' | 'otomatik' | 'tam') => t('tools.locked', { plan: t(`status.plan.${k}`) });
   const tiles: ToolTile[] = [
