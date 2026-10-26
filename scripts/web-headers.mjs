@@ -5,8 +5,17 @@
 // Böylece bir XSS açığı olsa bile dışarıdan betik yüklenemez ve veri başka bir sunucuya gönderilemez.
 // Kamera ve mikrofon yalnızca kendi sayfalarımızda (kapıda karekod okuma, albüme sesli mesaj); konum kapalı.
 // Ayrıca arama motorları için robots.txt, sitemap.xml ve index.html'e açıklama/OG etiketleri yazılır.
-import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { createHash } from 'node:crypto';
+import { existsSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
+
+function walk2(dir, acc) {
+  for (const f of readdirSync(dir)) {
+    const p = join(dir, f);
+    if (statSync(p).isDirectory()) walk2(p, acc);
+    else if (/\.(js|html|css|json)$/.test(f)) acc.push(p);
+  }
+}
 
 const out = process.argv[2] ?? 'dist';
 const supa = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -21,17 +30,40 @@ const origin = new URL(supa).origin;
 const nm = join(out, 'assets', 'node_modules');
 if (existsSync(nm)) {
   renameSync(nm, join(out, 'assets', 'vendor'));
+  const files = [];
   const walk = (dir) => {
     for (const f of readdirSync(dir)) {
       const p = join(dir, f);
       if (statSync(p).isDirectory()) walk(p);
-      else if (/\.(js|html|css|json)$/.test(f)) {
-        const src = readFileSync(p, 'utf8');
-        if (src.includes('/assets/node_modules/')) writeFileSync(p, src.replaceAll('/assets/node_modules/', '/assets/vendor/'));
-      }
+      else if (/\.(js|html|css|json)$/.test(f)) files.push(p);
     }
   };
   walk(out);
+  // İçeriği değişen paketlerin adı da değişmeli: _expo/static altı tarayıcıda "immutable" önbelleklenir,
+  // aynı adla kalırsa ziyaretçi eski (bozuk yollu) dosyayı görmeye devam eder.
+  const renames = [];
+  for (const p of files) {
+    const src = readFileSync(p, 'utf8');
+    if (!src.includes('/assets/node_modules/')) continue;
+    const next = src.replaceAll('/assets/node_modules/', '/assets/vendor/');
+    const m = basename(p).match(/^(.*)-([0-9a-f]{16,})\.js$/);
+    if (m) {
+      const fresh = `${m[1]}-${createHash('md5').update(next).digest('hex')}.js`;
+      writeFileSync(join(dirname(p), fresh), next);
+      unlinkSync(p);
+      renames.push([basename(p), fresh]);
+    } else writeFileSync(p, next);
+  }
+  if (renames.length) {
+    const all = [];
+    walk2(out, all);
+    for (const p of all) {
+      let src = readFileSync(p, 'utf8');
+      let changed = false;
+      for (const [a, b] of renames) if (src.includes(a)) { src = src.replaceAll(a, b); changed = true; }
+      if (changed) writeFileSync(p, src);
+    }
+  }
   console.log('assets/node_modules → assets/vendor (Cloudflare Pages node_modules klasörlerini yüklemez)');
 }
 const wss = origin.replace('https://', 'wss://');
