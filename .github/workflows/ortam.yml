@@ -123,19 +123,27 @@ jobs:
       - name: Cloudflare Pages
         id: pages
         env:
-          ACCOUNT_OVERRIDE: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          ACCOUNT_OVERRIDE: ${{ vars.CLOUDFLARE_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
           WEB_URL_OVERRIDE: ${{ vars.WEB_URL }}
         run: |
           set -euo pipefail
           cf=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json")
           CF=https://api.cloudflare.com/client/v4
-          acc="${ACCOUNT_OVERRIDE:-$(curl -fsS "${cf[@]}" "$CF/accounts" | jq -r '.result[0].id // empty')}"
-          [ -n "$acc" ] || { echo "::error::Cloudflare hesabı bulunamadı (token'ın 'Cloudflare Pages: Edit' izni olmalı)."; exit 1; }
+          acc=$(printf '%s' "$ACCOUNT_OVERRIDE" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-f0-9')
+          if [ -z "$acc" ]; then
+            res=$(curl -sS "${cf[@]}" "$CF/accounts")
+            acc=$(printf '%s' "$res" | jq -r '.result[0].id // empty' 2>/dev/null || true)
+            [ -n "$acc" ] || { echo "::error::Cloudflare hesabı bulunamadı. CLOUDFLARE_ACCOUNT_ID değişkenini (Variables) ekleyin. Cloudflare cevabı: $(printf '%s' "$res" | jq -c '.errors // .' 2>/dev/null | head -c 300)"; exit 1; }
+          else
+            echo "Cloudflare hesabı değişkenden alındı."
+          fi
+          v=$(curl -sS "${cf[@]}" "$CF/user/tokens/verify")
+          echo "Token durumu: $(printf '%s' "$v" | jq -r '.result.status // "bilinmiyor"')"
           project=$(echo "$PAGES_PROJECT" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-\n' '-' | cut -c1-58)
           res=$(curl -sS "${cf[@]}" "$CF/accounts/$acc/pages/projects/$project")
           if [ "$(echo "$res" | jq -r '.success')" != "true" ]; then
             echo "Pages projesi oluşturuluyor: $project"
-            res=$(curl -fsS -X POST "${cf[@]}" "$CF/accounts/$acc/pages/projects" \
+            res=$(curl -sS -X POST "${cf[@]}" "$CF/accounts/$acc/pages/projects" \
               -d "$(jq -n --arg n "$project" '{name: $n, production_branch: "main"}')")
           fi
           sub=$(echo "$res" | jq -r '.result.subdomain // empty')
