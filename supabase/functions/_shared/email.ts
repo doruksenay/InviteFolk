@@ -57,6 +57,9 @@ const THEME: Record<string, { bg: string; ink: string; soft: string; accent: str
   bulut: { bg: '#EEF6FC', ink: '#1E3247', soft: '#4F6375', accent: '#2E6E9E', button: '#1E3247', buttonInk: '#FFFFFF', shape: '#BFDDF2' },
   pamuk: { bg: '#FDF0F4', ink: '#3B2230', soft: '#6E5361', accent: '#A8406B', button: '#3B2230', buttonInk: '#FFFFFF', shape: '#F6C9D8' },
   kep: { bg: '#EEF0F7', ink: '#141B38', soft: '#4D5470', accent: '#2B3A78', button: '#141B38', buttonInk: '#FFFFFF', shape: '#E3B341' },
+  siyah_altin: { bg: '#121014', ink: '#F5EEDC', soft: '#C9BFA8', accent: '#E2C27A', button: '#D4AF5A', buttonInk: '#121014', shape: '#D4AF5A' },
+  osmanli: { bg: '#FAF3E6', ink: '#33140F', soft: '#674A40', accent: '#7A1F2B', button: '#7A1F2B', buttonInk: '#FFFFFF', shape: '#C9A044' },
+  cini: { bg: '#F5F8FC', ink: '#132744', soft: '#4A5C78', accent: '#1F4E8C', button: '#1F4E8C', buttonInk: '#FFFFFF', shape: '#2BA3A6' },
   isilti: { bg: '#1D1430', ink: '#F8F1FF', soft: '#CDBEDF', accent: '#F5C86A', button: '#F5C86A', buttonInk: '#1D1430', shape: '#B57BE8' },
 };
 

@@ -5,7 +5,7 @@ GitHub'a dört secret girildikten sonra her şeyi "Yayınla" iş akışı kendis
 
 ```
 main'e push (ya da Actions → Yayınla → Run workflow)
-  1. Kontrol    tip kontrolü, lint, 336 veritabanı testi, sunucu fonksiyonları
+  1. Kontrol    tip kontrolü, lint, 339 veritabanı testi, sunucu fonksiyonları
   2. Ortam      Supabase projesi yoksa açar (Frankfurt) ve hazır olmasını bekler
                 giriş ayarları: Gmail SMTP, 6 haneli kod e-postası, site adresi, iki adımlı doğrulama
                 Cloudflare Pages projesi yoksa açar, adresini bulur

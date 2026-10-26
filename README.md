@@ -19,7 +19,7 @@ Invitefolk; düğün, nişan, kına, sünnet, bebek partisi ve cinsiyet partisi,
 - Kendi davetiye tasarımı: görsel ya da PDF yükle (PDF web panelinde), isim alanını sürükle, yazı tipini/boyutunu/rengini seç; her davetli kendi adını tasarımın üstünde görür.
 - Oturma planı: masa ekle (4–14 kişi), sürükle-bırak, sahne/dans pisti/bar/DJ/pasta/foto köşesi/giriş, hızlı kurulum ("300 kişi, 10'luk masa"), otomatik yerleştirme, önizleme, masaları WhatsApp/e-posta ile bildirme, masa kartı ve isimlik çıktısı.
 - Etkinlik düzenleme: tüm bilgiler, menü seçenekleri, en fazla 3 özel soru, hediye notu, otomatik hatırlatma, arşivleme, silme.
-- Davetiye sayfası düzenleyici: 34 şablon (düğün, nişan, kına, sünnet, bebek partisi, mevlit, mezuniyet, bekârlığa veda, doğum günü, yemek, kurumsal, halı saha, basketbol, voleybol…), hareketli şablonlar (süzülen yaprak, konfeti, parıltı, yıldız, baloncuk, kalp; şablonun varsayılanı ya da elle seçilir, "hareketi azalt" ayarına uyar), "Katılacağım" deyince konfeti, mühürlü zarf açılışı, geri sayım, birden fazla tören (kına + nikâh + düğün) programı, takı/IBAN kartı (kopyalanır, masaya karekodlu kart basılır), fon müziği, fotoğraf galerisi, video davetiye.
+- Davetiye sayfası düzenleyici: 37 şablon ve 4 kart düzeni (klasik, sade, kapak, çerçeveli), çiftin fotoğrafıyla fotoğraflı davetiye (düğün, nişan, kına, sünnet, bebek partisi, mevlit, mezuniyet, bekârlığa veda, doğum günü, yemek, kurumsal, halı saha, basketbol, voleybol…), hareketli şablonlar (süzülen yaprak, konfeti, parıltı, yıldız, baloncuk, kalp; şablonun varsayılanı ya da elle seçilir, "hareketi azalt" ayarına uyar), "Katılacağım" deyince konfeti, mühürlü zarf açılışı, geri sayım, birden fazla tören (kına + nikâh + düğün) programı, takı/IBAN kartı (kopyalanır, masaya karekodlu kart basılır), fon müziği, fotoğraf galerisi, video davetiye.
 - Etkinlik sayfasında hazırlık listesi (davetli ekle → davetiyeni kişiselleştir → gönder → oturma planı → hatırlatma); hepsi bitince kaybolur. Davetli eklerken paket sınırına yaklaşınca uyarı.
 - Tarihler web'de tarayıcının takvim/saat seçicisiyle, uygulamada GG.AA.YYYY olarak girilir.
 - Ulaşım ve konaklama kartı: yol tarifi, otopark, konaklama, kıyafet notu.
@@ -205,7 +205,7 @@ public/zxing/                  Karekod okuyucu WASM (yalnızca web, yerleşik ok
 
 ## Güvenlik
 
-İlke: uygulama ya da web sitesi tamamen ele geçirilse bile saldırganın elinde yalnızca herkese açık anahtar ve en fazla kendi oturumu olur; asıl koruma veritabanındadır. 336 saldırı ve işlev senaryosu gerçek Postgres üzerinde test edildi. İki ayrı bağımsız güvenlik incelemesi yapıldı: ilki 5, ortak yönetim ve yeni araçlar için yapılan ikincisi 11 bulgu çıkardı; hepsi kapatılıp tekrar test edildi. Son cevap günü bilerek yalnızca bilgi amaçlıdır: geç cevaplar da kabul edilir.
+İlke: uygulama ya da web sitesi tamamen ele geçirilse bile saldırganın elinde yalnızca herkese açık anahtar ve en fazla kendi oturumu olur; asıl koruma veritabanındadır. 339 saldırı ve işlev senaryosu gerçek Postgres üzerinde test edildi. İki ayrı bağımsız güvenlik incelemesi yapıldı: ilki 5, ortak yönetim ve yeni araçlar için yapılan ikincisi 11 bulgu çıkardı; hepsi kapatılıp tekrar test edildi. Son cevap günü bilerek yalnızca bilgi amaçlıdır: geç cevaplar da kabul edilir.
 
 **Veritabanı**
 - Satır düzeyi güvenlik: herkes yalnızca kendi etkinlik, kişi, masa, davet, tasarım dosyası ve bildirim anahtarını görür.

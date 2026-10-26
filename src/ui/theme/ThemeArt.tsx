@@ -564,6 +564,80 @@ const MOTIFS: Record<InvitationTheme['motif'], Draw> = {
   },
 
   // Balonlar
+  // Lüks: siyah zeminde altın art deco (çift çerçeve, ışın yelpazesi, basamaklı köşeler)
+  luxe: (t) => {
+    const rays: ReactElement[] = [];
+    for (let i = -9; i <= 9; i++) rays.push(<Line key={i} x1={180} y1={-30} x2={180 + i * 24} y2={150} stroke={t.shapeB} strokeWidth={i % 3 ? 0.5 : 1.1} opacity={0.75} />);
+    const corner = (sx: number, sy: number, k: string) => (
+      <Path key={k} d={`M${sx} ${sy + 46 * Math.sign(120 - sy)} V${sy + 24 * Math.sign(120 - sy)} H${sx + 24 * Math.sign(180 - sx)} V${sy} H${sx + 46 * Math.sign(180 - sx)}`} stroke={t.shapeB} strokeWidth={1.4} fill="none" />
+    );
+    return (
+      <G>
+        <Rect x={0} y={0} width={360} height={240} fill={t.shapeC} />
+        {rays}
+        <Rect x={0} y={150} width={360} height={90} fill={t.bg} />
+        <Line x1={30} y1={150} x2={330} y2={150} stroke={t.shapeB} strokeWidth={1.2} />
+        <Path d="M110 150 L180 104 L250 150" stroke={t.shapeB} strokeWidth={1.4} fill="none" />
+        <Path d="M136 150 L180 121 L224 150" stroke={t.shapeB} strokeWidth={1.1} fill="none" />
+        <Path d={`M180 150 l-9 -14 l9 -14 l9 14 Z`} fill={t.shapeB} />
+        <Rect x={12} y={12} width={336} height={216} fill="none" stroke={t.shapeB} strokeWidth={1.2} />
+        <Rect x={18} y={18} width={324} height={204} fill="none" stroke={t.shapeB} strokeWidth={0.5} />
+        {corner(18, 18, 'a')}
+        {corner(342, 18, 'b')}
+        {corner(18, 222, 'c')}
+        {corner(342, 222, 'd')}
+      </G>
+    );
+  },
+
+  // Osmanlı: üstte rumi kenar bordürü, ortada şemse (madalyon)
+  rumi: (t) => {
+    const scallops: ReactElement[] = [];
+    for (let x = 0; x < 360; x += 30) {
+      scallops.push(<Path key={x} d={`M${x} 34 Q ${x + 15} 62 ${x + 30} 34 Z`} fill={t.shapeA} />);
+      scallops.push(<Circle key={`d${x}`} cx={x + 15} cy={44} r={2.6} fill={t.shapeB} />);
+      scallops.push(<Path key={`l${x}`} d={`M${x + 4} 17 C ${x + 10} 6 ${x + 20} 6 ${x + 26} 17 C ${x + 20} 28 ${x + 10} 28 ${x + 4} 17 Z`} fill="none" stroke={t.shapeB} strokeWidth={1} />);
+    }
+    const tips = [0, 90, 180, 270].map((a) => (
+      <Path key={a} d="M180 66 L172 80 L188 80 Z" fill={t.shapeB} transform={`rotate(${a} 180 130)`} />
+    ));
+    return (
+      <G>
+        <Rect x={0} y={0} width={360} height={34} fill={t.shapeA} />
+        {scallops}
+        {tips}
+        <Ellipse cx={180} cy={130} rx={66} ry={50} fill={t.shapeC} stroke={t.shapeB} strokeWidth={2} />
+        <Ellipse cx={180} cy={130} rx={56} ry={41} fill="none" stroke={t.shapeA} strokeWidth={1} />
+        <Path d={star8(180, 130, 26)} fill={t.shapeA} />
+        <Path d={star8(180, 130, 13)} fill={t.shapeB} />
+        <Path d="M40 236 C 40 200 60 186 78 192 C 64 200 58 214 60 236 Z" fill={t.shapeA} opacity={0.85} />
+        <Path d="M320 236 C 320 200 300 186 282 192 C 296 200 302 214 300 236 Z" fill={t.shapeA} opacity={0.85} />
+      </G>
+    );
+  },
+
+  // Çini: İznik karoları, her karoda çiçek rozeti
+  tiles: (t) => {
+    const items: ReactElement[] = [];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 4; c++) {
+        const x = c * 90;
+        const y = r * 80;
+        const cx = x + 45;
+        const cy = y + 40;
+        items.push(<Rect key={`t${r}${c}`} x={x} y={y} width={90} height={80} fill={t.shapeC} stroke={t.shapeA} strokeWidth={1.2} />);
+        for (const [qx, qy, a] of [[x, y, 0], [x + 90, y, 90], [x + 90, y + 80, 180], [x, y + 80, 270]] as const) {
+          items.push(<Circle key={`k${r}${c}${a}`} cx={qx} cy={qy} r={14} fill={t.shapeA} opacity={0.55} />);
+        }
+        for (let k = 0; k < 8; k++) {
+          items.push(<Ellipse key={`p${r}${c}${k}`} cx={cx} cy={cy - 13} rx={5.5} ry={12} fill={k % 2 ? t.shapeB : t.shapeA} opacity={0.9} transform={`rotate(${k * 45} ${cx} ${cy})`} />);
+        }
+        items.push(<Circle key={`m${r}${c}`} cx={cx} cy={cy} r={6} fill={t.palette[2] ?? t.shapeB} />);
+      }
+    }
+    return <G>{items}</G>;
+  },
+
   balloons: (t) => {
     const b = (cx: number, cy: number, c: string, k: string, s = 1) => (
       <G key={k}>

@@ -135,5 +135,11 @@ ok(!(await tryq(OWN, `update public.events set settings = settings || jsonb_buil
 
 ok((await tryq(null, `select plan, max_events from public.plan_limits`, 'anon')).r?.rows?.length > 0, 'ziyaretçi paket sınırlarını okur (fiyat kartları)');
 
+await as(OWN, `update public.events set settings = settings || '{"layout":"cover"}'::jsonb || jsonb_build_object('cover', jsonb_build_object('path', '${OWN}/${ev.id}/abcdef0123456789.jpg', 'width', 1200, 'height', 800)) where id='${ev.id}'`);
+const gi3 = (await one(null, `select public.get_invitation('${tok}') j`)).j;
+ok(gi3.event.settings.layout === 'cover' && gi3.event.settings.has_cover === true && !('cover' in gi3.event.settings), 'davetli düzeni ve kapak varlığını görür, dosya yolunu görmez');
+ok(!(await tryq(OWN, `update public.events set settings = settings || '{"layout":"weird"}'::jsonb where id='${ev.id}'`)).ok, 'bilinmeyen düzen reddedilir');
+ok(!(await tryq(OWN, `update public.events set settings = settings || jsonb_build_object('cover', jsonb_build_object('path', '${EVIL}/${ev.id}/abcdef0123456789.jpg', 'width', 1, 'height', 1)) where id='${ev.id}'`)).ok, 'başkasının klasöründeki kapak yolu reddedilir');
+
 console.log(`\nSONUÇ: ${pass} geçti, ${fail} kaldı`);
 process.exit(fail ? 1 : 0);

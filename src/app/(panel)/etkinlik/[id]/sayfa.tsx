@@ -1,16 +1,17 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Pressable, Text, TextInput, useWindowDimensions, View } from 'react-native';
 
 import { eventCopy, getEventType, sportOf } from '@/core/event-types';
 import { formatWhen, publicUrl } from '@/core/format';
 import { formatIban, ibanValid, normalizeIban } from '@/core/iban';
-import { getTheme, THEME_EFFECTS, type ThemeEffect } from '@/core/themes';
+import { getTheme, THEME_EFFECTS, THEME_LAYOUTS, type ThemeEffect, type ThemeLayout } from '@/core/themes';
 import type { EventRow, EventSettings, GiftInfo, InvitationWithContact } from '@/core/types';
 import { eventLang, LOCALE_TAG, makeT, useI18n } from '@/i18n';
 import { getEvent, useQuery } from '@/lib/api';
 import { updateEvent } from '@/lib/api-guests';
-import { patchSettings } from '@/lib/api-page';
+import { patchSettings, removeCover, setCover, signedMediaUrls } from '@/lib/api-page';
+import { pickPhotos } from '@/lib/media-pick';
 import { type EventLimits, getEventLimits, getSignupClaims } from '@/lib/api-tools';
 import { toIso } from '@/ui/eventForm/dates';
 import { OptionChip } from '@/ui/guests/common';
@@ -69,6 +70,34 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
   const [info, setInfo] = useState({ directions: s0.info?.directions ?? '', parking: s0.info?.parking ?? '', stay: s0.info?.stay ?? '', dress: s0.info?.dress ?? '' });
   const [countdown, setCountdown] = useState(!!s0.countdown);
   const [effect, setEffect] = useState<ThemeEffect | 'auto'>(s0.effect ?? 'auto');
+  const [layout, setLayout] = useState<ThemeLayout>(s0.layout ?? 'classic');
+  const [coverBusy, setCoverBusy] = useState(false);
+  const coverUrl = useQuery(() => (s0.cover ? signedMediaUrls([s0.cover.path]).then((m) => m[s0.cover!.path] ?? null) : Promise.resolve(null)).catch(() => null), [s0.cover?.path]);
+  const pickCover = async () => {
+    setErr(null);
+    try {
+      const [photo] = await pickPhotos(1);
+      if (!photo) return;
+      setCoverBusy(true);
+      await setCover(event.id, photo);
+      reload();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setCoverBusy(false);
+    }
+  };
+  const dropCover = async () => {
+    setCoverBusy(true);
+    try {
+      await removeCover(event.id);
+      reload();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setCoverBusy(false);
+    }
+  };
   const [program, setProgram] = useState<ProgramDraft[]>(programToDraft(s0.program));
   const [gift, setGift] = useState<GiftDraft>({ holder: s0.gift?.holder ?? '', iban: s0.gift?.iban ? formatIban(s0.gift.iban) : '', bank: s0.gift?.bank ?? '', note: s0.gift?.note ?? '', public: !!s0.gift?.public });
   const [askChildren, setAskChildren] = useState(!!s0.ask_children);
@@ -142,6 +171,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
 
     const patch: Partial<EventSettings> = {
       ...(effect !== 'auto' ? { effect } : {}),
+      ...(layout !== 'classic' ? { layout } : {}),
       envelope: { enabled: envelope, ...(seal.trim() ? { seal: seal.trim().slice(0, 6) } : {}) },
       countdown,
       ask_children: askChildren,
@@ -154,6 +184,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
     };
     const drop: (keyof EventSettings)[] = [];
     if (effect === 'auto') drop.push('effect');
+    if (layout === 'classic') drop.push('layout');
     if (message.trim()) patch.message = message.trim().slice(0, 400);
     else drop.push('message');
     if (prog.length) patch.program = prog;
@@ -200,6 +231,8 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
       <InvitationCard
         theme={theme}
         effect={effect === 'auto' ? theme.effect : effect}
+        layout={layout}
+        photoUri={coverUrl.data ?? null}
         lang={evLang}
         copy={{
           greet: copy.sample.greet,
@@ -233,6 +266,25 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
           accessibilityLabel={t('tools.page.message.title')}
           style={{ minHeight: 110, borderRadius: radius.md, backgroundColor: color.surfaceSoft, padding: 14, fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: color.ink, textAlignVertical: 'top' }}
         />
+      </Surface>
+
+      {/* Düzen ve kapak fotoğrafı */}
+      <Surface style={{ gap: 12 }}>
+        <SectionHead title={t('tools.page.layout.title')} hint={t('tools.page.layout.hint')} />
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+          {THEME_LAYOUTS.map((k) => (
+            <LayoutTile key={k} kind={k} on={layout === k} label={t(`tools.page.layout.kinds.${k}`)} onPress={() => setLayout(k)} />
+          ))}
+        </View>
+        <Caption>{t(`tools.page.layout.hints.${layout}`)}</Caption>
+        <View style={{ gap: 8, paddingTop: 6 }}>
+          <Label>{t('tools.page.layout.cover')}</Label>
+          <Caption>{t('tools.page.layout.coverHint')}</Caption>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <Button label={s0.cover ? t('tools.page.layout.coverChange') : t('tools.page.layout.coverPick')} icon="image" variant="secondary" loading={coverBusy} onPress={pickCover} />
+            {s0.cover && <Button label={t('tools.page.layout.coverRemove')} variant="ghost" onPress={dropCover} disabled={coverBusy} />}
+          </View>
+        </View>
       </Surface>
 
       {/* Açılış ve sayaç */}
@@ -388,5 +440,74 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
       </View>
       <Text style={{ height: 1 }} />
     </Screen>
+  );
+}
+
+/** Düzen seçimi: küçük şematik çizimle. */
+function LayoutTile({ kind, on, label, onPress }: { kind: ThemeLayout; on: boolean; label: string; onPress: () => void }) {
+  const ink = on ? color.lavenderInk : color.faint;
+  const bar = (w: number | `${number}%`, h = 4) => <View style={{ width: w, height: h, borderRadius: 2, backgroundColor: ink, opacity: 0.55 }} />;
+  const art = (h: number, round = 6) => <View style={{ alignSelf: 'stretch', height: h, borderRadius: round, backgroundColor: on ? color.lavender : color.ring, opacity: on ? 0.55 : 0.6 }} />;
+  return (
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityState={{ checked: on }}
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={{ width: 104, gap: 8, alignItems: 'center' }}>
+      <View
+        style={{
+          width: 96,
+          height: 120,
+          borderRadius: 14,
+          padding: kind === 'framed' ? 6 : 0,
+          backgroundColor: color.surface,
+          overflow: 'hidden',
+          boxShadow: on ? `inset 0 0 0 2px ${color.lavender}` : `inset 0 0 0 1px ${color.hairline}`,
+        }}>
+        <View style={{ flex: 1, borderRadius: 9, gap: 5, padding: kind === 'cover' || kind === 'classic' ? 0 : 6, alignItems: kind === 'minimal' || kind === 'framed' ? 'center' : 'flex-start', boxShadow: kind === 'framed' ? `inset 0 0 0 1px ${ink}` : 'none' }}>
+          {kind === 'classic' && (
+            <>
+              {art(44, 0)}
+              <View style={{ paddingHorizontal: 8, gap: 5 }}>
+                {bar(50, 6)}
+                {bar(70)}
+                {bar(60)}
+              </View>
+            </>
+          )}
+          {kind === 'minimal' && (
+            <>
+              <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: on ? color.lavender : color.ring, opacity: 0.55, marginTop: 6 }} />
+              {bar(56, 6)}
+              {bar(30, 2)}
+              {bar(64)}
+              {bar(48)}
+            </>
+          )}
+          {kind === 'cover' && (
+            <>
+              <View style={{ alignSelf: 'stretch', height: 72, justifyContent: 'flex-end', padding: 8, gap: 4, backgroundColor: on ? color.lavender : color.ring, opacity: 0.75 }}>
+                <View style={{ width: 54, height: 6, borderRadius: 2, backgroundColor: '#FFFFFF' }} />
+                <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: '#FFFFFF', opacity: 0.8 }} />
+              </View>
+              <View style={{ paddingHorizontal: 8, gap: 5 }}>
+                {bar(66)}
+                {bar(52)}
+              </View>
+            </>
+          )}
+          {kind === 'framed' && (
+            <>
+              {art(30)}
+              {bar(50, 6)}
+              {bar(30, 2)}
+              {bar(56)}
+            </>
+          )}
+        </View>
+      </View>
+      <Text style={{ fontFamily: on ? font.bold : font.semibold, fontSize: 13, color: on ? color.lavenderInk : color.inkSoft }}>{label}</Text>
+    </Pressable>
   );
 }

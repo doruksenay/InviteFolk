@@ -39,6 +39,22 @@ export const tools: typeof TR = {
       dress: 'Dress code',
       dressPlaceholder: 'Smart / Cocktail',
     },
+    layout: {
+      title: 'Layout and cover photo',
+      hint: 'Choose how the card is laid out, and add a photo of the couple if you like. Changes show in the preview straight away.',
+      kinds: { classic: 'Classic', minimal: 'Minimal', cover: 'Cover', framed: 'Framed' },
+      hints: {
+        classic: 'Theme artwork or photo on top, invitation text below.',
+        minimal: 'Centred, simple type; a photo, if any, sits in a round frame on top.',
+        cover: 'A large image with the title on it. Best for photo invitations.',
+        framed: 'A centred, classic invitation inside a fine double frame.',
+      },
+      cover: 'Cover photo',
+      coverHint: 'A photo of the couple or the occasion; it replaces the theme artwork on the card. Saved straight away.',
+      coverPick: 'Choose photo',
+      coverChange: 'Change photo',
+      coverRemove: 'Remove',
+    },
     look: {
       title: 'Opening and countdown',
       envelope: 'Envelope opening',

@@ -178,7 +178,8 @@ export type PublicMatch = {
 };
 
 /** Davetliye açılan ayarlar (get_invitation süzer; dosya yolları yok). */
-export type GuestSettings = Omit<EventSettings, 'design' | 'music' | 'video' | 'gallery' | 'gift' | 'album' | 'guestbook'> & {
+export type GuestSettings = Omit<EventSettings, 'design' | 'music' | 'video' | 'gallery' | 'gift' | 'album' | 'guestbook' | 'cover'> & {
+  has_cover?: boolean;
   guestbook?: { enabled: boolean; public: boolean };
   has_design?: boolean;
   design?: Omit<EventDesign, 'path'>;
@@ -281,6 +282,10 @@ export type EventSettings = {
   guestbook?: { enabled?: boolean; public?: boolean; moderate?: boolean };
   /** Davetli sayfasında ulaşım ve konaklama: yol tarifi, otopark, konaklama, kıyafet (her biri ≤ 400 karakter). */
   info?: { directions?: string; parking?: string; stay?: string; dress?: string };
+  /** Kart düzeni (klasik, sade, kapak, çerçeveli). */
+  layout?: import('./themes').ThemeLayout;
+  /** Kapak fotoğrafı (çiftin fotoğrafı gibi): kartta tema deseninin yerine geçer. */
+  cover?: GalleryPhoto;
   poll?: { options: PollOption[]; closed?: boolean; chosen?: string | null };
   signup?: SignupItem[];
 };

@@ -7,17 +7,22 @@ export type ThemeKey =
   | 'fildisi' | 'gul' | 'zumrut' | 'lacivert' | 'okaliptus' | 'sampanya' | 'bordo' | 'beyaz' | 'pudra' | 'zeytin'
   | 'kina_kirmizi' | 'mor_gece'
   | 'konfeti' | 'limon' | 'deniz' | 'pembe' | 'gokkusagi' | 'kurumsal' | 'saha_yesil' | 'parke' | 'file'
-  | 'sakura' | 'lale' | 'sehzade' | 'nur' | 'bulut' | 'pamuk' | 'kep' | 'isilti';
+  | 'sakura' | 'lale' | 'sehzade' | 'nur' | 'bulut' | 'pamuk' | 'kep' | 'isilti'
+  | 'siyah_altin' | 'osmanli' | 'cini';
 
 /** Görsel alandaki desen. */
 export type Motif =
   | 'arch' | 'botanical' | 'frame' | 'deco' | 'confetti' | 'waves' | 'stars' | 'sun' | 'rainbow' | 'petals'
   | 'ottoman' | 'minimal' | 'pitch' | 'balloons' | 'court' | 'net'
-  | 'sakura' | 'tulips' | 'crown' | 'geometric' | 'clouds' | 'caps' | 'disco';
+  | 'sakura' | 'tulips' | 'crown' | 'geometric' | 'clouds' | 'caps' | 'disco'
+  | 'luxe' | 'rumi' | 'tiles';
 
 /** Davetiye görselinin üstünde süzülen hareket (davetli sayfası ve önizleme). */
 export type ThemeEffect = 'none' | 'petals' | 'confetti' | 'sparkles' | 'stars' | 'bubbles' | 'hearts';
 export const THEME_EFFECTS: ThemeEffect[] = ['petals', 'confetti', 'sparkles', 'stars', 'bubbles', 'hearts', 'none'];
+/** Kartın düzeni: klasik (üstte görsel), sade (ortalı yazı), kapak (görselin üstünde başlık), çerçeveli. */
+export type ThemeLayout = 'classic' | 'minimal' | 'cover' | 'framed';
+export const THEME_LAYOUTS: ThemeLayout[] = ['classic', 'minimal', 'cover', 'framed'];
 
 /** Başlık yazısı: serif (Instrument Serif), formal (Playfair Display), script (Great Vibes), sans (Nunito). */
 export type ThemeFont = 'serif' | 'formal' | 'script' | 'sans';
@@ -51,6 +56,7 @@ const MOTIF_EFFECT: Record<Motif, ThemeEffect> = {
   arch: 'sparkles', botanical: 'petals', frame: 'sparkles', deco: 'sparkles', confetti: 'confetti', waves: 'bubbles', stars: 'stars',
   sun: 'sparkles', rainbow: 'confetti', petals: 'petals', ottoman: 'sparkles', minimal: 'none', pitch: 'none', balloons: 'bubbles',
   court: 'none', net: 'none', sakura: 'petals', tulips: 'petals', crown: 'sparkles', geometric: 'stars', clouds: 'bubbles', caps: 'confetti', disco: 'sparkles',
+  luxe: 'sparkles', rumi: 'none', tiles: 'none',
 };
 
 const LIGHT_CHIP = 'rgba(255,255,255,0.82)';
@@ -99,6 +105,10 @@ const DEFS: Record<ThemeKey, Def> = {
   bulut: { bg: '#EEF6FC', shapeA: '#BFDDF2', shapeB: '#F9D976', shapeC: '#FFFFFF', ink: '#1E3247', soft: '#4F6375', key_: '#2E6E9E', dark: false, motif: 'clouds', font: 'sans', group: 'celebration', palette: ['#9CCBEA', '#F9D976', '#F7B6C8'] },
   pamuk: { bg: '#FDF0F4', shapeA: '#F6C9D8', shapeB: '#BFDDF2', shapeC: '#FFFFFF', ink: '#3B2230', soft: '#6E5361', key_: '#A8406B', dark: false, motif: 'clouds', font: 'sans', group: 'celebration', palette: ['#F6B3C9', '#9CCBEA', '#F9D976'], effect: 'hearts' },
   kep: { bg: '#EEF0F7', shapeA: '#1F2A55', shapeB: '#E3B341', shapeC: '#D7DCEE', ink: '#141B38', soft: '#4D5470', key_: '#2B3A78', dark: false, motif: 'caps', font: 'sans', group: 'celebration', palette: ['#E3B341', '#1F2A55', '#E86A5A', '#5BB3A0'] },
+  // Lüks ve geleneksel
+  siyah_altin: { bg: '#121014', shapeA: '#2A2620', shapeB: '#D4AF5A', shapeC: '#1C1A17', ink: '#F5EEDC', soft: '#C9BFA8', key_: '#E2C27A', chip: 'rgba(18,16,20,0.7)', dark: true, motif: 'luxe', font: 'formal', group: 'wedding', palette: ['#D4AF5A', '#F5EEDC'] },
+  osmanli: { bg: '#FAF3E6', shapeA: '#7A1F2B', shapeB: '#C9A044', shapeC: '#F1E3C8', ink: '#33140F', soft: '#674A40', key_: '#7A1F2B', dark: false, motif: 'rumi', font: 'formal', group: 'wedding', palette: ['#7A1F2B', '#C9A044', '#F1E3C8'] },
+  cini: { bg: '#F5F8FC', shapeA: '#1F4E8C', shapeB: '#2BA3A6', shapeC: '#E3ECF7', ink: '#132744', soft: '#4A5C78', key_: '#1F4E8C', dark: false, motif: 'tiles', font: 'formal', group: 'tradition', palette: ['#1F4E8C', '#2BA3A6', '#C8414B'] },
   isilti: { bg: '#1D1430', shapeA: '#B57BE8', shapeB: '#F5C86A', shapeC: '#2E2148', ink: '#F8F1FF', soft: '#CDBEDF', key_: '#F5C86A', chip: 'rgba(29,20,48,0.6)', dark: true, motif: 'disco', font: 'script', group: 'celebration', palette: ['#B57BE8', '#F5C86A', '#FF8FB1'] },
 };
 
@@ -108,8 +118,8 @@ export const THEMES = Object.fromEntries(
 
 /** Seçicideki sıra: düğüne uygunlar önce. */
 export const THEME_ORDER: ThemeKey[] = [
-  'fildisi', 'sakura', 'adacayi', 'gul', 'okaliptus', 'pudra', 'sampanya', 'beyaz', 'lale', 'zeytin', 'bordo', 'zumrut', 'lacivert', 'lavanta', 'mor_gece', 'kina_kirmizi',
-  'sehzade', 'nur',
+  'fildisi', 'siyah_altin', 'osmanli', 'sakura', 'adacayi', 'gul', 'okaliptus', 'pudra', 'sampanya', 'beyaz', 'lale', 'zeytin', 'bordo', 'zumrut', 'lacivert', 'lavanta', 'mor_gece', 'kina_kirmizi',
+  'sehzade', 'nur', 'cini',
   'konfeti', 'gokkusagi', 'pembe', 'bulut', 'pamuk', 'kep', 'isilti', 'limon', 'deniz', 'mercan', 'altin',
   'kurumsal', 'gece', 'saha_yesil', 'parke', 'file',
 ];

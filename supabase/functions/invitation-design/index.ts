@@ -1,6 +1,7 @@
 // POST { token } (ya da GET ?token=)
 //   → { design?: { url, width, height, overlay }, music?: { url, title }, gallery?: [{ url, width, height }],
-//       video?: { url, width, height, overlay }, url?, width?, height?, overlay? (eski istemciler için tasarım) }
+//       video?: { url, width, height, overlay }, cover?: { url, width, height },
+//       url?, width?, height?, overlay? (eski istemciler için tasarım) }
 // Davetlinin sayfası, organizatörün yüklediği medyayı bu fonksiyonla alır.
 // Dosyalar özel kovalarda durur; burada davet anahtarı doğrulanır ve 15 dakikalık imzalı linkler üretilir.
 //
@@ -109,6 +110,13 @@ Deno.serve(async (req) => {
     out.gallery = photos
       .map((p) => ({ url: urls.get(p.path), width: Number(p.width) || 0, height: Number(p.height) || 0 }))
       .filter((p) => p.url);
+  }
+
+  // Kapak fotoğrafı (her pakette): kartta tema deseninin yerine geçer.
+  const cover = s.cover as { path?: unknown; width?: unknown; height?: unknown } | undefined;
+  if (cover && safe(cover.path, 'png|jpe?g|webp')) {
+    const url = await sign('media', cover.path);
+    if (url) out.cover = { url, width: Number(cover.width) || 0, height: Number(cover.height) || 0 };
   }
 
   if (!Object.keys(out).length) return notFound(req);

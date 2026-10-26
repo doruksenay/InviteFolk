@@ -3,6 +3,7 @@
 // onaltılık olduğundan karışmaz. Hiçbir şey kaydedilmez: sayfa yenilenince her şey baştan başlar.
 
 import { EVENT_TYPES, type EventTypeKey, sportOf } from '@/core/event-types';
+import type { ThemeKey, ThemeLayout } from '@/core/themes';
 import type { PollVote, PublicGuestbookEntry, PublicInvitation } from '@/core/types';
 
 export const DEMO_PREFIX = 'demo-';
@@ -139,6 +140,7 @@ function build(token: string): PublicInvitation | null {
     program: c.program?.map(([title, mins], i) => ({ id: `p${i}`, title, at: new Date(new Date(starts).getTime() + mins * 60000).toISOString() })),
     guestbook: sport ? undefined : { enabled: true, public: true },
     checkin: type === 'dugun' || type === 'kurumsal' || type === 'mezuniyet',
+    layout: LOOK[type]?.layout,
     info: wedding
       ? lang === 'en'
         ? { directions: 'A 5-minute walk from the nearest bus stop; a shuttle leaves the pier at 6.30pm.', parking: 'The car park next to the venue is free for our guests.', dress: 'Smart / Cocktail' }
@@ -171,7 +173,7 @@ function build(token: string): PublicInvitation | null {
     announcement: null,
     event: {
       type,
-      theme: cfg.suggestedTheme,
+      theme: LOOK[type]?.theme ?? cfg.suggestedTheme,
       title: c.title,
       host_names: c.hosts,
       starts_at: type === 'yemek' ? null : starts,
@@ -183,6 +185,19 @@ function build(token: string): PublicInvitation | null {
   };
   return inv;
 }
+
+/** Örneklerde düzen ve tema çeşitliliği görünsün (sihirbazın önerdiği temadan farklı olabilir). */
+const LOOK: Partial<Record<EventTypeKey, { layout?: ThemeLayout; theme?: ThemeKey }>> = {
+  nisan: { layout: 'framed', theme: 'osmanli' },
+  kina: { layout: 'cover' },
+  sunnet: { layout: 'framed' },
+  bebek: { layout: 'minimal' },
+  mevlut: { layout: 'framed', theme: 'cini' },
+  mezuniyet: { layout: 'cover' },
+  veda: { layout: 'cover' },
+  yemek: { layout: 'minimal' },
+  kurumsal: { layout: 'minimal', theme: 'siyah_altin' },
+};
 
 const store = new Map<string, PublicInvitation>();
 const books = new Map<string, PublicGuestbookEntry[]>();
@@ -282,5 +297,5 @@ export async function demoSignGuestbook(token: string, message: string): Promise
 /** Tanıtım sayfasındaki canlı önizleme için örnek içerik (sunucuya gitmez). */
 export function demoPreview(type: EventTypeKey, lang: Lang) {
   const c = COPY[type][lang];
-  return { title: c.title, hosts: c.hosts, venue: c.venue, address: c.address, message: c.message, guest: c.guest, theme: EVENT_TYPES[type].suggestedTheme };
+  return { title: c.title, hosts: c.hosts, venue: c.venue, address: c.address, message: c.message, guest: c.guest, theme: LOOK[type]?.theme ?? EVENT_TYPES[type].suggestedTheme, layout: LOOK[type]?.layout ?? ('classic' as ThemeLayout) };
 }

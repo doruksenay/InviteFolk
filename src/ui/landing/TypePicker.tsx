@@ -41,6 +41,7 @@ function Phone({ type, lang, onOpen, label }: { type: EventTypeKey; lang: Lang; 
               lang={lang}
               artHeight={140}
               effect={theme.effect}
+              layout={p.layout}
               copy={{
                 greet: t('rsvp.greet', { name: p.guest }),
                 kicker: copy.sample.kicker,

@@ -35,5 +35,8 @@ export const themes: typeof TR = {
   pamuk: 'Cotton',
   kep: 'Mortarboard',
   isilti: 'Glitter',
+  siyah_altin: 'Black & Gold',
+  osmanli: 'Ottoman',
+  cini: 'Iznik Tile',
   groups: { wedding: 'Wedding, engagement, henna', tradition: 'Circumcision, mevlit and tradition', celebration: 'Celebration', everyday: 'Work, dinner, sports' },
 };

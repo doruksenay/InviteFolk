@@ -33,5 +33,8 @@ export const themes = {
   pamuk: 'Pamuk',
   kep: 'Kep',
   isilti: 'Işıltı',
+  siyah_altin: 'Siyah Altın',
+  osmanli: 'Osmanlı',
+  cini: 'Çini',
   groups: { wedding: 'Düğün, nişan, kına', tradition: 'Sünnet, mevlüt ve gelenek', celebration: 'Kutlama', everyday: 'İş, yemek, spor' },
 };

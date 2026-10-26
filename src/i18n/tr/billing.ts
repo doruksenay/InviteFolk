@@ -27,7 +27,7 @@ export const billing = {
     design: 'Kendi davetiye tasarımını yükleme',
     import: "Excel/CSV'den toplu davetli aktarma",
     rsvp: 'Davetli sayfası ve canlı cevap takibi',
-    page: '34 hareketli şablon, zarf açılışı, geri sayım, program, takı/IBAN kartı',
+    page: '37 şablon, 4 düzen, fotoğraflı davetiye, zarf açılışı, geri sayım, program, takı/IBAN kartı',
     gallery: { one: 'Galeriye {count} fotoğraf', other: 'Galeriye {count} fotoğraf' },
     music: 'Fon müziği',
     video: 'Video davetiye',

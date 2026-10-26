@@ -100,6 +100,23 @@ export async function removeVideo(eventId: string) {
   await remove([prev.video?.path]);
 }
 
+/** Kapak fotoğrafı: yükler, ayara yazar, eskisini siler. */
+export async function setCover(eventId: string, photo: PickedPhoto) {
+  const path = await upload(eventId, photo.data, photo.mime, ext(photo.mime));
+  try {
+    const prev = await patchSettings(eventId, { cover: { path, width: Math.round(photo.width), height: Math.round(photo.height) } });
+    if (prev.cover?.path && prev.cover.path !== path) await remove([prev.cover.path]);
+  } catch (e) {
+    await remove([path]);
+    throw e;
+  }
+}
+
+export async function removeCover(eventId: string) {
+  const prev = await patchSettings(eventId, {}, ['cover']);
+  await remove([prev.cover?.path]);
+}
+
 /** Organizatör önizlemesi için imzalı linkler (10 dakika). */
 export async function signedMediaUrls(paths: string[]): Promise<Record<string, string>> {
   if (!paths.length) return {};
@@ -116,10 +133,11 @@ export type GuestMedia = {
   music?: { url: string; title: string | null };
   video?: { url: string; width: number; height: number; overlay: DesignOverlay | null };
   gallery?: { url: string; width: number; height: number }[];
+  cover?: { url: string; width: number; height: number };
 };
 
 export function guestNeedsMedia(s: GuestSettings | undefined) {
-  return !!(s && (s.has_design || s.music || s.video || (s.gallery_count ?? 0) > 0));
+  return !!(s && (s.has_design || s.has_cover || s.music || s.video || (s.gallery_count ?? 0) > 0));
 }
 
 export async function getGuestMedia(token: string): Promise<GuestMedia> {

@@ -271,6 +271,8 @@ export default function GuestRsvp() {
                   lang={lang}
                   artHeight={240}
                   effect={settings.effect ?? theme.effect}
+                  layout={settings.layout}
+                  photoUri={media?.cover?.url ?? null}
                   copy={{
                     greet: t('rsvp.greet', { name: inv.guest_name }),
                     kicker: copyText.sample.kicker,

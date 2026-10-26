@@ -40,6 +40,22 @@ export const tools = {
       dress: 'Kıyafet',
       dressPlaceholder: 'Şık / Kokteyl',
     },
+    layout: {
+      title: 'Düzen ve kapak fotoğrafı',
+      hint: 'Kartın yerleşimini seç; istersen çiftin fotoğrafını ekle. Değişiklikler önizlemede hemen görünür.',
+      kinds: { classic: 'Klasik', minimal: 'Sade', cover: 'Kapak', framed: 'Çerçeveli' },
+      hints: {
+        classic: 'Üstte tema deseni ya da fotoğraf, altta davet metni.',
+        minimal: 'Ortalı, sade yazı; fotoğraf varsa üstte yuvarlak çerçevede.',
+        cover: 'Büyük görsel, başlık üstünde. Fotoğraflı davetiye için en iyisi.',
+        framed: 'İnce çift çerçeve içinde ortalı, klasik davetiye.',
+      },
+      cover: 'Kapak fotoğrafı',
+      coverHint: 'Çiftin ya da etkinliğin fotoğrafı; kartta tema deseninin yerine geçer. Hemen kaydedilir.',
+      coverPick: 'Fotoğraf seç',
+      coverChange: 'Fotoğrafı değiştir',
+      coverRemove: 'Kaldır',
+    },
     look: {
       title: 'Açılış ve sayaç',
       envelope: 'Zarf açılışı',
