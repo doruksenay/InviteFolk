@@ -51,7 +51,13 @@ jobs:
         run: supabase link --project-ref "$REF"
 
       - name: Veritabanı (migration'lar)
-        run: supabase db push --yes
+        run: |
+          set -o pipefail
+          if ! supabase db push --yes 2>&1 | tee db.log; then
+            # Hatanın özeti iş özetine yazılır (kayıt dosyası açılamasa da görünsün).
+            echo "::error::Migration hatası: $(grep -iE 'error|failed|at statement' db.log | tail -n 6 | tr -d '\r' | tr '\n' ' ' | head -c 900)"
+            exit 1
+          fi
 
       - name: Sunucu sırları
         # Yalnızca dolu olanlar yazılır; boş bırakılan özellik (SMS, yapay zekâ, otomatik WhatsApp…) kapalı kalır.
