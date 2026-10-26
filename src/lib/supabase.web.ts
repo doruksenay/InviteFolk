@@ -12,6 +12,7 @@ export const supabase = createClient(isSupabaseConfigured ? url : 'http://localh
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    // E-postadaki giriş linkiyle gelinirse oturum adresten alınır (6 haneli kod da çalışır).
+    detectSessionInUrl: true,
   },
 });

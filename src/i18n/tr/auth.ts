@@ -8,7 +8,7 @@ export const auth = {
   sendCode: 'Giriş kodu gönder',
   sendFailed: 'Kod gönderilemedi. Biraz sonra tekrar dene.',
   newAccountHint: 'Hesabın yoksa ilk girişte otomatik oluşturulur.',
-  codeSent: '{email} adresine 6 haneli bir kod gönderdik.',
+  codeSent: '{email} adresine bir giriş e-postası gönderdik. İçindeki 6 haneli kodu buraya yaz ya da e-postadaki bağlantıya bu tarayıcıda dokun.',
   code: 'Giriş kodu',
   codeTooShort: 'E-postadaki 6 haneli kodu yaz.',
   verifyFailed: 'Kod doğrulanamadı. Kodu kontrol et ya da yenisini iste.',

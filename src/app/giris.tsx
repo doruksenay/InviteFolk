@@ -26,7 +26,10 @@ export default function SignIn() {
     }
     setBusy(true);
     setError(null);
-    const { error: err } = await supabase.auth.signInWithOtp({ email: e, options: { shouldCreateUser: true } });
+    const { error: err } = await supabase.auth.signInWithOtp({
+      email: e,
+      options: { shouldCreateUser: true, ...(Platform.OS === 'web' && typeof window !== 'undefined' ? { emailRedirectTo: window.location.origin } : {}) },
+    });
     setBusy(false);
     if (err) setError(t('auth.sendFailed'));
     else setStep('code');
