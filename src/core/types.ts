@@ -295,7 +295,6 @@ export type PlanLimits = {
   max_gallery: number;
   album_photos: number;
   sms_per_day: number;
-  ai_per_day: number;
   music: boolean;
   video: boolean;
   checkin: boolean;

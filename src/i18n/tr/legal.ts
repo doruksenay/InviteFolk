@@ -53,7 +53,7 @@ export const legal = {
           id: 'paylasim',
           title: '4. Kimlerle paylaşıyoruz?',
           body: [
-            'Hizmeti sunmak için aşağıdaki hizmet sağlayıcılarla, yalnızca gereken ölçüde: Supabase (veritabanı, kimlik doğrulama, sunucu fonksiyonları), Meta Platforms (WhatsApp Business mesajları), Netgsm (SMS), Resend (e-posta gönderimi), Anthropic (yalnızca organizatör yapay zekâ özelliğini kullandığında: davet metni ve basılı davetiye fotoğrafından bilgi okuma; içerik saklanmaz), Open-Meteo (etkinlik adresine göre hava tahmini; kişisel veri gönderilmez), Expo (mobil bildirimler), Cloudflare (web barındırma), RevenueCat, Apple ve Google (uygulama içi satın alma), iyzico (web ödemesi).',
+            'Hizmeti sunmak için aşağıdaki hizmet sağlayıcılarla, yalnızca gereken ölçüde: Supabase (veritabanı, kimlik doğrulama, sunucu fonksiyonları), Meta Platforms (WhatsApp Business mesajları), Netgsm (SMS), Resend (e-posta gönderimi), Open-Meteo (etkinlik adresine göre hava tahmini; kişisel veri gönderilmez), Expo (mobil bildirimler), Cloudflare (web barındırma), RevenueCat, Apple ve Google (uygulama içi satın alma), iyzico (web ödemesi).',
             'Bu sağlayıcıların bir kısmı yurt dışındadır; aktarımlar KVKK\'nın 9. maddesine uygun şekilde yapılır (ayrıntı: KVKK Aydınlatma Metni).',
             'Yasal zorunluluk olmadıkça verileri resmi makamlar dahil kimseyle paylaşmayız.',
           ],
@@ -205,7 +205,7 @@ export const legal = {
           id: 'aktarim',
           title: '4. Aktarım (KVKK md. 8 ve 9)',
           body: [
-            'Hizmetin sunulması için veriler şu hizmet sağlayıcılarına aktarılır: Supabase Inc. (veritabanı ve barındırma; veri bölgesi: [AB – Frankfurt]), Meta Platforms Ireland Ltd. (WhatsApp Business), Netgsm İletişim A.Ş. (SMS, yurt içi), Resend Inc. (e-posta), Anthropic PBC (yapay zekâ yardımcısı, yalnızca kullanıldığında), 650 Industries Inc. / Expo (mobil bildirim), Cloudflare Inc. (web barındırma), RevenueCat Inc., Apple ve Google (uygulama içi satın alma), iyzico Ödeme Hizmetleri A.Ş. (web ödemesi, yurt içi).',
+            'Hizmetin sunulması için veriler şu hizmet sağlayıcılarına aktarılır: Supabase Inc. (veritabanı ve barındırma; veri bölgesi: [AB – Frankfurt]), Meta Platforms Ireland Ltd. (WhatsApp Business), Netgsm İletişim A.Ş. (SMS, yurt içi), Resend Inc. (e-posta), 650 Industries Inc. / Expo (mobil bildirim), Cloudflare Inc. (web barındırma), RevenueCat Inc., Apple ve Google (uygulama içi satın alma), iyzico Ödeme Hizmetleri A.Ş. (web ödemesi, yurt içi).',
             'Yurt dışına aktarımlar KVKK md. 9 kapsamında Kurul\'un ilan ettiği standart sözleşmeler ile yapılır ve standart sözleşmeler süresi içinde Kurul\'a bildirilir. [Avukat kontrolü: sağlayıcı bazında aktarım dayanağını doğrulayın.]',
             'Yasal zorunluluk halinde yetkili kamu kurum ve kuruluşlarına aktarım yapılabilir.',
           ],

@@ -59,7 +59,6 @@ Boş bırakılan özellik kapalı kalır, uygulamanın geri kalanı çalışır.
 |---|---|---|
 | Otomatik WhatsApp (Meta test numarası ücretsiz, 5 doğrulanmış alıcıya gönderir) | `WHATSAPP_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN` | `WHATSAPP_PHONE_NUMBER_ID` |
 | E-postayla davetiye (Resend; alan adı doğrulaması gerekir) | `RESEND_API_KEY` | `EMAIL_FROM` |
-| Yapay zekâ (davet metni, basılı davetiyeden okuma; ücretli API) | `ANTHROPIC_API_KEY` | |
 | SMS (Netgsm; ücretli) | `NETGSM_USERCODE`, `NETGSM_PASSWORD` | `NETGSM_HEADER` |
 | Web ödemesi (iyzico sandbox ücretsiz) | `IYZICO_API_KEY`, `IYZICO_SECRET_KEY` | `IYZICO_BASE_URL` = `https://sandbox-api.iyzipay.com` |
 | Android APK | `EXPO_TOKEN` (expo.dev → Account settings → Access tokens) | |
@@ -83,7 +82,7 @@ Boş bırakılan özellik kapalı kalır, uygulamanın geri kalanı çalışır.
 | Davetliye gönderim: WhatsApp linkleriyle tek tek, kişiye özel link kopyalama | ✓ |
 | Giriş kodu e-postası | ✓ (Gmail; ilk e-postalar Spam'e düşebilir) |
 | Organizatöre telefon bildirimi | Android APK'da ✓, web'de yok |
-| Otomatik WhatsApp, e-posta davetiyesi, SMS, yapay zekâ, ödeme | Anahtarları ekleyince açılır |
+| Otomatik WhatsApp, e-posta davetiyesi, SMS, ödeme | Anahtarları ekleyince açılır |
 
 ## Sorun giderme
 

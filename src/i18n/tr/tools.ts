@@ -1,5 +1,5 @@
 // Organizatör araçları: davetiye sayfası düzenleyici, ortak yöneticiler, duyuru, dışa aktarma, kapıda giriş,
-// fotoğraf albümü, bilgi toplama, halı saha takımları, tarih anketi, getir listesi, yapay zekâ.
+// fotoğraf albümü, bilgi toplama, halı saha takımları, tarih anketi, getir listesi.
 export const tools = {
   section: 'Araçlar',
   locked: '{plan} pakette',
@@ -27,11 +27,6 @@ export const tools = {
       title: 'Davet metni',
       hint: 'Kartta başlığın altında görünür. Boş bırakırsan türe uygun hazır metin kullanılır.',
       placeholder: 'Hayatımızın en güzel gününde sizi de aramızda görmek istiyoruz.',
-      ai: 'Yapay zekâ yazsın',
-      aiTone: 'Ton',
-      tones: { warm: 'Sıcak', formal: 'Resmî', fun: 'Eğlenceli', short: 'Kısa' },
-      aiWriting: 'Yazılıyor…',
-      aiLeft: 'Bugün kalan: {count}',
     },
     look: {
       title: 'Açılış ve sayaç',
@@ -367,15 +362,6 @@ export const tools = {
     noVotes: 'Henüz oy yok',
     leaders: { futbol: 'Gol krallığı', basket: 'Sayı krallığı', voleybol: 'Sayı liderleri' },
     paidClaims: { one: '{count} oyuncu "ödedim" dedi', other: '{count} oyuncu "ödedim" dedi' },
-  },
-
-  // --- Yapay zekâ
-  ai: {
-    fromPhoto: 'Basılı davetiyeden doldur',
-    fromPhotoHint: 'Davetiyenin fotoğrafını seç; başlık, tarih, saat ve yer otomatik dolsun.',
-    reading: 'Davetiye okunuyor…',
-    filled: 'Bilgiler davetiyeden dolduruldu. Kontrol edip düzeltebilirsin.',
-    nothing: 'Davetiyeden bilgi okunamadı. Daha net bir fotoğraf dene.',
   },
 
   // --- Etkinlik sayfası listesi

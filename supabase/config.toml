@@ -54,10 +54,6 @@ verify_jwt = true
 [functions.cohost-invite]
 verify_jwt = true
 
-# Yapay zekâ yardımcısı (giriş yapmış kullanıcı; günlük hak veritabanında)
-[functions.ai-assist]
-verify_jwt = true
-
 # Davetli sayfası: hava durumu (girişsiz; davet anahtarı fonksiyon içinde doğrulanır)
 [functions.weather]
 verify_jwt = false

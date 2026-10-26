@@ -58,7 +58,7 @@ export const landing = {
     title: 'Üç adımda',
     titleAccent: 'davet hazır',
     items: [
-      { icon: 'wand', title: 'Etkinliğini oluştur', body: 'Türü ve şablonu seç; tarih, yer ve mesajını yaz. Yapay zekâ metni senin için de yazabilir.' },
+      { icon: 'wand', title: 'Etkinliğini oluştur', body: 'Türü ve şablonu seç; tarih, yer ve mesajını yaz.' },
       { icon: 'send', title: 'Davetlilerine gönder', body: 'Listeni ekle, WhatsApp’tan tek tek ya da otomatik gönder. Herkes kendi linkini alır.' },
       { icon: 'chart', title: 'Cevapları izle', body: 'Kim geldi, kaç kişi, hangi masa: hepsi canlı. Etkinlik günü albüm ve anı defteri dolsun.' },
     ] as Item[],

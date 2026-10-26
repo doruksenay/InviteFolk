@@ -60,7 +60,7 @@ jobs:
           fi
 
       - name: Sunucu sırları
-        # Yalnızca dolu olanlar yazılır; boş bırakılan özellik (SMS, yapay zekâ, otomatik WhatsApp…) kapalı kalır.
+        # Yalnızca dolu olanlar yazılır; boş bırakılan özellik (SMS, otomatik WhatsApp…) kapalı kalır.
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           EMAIL_FROM: ${{ vars.EMAIL_FROM }}
@@ -68,7 +68,6 @@ jobs:
           WHATSAPP_PHONE_NUMBER_ID: ${{ vars.WHATSAPP_PHONE_NUMBER_ID }}
           WHATSAPP_APP_SECRET: ${{ secrets.WHATSAPP_APP_SECRET }}
           WHATSAPP_VERIFY_TOKEN: ${{ secrets.WHATSAPP_VERIFY_TOKEN }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           NETGSM_USERCODE: ${{ secrets.NETGSM_USERCODE }}
           NETGSM_PASSWORD: ${{ secrets.NETGSM_PASSWORD }}
           NETGSM_HEADER: ${{ vars.NETGSM_HEADER }}
@@ -83,7 +82,7 @@ jobs:
           put APP_WEB_URL "$WEB_URL"
           put ALLOWED_ORIGINS "$WEB_URL"
           for k in RESEND_API_KEY EMAIL_FROM WHATSAPP_TOKEN WHATSAPP_PHONE_NUMBER_ID WHATSAPP_APP_SECRET \
-                   WHATSAPP_VERIFY_TOKEN ANTHROPIC_API_KEY NETGSM_USERCODE NETGSM_PASSWORD NETGSM_HEADER \
+                   WHATSAPP_VERIFY_TOKEN NETGSM_USERCODE NETGSM_PASSWORD NETGSM_HEADER \
                    IYZICO_API_KEY IYZICO_SECRET_KEY IYZICO_BASE_URL; do
             put "$k" "${!k}"
           done
@@ -92,7 +91,10 @@ jobs:
 
       - name: Sunucu fonksiyonları
         # JWT ayarları supabase/config.toml'dan okunur (webhook ve davetli fonksiyonları girişsiz çalışır).
-        run: supabase functions deploy --use-api --project-ref "$REF"
+        run: |
+          supabase functions deploy --use-api --project-ref "$REF"
+          # Kaldırılan fonksiyonlar sunucudan da silinir (yoksa sessizce geçilir).
+          for fn in ai-assist; do supabase functions delete "$fn" --project-ref "$REF" >/dev/null 2>&1 || true; done
 
       - name: Zamanlayıcı (10 dakikada bir; yoksa kurulur)
         run: |

@@ -17,7 +17,6 @@ export const errors = {
     sms: 'günlük SMS',
     cohosts: 'ortak yönetici sayısı',
     album: 'albüm fotoğrafı',
-    ai: 'günlük yapay zekâ kullanımı',
     signup: 'kalan adet',
   },
   planFeature: 'Bu özellik paketinde yok: {what}. Paketler sayfasından yükseltebilirsin.',
@@ -30,6 +29,5 @@ export const errors = {
     album: 'fotoğraf albümü',
     sms: 'SMS',
   },
-  aiUnavailable: 'Yapay zekâ şu an cevap veremedi. Biraz sonra tekrar dene.',
   notFound: 'Aradığın kayıt bulunamadı.',
 };

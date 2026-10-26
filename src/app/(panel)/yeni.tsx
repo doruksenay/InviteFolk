@@ -8,8 +8,6 @@ import { THEMES, type ThemeKey } from '@/core/themes';
 import type { EventRow } from '@/core/types';
 import { type Lang, LOCALE_TAG, useI18n } from '@/i18n';
 import { createEvent, getEvent, useQuery } from '@/lib/api';
-import { aiExtractInvitation } from '@/lib/api-ai';
-import { pickPhotoBase64 } from '@/lib/media-pick';
 import { toIso } from '@/ui/eventForm/dates';
 import { LangPicker, ThemePicker } from '@/ui/eventForm/Pickers';
 import { GuestAdder } from '@/ui/guests/GuestAdder';
@@ -56,8 +54,6 @@ export default function NewEvent() {
   const [rosterSize, setRosterSize] = useState('14');
   const [weekly, setWeekly] = useState(true);
   const [message, setMessage] = useState('');
-  const [aiBusy, setAiBusy] = useState(false);
-  const [aiNote, setAiNote] = useState<{ tone: 'success' | 'error' | 'info'; text: string } | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -266,36 +262,6 @@ export default function NewEvent() {
     </View>
   );
 
-  // Basılı davetiyenin fotoğrafından alanları doldur (yalnızca boş alanlar değil: okunanlar yazılır, kullanıcı düzeltir).
-  const fillFromPhoto = async () => {
-    setAiNote(null);
-    try {
-      const img = await pickPhotoBase64();
-      if (!img) return;
-      setAiBusy(true);
-      const f = await aiExtractInvitation(img);
-      let n = 0;
-      const set = (v: string | null, fn: (s: string) => void) => {
-        if (v && v.trim()) {
-          fn(v.trim());
-          n++;
-        }
-      };
-      set(f.title, setTitle);
-      set(f.host_names, setHosts);
-      if (f.date && /^\d{4}-\d{2}-\d{2}$/.test(f.date)) set(f.date, setDate);
-      if (f.time && /^\d{2}:\d{2}$/.test(f.time)) set(f.time, setTime);
-      set(f.venue_name, setVenue);
-      set(f.venue_address, setAddress);
-      set(f.message, (v) => setMessage(v.slice(0, 400)));
-      setAiNote(n ? { tone: 'success', text: t('tools.ai.filled') } : { tone: 'info', text: t('tools.ai.nothing') });
-    } catch (e) {
-      setAiNote({ tone: 'error', text: e instanceof Error ? e.message : String(e) });
-    } finally {
-      setAiBusy(false);
-    }
-  };
-
   // ------------------------------------------------------------------ adım 2
   const half = wide || width >= 640 ? '48.5%' : '100%';
   const stepTwo = (
@@ -305,22 +271,6 @@ export default function NewEvent() {
         <LangPicker value={eventLang} onChange={setEventLang} />
         <Caption>{t('wizard.languageHint')}</Caption>
       </View>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('tools.ai.fromPhoto')}
-        onPress={fillFromPhoto}
-        disabled={aiBusy}
-        style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 22, backgroundColor: color.lavenderTint, transform: [{ scale: pressed ? 0.99 : 1 }] })}>
-        <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon name={aiBusy ? 'refresh' : 'camera'} size={20} color={color.lavenderInk} />
-        </View>
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text style={{ fontFamily: font.bold, fontSize: 15, color: color.lavenderInk }}>{aiBusy ? t('tools.ai.reading') : t('tools.ai.fromPhoto')}</Text>
-          <Caption>{t('tools.ai.fromPhotoHint')}</Caption>
-        </View>
-        <Icon name="sparkle" size={18} color={color.lavenderInk} />
-      </Pressable>
-      {aiNote && <Notice tone={aiNote.tone} text={aiNote.text} />}
       <Field label={t('wizard.fields.title')} placeholder={ec.sample.title.replace('\n', ' ')} value={title} onChangeText={setTitle} hint={t('wizard.fields.titleHint')} multiline={false} />
       <Field label={t('wizard.fields.hosts')} placeholder={t('wizard.fields.hostsPlaceholder')} value={hosts} onChangeText={setHosts} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>

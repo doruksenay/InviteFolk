@@ -19,7 +19,7 @@ Invitefolk; düğün, nişan, kına, sünnet, bebek partisi ve cinsiyet partisi,
 - Kendi davetiye tasarımı: görsel ya da PDF yükle (PDF web panelinde), isim alanını sürükle, yazı tipini/boyutunu/rengini seç; her davetli kendi adını tasarımın üstünde görür.
 - Oturma planı: masa ekle (4–14 kişi), sürükle-bırak, sahne/dans pisti/bar/DJ/pasta/foto köşesi/giriş, hızlı kurulum ("300 kişi, 10'luk masa"), otomatik yerleştirme, önizleme, masaları WhatsApp/e-posta ile bildirme, masa kartı ve isimlik çıktısı.
 - Etkinlik düzenleme: tüm bilgiler, menü seçenekleri, en fazla 3 özel soru, hediye notu, otomatik hatırlatma, arşivleme, silme.
-- Davetiye sayfası düzenleyici: 34 şablon (düğün, nişan, kına, sünnet, bebek partisi, mevlit, mezuniyet, bekârlığa veda, doğum günü, yemek, kurumsal, halı saha, basketbol, voleybol…), hareketli şablonlar (süzülen yaprak, konfeti, parıltı, yıldız, baloncuk, kalp; şablonun varsayılanı ya da elle seçilir, "hareketi azalt" ayarına uyar), "Katılacağım" deyince konfeti, mühürlü zarf açılışı, geri sayım, birden fazla tören (kına + nikâh + düğün) programı, takı/IBAN kartı (kopyalanır, masaya karekodlu kart basılır), fon müziği, fotoğraf galerisi, video davetiye, yapay zekâ ile davet metni.
+- Davetiye sayfası düzenleyici: 34 şablon (düğün, nişan, kına, sünnet, bebek partisi, mevlit, mezuniyet, bekârlığa veda, doğum günü, yemek, kurumsal, halı saha, basketbol, voleybol…), hareketli şablonlar (süzülen yaprak, konfeti, parıltı, yıldız, baloncuk, kalp; şablonun varsayılanı ya da elle seçilir, "hareketi azalt" ayarına uyar), "Katılacağım" deyince konfeti, mühürlü zarf açılışı, geri sayım, birden fazla tören (kına + nikâh + düğün) programı, takı/IBAN kartı (kopyalanır, masaya karekodlu kart basılır), fon müziği, fotoğraf galerisi, video davetiye.
 - Davetliye sorulanlar: kişi sayısının içinde kaç çocuk, yanındakilerin adları; tarih anketi (tarih belli değilse); "kim ne getiriyor" listesi (doğum günü, yemek).
 - Ortak yöneticiler: eş, aile ya da arkadaş e-postayla davet edilir ve birlikte yönetir; silme yalnızca sahibe açık.
 - Duyuru: saat/yer değişikliği davetiye sayfasının üstünde görünür; istenirse WhatsApp, e-posta ya da SMS ile de gider.
@@ -30,7 +30,6 @@ Invitefolk; düğün, nişan, kına, sünnet, bebek partisi ve cinsiyet partisi,
 - Anı defteri: davetliler davetiyeden ya da masadaki karekoddan dilek ve tebrik bırakır; organizatör onaylar, gizler, siler; isterse davetliler de okur.
 - Bilgi toplama linki: aile gruplarına atılan tek link; davetli adını, telefonunu, kişi sayısını kendisi yazar, organizatör onaylayınca listeye girer.
 - SMS yedeği: WhatsApp'a ulaşılamayan davet ve hatırlatmalar SMS ile gider (Netgsm).
-- Basılı davetiyeden doldurma: davetiyenin fotoğrafından başlık, tarih, saat ve yer yapay zekâ ile okunur.
 - Hava durumu: etkinliğe 14 gün kala davetli sayfasında tahmin.
 - Takım sporları (halı saha, basketbol, voleybol): kadro ve yedek listesi (kadro dolunca yedeğe, biri çıkınca ilk yedek kadroya), kişi başı ücret ve "kim ödedi" takibi (oyuncu "ödedim" der, organizatör onaylar), her hafta otomatik tekrar ve davet, seviye ve mevkiye göre dengeli takım (kaleci; oyun kurucu/pivot; pasör/libero takımlara eşit dağılır), maç skoru ve gol/sayılar, maçın oyuncusu oylaması, gol krallığı, takvime abone olma (her hafta kendiliğinden).
 - Rehber: tüm etkinliklerde ortak kişi listesi.
@@ -107,13 +106,13 @@ npx expo start               # Expo Go ile telefonda dene; w: web
    | tam | 1.000 ₺ | 20 | 1.000 | 2.000 | 2.000 |
    | b2b | — | 200 | 5.000 | 20.000 | 20.000 |
 
-   | Paket | Ortak yönetici | Galeri | Albüm | SMS/gün | Yapay zekâ/gün | Müzik | Video | Kapıda giriş | Bilgi toplama |
-   |---|---|---|---|---|---|---|---|---|---|
-   | free | 0 | 3 | — | — | 3 | — | — | — | — |
-   | temel | 1 | 8 | — | — | 20 | ✓ | — | — | ✓ |
-   | otomatik | 2 | 12 | 300 | 100 | 40 | ✓ | — | ✓ | ✓ |
-   | tam | 5 | 24 | 1.500 | 300 | 100 | ✓ | ✓ | ✓ | ✓ |
-   | b2b | 20 | 24 | 5.000 | 2.000 | 500 | ✓ | ✓ | ✓ | ✓ |
+   | Paket | Ortak yönetici | Galeri | Albüm | SMS/gün | Müzik | Video | Kapıda giriş | Bilgi toplama |
+   |---|---|---|---|---|---|---|---|---|
+   | free | 0 | 3 | — | — | — | — | — | — |
+   | temel | 1 | 8 | — | — | ✓ | — | — | ✓ |
+   | otomatik | 2 | 12 | 300 | 100 | ✓ | — | ✓ | ✓ |
+   | tam | 5 | 24 | 1.500 | 300 | ✓ | ✓ | ✓ | ✓ |
+   | b2b | 20 | 24 | 5.000 | 2.000 | ✓ | ✓ | ✓ | ✓ |
 
    Ortak yöneticinin işlemleri etkinlik sahibinin paketinden ve kotalarından düşer.
 
@@ -132,7 +131,6 @@ npx supabase functions deploy                          # tümü; JWT ayarları s
 | `invitation-design` | Davetliye tasarım görseli, müzik, video ve galerinin kısa süreli imzalı linkleri |
 | `send-sms` | SMS ile davet, hatırlatma, duyuru (Netgsm); WhatsApp ulaşmazsa yedek |
 | `cohost-invite` | Ortak yönetici davet e-postası |
-| `ai-assist` | Davet metni yazma ve basılı davetiyeden bilgi okuma (Claude API; günlük hak paketten) |
 | `album-upload` | Davetlinin albüme tek kullanımlık imzalı linkle fotoğraf yüklemesi |
 | `weather` | Davetli sayfası için hava tahmini (Open-Meteo, 3 saat önbellek) |
 | `calendar` | Haftalık maçlar için takvim aboneliği (ICS) |
@@ -140,7 +138,7 @@ npx supabase functions deploy                          # tümü; JWT ayarları s
 | `iyzico-checkout`, `iyzico-callback` | Web ödemesi |
 | `revenuecat-webhook` | Mağaza satın alma ve iadeleri |
 
-- WhatsApp kurulumu, şablon metinleri (`davet_lcv`, `davet_masa`, `davet_duyuru`; TR ve EN), SMS, yapay zekâ, e-posta ve zamanlama (pg_cron): **[docs/automation.md](docs/automation.md)**
+- WhatsApp kurulumu, şablon metinleri (`davet_lcv`, `davet_masa`, `davet_duyuru`; TR ve EN), SMS, e-posta ve zamanlama (pg_cron): **[docs/automation.md](docs/automation.md)**
 - Ödeme kurulumu (App Store Connect, Play Console, RevenueCat, iyzico, sandbox testleri): **[docs/payments.md](docs/payments.md)**
 - Mağaza metinleri, App Privacy / Veri Güvenliği cevapları, ekran görüntüsü planı: **[docs/store-listing.md](docs/store-listing.md)**
 
@@ -218,7 +216,6 @@ public/zxing/                  Karekod okuyucu WASM (yalnızca web, yerleşik ok
 - Ortak yönetici yalnızca davet edilen e-postayla giriş yapıp linki bir kez kabul edebilir; davet anahtarı kullanılınca değişir. Ortak yönetici etkinliği silemez ya da arşivleyemez, başkalarını davet edemez, takı/IBAN bilgisini değiştiremez (IBAN değişiklikleri denetim kaydına yazılır), başkasının rehberindeki kişileri düzeltemez ve etkinliğe yalnızca kendi kişilerini bağlar. Davet e-postaları kullanıcı başına günde 20 ve aynı adrese 10 dakikada bir ile sınırlı.
 - Herkese açık kısa sayfalar (`/a`, `/h`, `/k`) 12+ karakterlik rastgele kodla çalışır, kod tek tıkla yenilenir; yalnızca gereken alanları döndürür (ör. hediye sayfası yalnızca organizatörün herkese açık işaretlediği IBAN'ı). Bilgi toplama formunda hız ve bekleyen başvuru sınırı vardır, telefonla tekrar engellenir.
 - IBAN sunucuda mod-97 ile doğrulanır; uygulama para toplamaz, yalnızca bilgiyi gösterir. "Ödedim" yalnızca oyuncunun beyanıdır; ödemeyi organizatör işaretler.
-- Yapay zekâ anahtarı yalnızca sunucuda; günlük kullanım hakkı veritabanında sayılır. Görseller kaydedilmez.
 
 **Sunucu fonksiyonları**
 - Kullanıcı adına çalışan fonksiyonlar kullanıcının yetkisiyle okur; servis anahtarı yalnızca istemcinin yazamadığı kayıtlar için.
@@ -244,7 +241,6 @@ public/zxing/                  Karekod okuyucu WASM (yalnızca web, yerleşik ok
 - Yasal metinlerdeki `[Şirket Unvanı]`, `[Adres]`, `[KEP]`, `[e-posta]` alanlarını doldurup bir avukata kontrol ettirin.
 - Meta'da `davet_lcv`, `davet_masa` ve `davet_duyuru` şablonlarını TR ve EN onaylatın.
 - SMS için Netgsm hesabı açıp başlığınızı (gönderici adı) onaylatın ve İYS kaydını yapın; `supabase/functions/_shared/sms.ts` içindeki istek biçimini Netgsm'in güncel dokümanıyla doğrulayın.
-- Yapay zekâ için Anthropic API anahtarı alın (`ANTHROPIC_API_KEY`); yoksa bu düğmeler "şu an kullanılamıyor" der, uygulamanın geri kalanı etkilenmez.
 - Fon müziği için kullanıcıların telif hakkına sahip olduğu ya da serbest parçalar yüklediğini kullanım koşullarında belirtin.
 - App Store Connect / Play Console'da `invitefolk_temel`, `invitefolk_otomatik`, `invitefolk_tam` ürünlerini, RevenueCat'te webhook'u, iyzico'da üye işyerini kurun.
 - Gerçek telefonlarda test: oturma planında sürükleme, bildirimler, satın alma (sandbox), PDF/görsel yükleme.

@@ -26,11 +26,6 @@ export const tools: typeof TR = {
       title: 'Invitation text',
       hint: 'Shown under the title on the card. Leave it blank to use a ready-made text for this event type.',
       placeholder: 'We would love you to celebrate the happiest day of our lives with us.',
-      ai: 'Let AI write it',
-      aiTone: 'Tone',
-      tones: { warm: 'Warm', formal: 'Formal', fun: 'Playful', short: 'Short' },
-      aiWriting: 'Writing…',
-      aiLeft: 'Left today: {count}',
     },
     look: {
       title: 'Opening and countdown',
@@ -358,14 +353,6 @@ export const tools: typeof TR = {
     noVotes: 'No votes yet',
     leaders: { futbol: 'Top scorers', basket: 'Top scorers', voleybol: 'Top scorers' },
     paidClaims: { one: '{count} player says they have paid', other: '{count} players say they have paid' },
-  },
-
-  ai: {
-    fromPhoto: 'Fill in from a printed invitation',
-    fromPhotoHint: 'Choose a photo of the invitation; the title, date, time and place are filled in for you.',
-    reading: 'Reading the invitation…',
-    filled: 'Filled in from the invitation. Check and correct anything as needed.',
-    nothing: "We couldn't read the invitation. Try a clearer photo.",
   },
 
   list: {

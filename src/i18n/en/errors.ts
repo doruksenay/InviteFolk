@@ -19,7 +19,6 @@ export const errors: typeof TR = {
     sms: 'daily text messages',
     cohosts: 'number of co-hosts',
     album: 'album photos',
-    ai: 'daily AI uses',
     signup: 'items left',
   },
   planFeature: "This isn't included in your plan: {what}. You can upgrade on the Plans page.",
@@ -32,6 +31,5 @@ export const errors: typeof TR = {
     album: 'photo album',
     sms: 'text messages',
   },
-  aiUnavailable: "The AI assistant couldn't answer right now. Try again in a moment.",
   notFound: "We couldn't find what you were looking for.",
 };

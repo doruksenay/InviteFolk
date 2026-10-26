@@ -149,7 +149,7 @@ export async function getSignupClaims(eventId: string): Promise<{ invitation_id:
 }
 
 // --- Paket sınırları (etkinlik sahibinin paketi; ortak yönetici de görür)
-export type EventLimits = { plan: string; limits: import('@/core/types').PlanLimits; is_owner: boolean; cohosts: number; album_used: number; ai_left: number };
+export type EventLimits = { plan: string; limits: import('@/core/types').PlanLimits; is_owner: boolean; cohosts: number; album_used: number };
 
 export async function getEventLimits(eventId: string): Promise<EventLimits> {
   return must(await supabase.rpc('event_limits', { p_event: eventId })) as EventLimits;

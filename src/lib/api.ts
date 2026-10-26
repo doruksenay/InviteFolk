@@ -40,7 +40,6 @@ export function friendlyError(err: DbError | Error | unknown): Error {
     const what = (e.details ?? '') as keyof ReturnType<typeof dict>['errors']['planFeatureWhat'];
     return new Error(t('errors.planFeature', { what: dict(currentLang()).errors.planFeatureWhat[what] ?? '' }));
   }
-  if (msg.includes('ai_unavailable')) return new Error(t('errors.aiUnavailable'));
   if (msg.includes('rate_limited')) return new Error(t('errors.rateLimited'));
   if (msg.includes('forbidden') || e.code === '42501' || e.code === 'PGRST301') return new Error(t('errors.forbidden'));
   if (msg.includes('not_found') || e.code === 'P0002') return new Error(t('errors.notFound'));

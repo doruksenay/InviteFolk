@@ -121,5 +121,11 @@ await as(OWN, `update public.events set settings = (settings - 'album') || '{"gu
 const pe2 = (await one(null, `select public.get_public_event('${ev.public_slug}') j`)).j;
 ok(pe2 && pe2.album === false && pe2.guestbook === true, 'yalnızca anı defteri açıkken de sayfa açılır');
 
+const aiGone = (await svc(`select count(*)::int n from pg_proc where proname = 'ai_take'`)).rows[0].n === 0
+  && (await svc(`select count(*)::int n from information_schema.columns where table_name = 'plan_limits' and column_name = 'ai_per_day'`)).rows[0].n === 0;
+ok(aiGone, 'yapay zekâ sayacı ve sınırı kaldırıldı');
+const lim2 = (await one(OWN, `select public.event_limits('${ev.id}') j`)).j;
+ok(lim2 && !('ai_left' in lim2) && typeof lim2.album_used === 'number', 'etkinlik sınırlarında yapay zekâ yok');
+
 console.log(`\nSONUÇ: ${pass} geçti, ${fail} kaldı`);
 process.exit(fail ? 1 : 0);

@@ -9,7 +9,6 @@ import { getTheme, THEME_EFFECTS, type ThemeEffect } from '@/core/themes';
 import type { EventRow, EventSettings, GiftInfo, InvitationWithContact } from '@/core/types';
 import { eventLang, LOCALE_TAG, makeT, useI18n } from '@/i18n';
 import { getEvent, useQuery } from '@/lib/api';
-import { type AiTone, aiWriteMessage } from '@/lib/api-ai';
 import { updateEvent } from '@/lib/api-guests';
 import { patchSettings } from '@/lib/api-page';
 import { type EventLimits, getEventLimits, getSignupClaims } from '@/lib/api-tools';
@@ -65,9 +64,6 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
   const locked = (plan: string) => t('tools.locked', { plan });
 
   const [message, setMessage] = useState(s0.message ?? '');
-  const [tone, setTone] = useState<AiTone>('warm');
-  const [aiBusy, setAiBusy] = useState(false);
-  const [aiLeft, setAiLeft] = useState<number | null>(limits?.ai_left ?? null);
   const [envelope, setEnvelope] = useState(!!s0.envelope?.enabled);
   const [seal, setSeal] = useState(s0.envelope?.seal ?? '');
   const [countdown, setCountdown] = useState(!!s0.countdown);
@@ -111,20 +107,6 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
   const back = () => (router.canGoBack() ? router.back() : router.replace({ pathname: '/etkinlik/[id]', params: { id: event.id } }));
   const copy = eventCopy(event.type, evLang);
   const where = [event.venue_name, event.venue_address].filter(Boolean).join(', ');
-
-  const writeWithAi = async () => {
-    setAiBusy(true);
-    setErr(null);
-    try {
-      const text = await aiWriteMessage({ lang: evLang, type: event.type, title: event.title, hosts: event.host_names ?? undefined, tone, hint: message.trim() || undefined });
-      setMessage(text.slice(0, 400));
-      setAiLeft((n) => (n === null ? n : Math.max(0, n - 1)));
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : String(e));
-    } finally {
-      setAiBusy(false);
-    }
-  };
 
   /** Ayarları kaydeder (medya anahtarlarına dokunmaz: onlar yüklenirken ayrı kaydedilir). */
   const save = async (extra?: { pollChosen?: string; startsAt?: string }) => {
@@ -247,13 +229,6 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
           accessibilityLabel={t('tools.page.message.title')}
           style={{ minHeight: 110, borderRadius: radius.md, backgroundColor: color.surfaceSoft, padding: 14, fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: color.ink, textAlignVertical: 'top' }}
         />
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
-          {(['warm', 'formal', 'fun', 'short'] as AiTone[]).map((k) => (
-            <OptionChip key={k} small label={t(`tools.page.message.tones.${k}`)} on={tone === k} onPress={() => setTone(k)} />
-          ))}
-          <Button label={aiBusy ? t('tools.page.message.aiWriting') : t('tools.page.message.ai')} icon="sparkle" variant="secondary" loading={aiBusy} onPress={writeWithAi} disabled={aiLeft === 0} />
-          {aiLeft !== null && <Caption>{t('tools.page.message.aiLeft', { count: aiLeft })}</Caption>}
-        </View>
       </Surface>
 
       {/* Açılış ve sayaç */}

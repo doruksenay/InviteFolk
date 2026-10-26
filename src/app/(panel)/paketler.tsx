@@ -157,7 +157,6 @@ export default function PlansScreen() {
       ...(l.checkin ? [t('billing.included.checkin')] : []),
       ...(l.album_photos > 0 ? [t('billing.included.album', { count: n(l.album_photos) })] : []),
       ...(l.sms_per_day > 0 ? [t('billing.included.sms', { count: n(l.sms_per_day) })] : []),
-      ...(l.ai_per_day > 0 ? [t('billing.included.ai', { count: n(l.ai_per_day) })] : []),
     ];
   };
 

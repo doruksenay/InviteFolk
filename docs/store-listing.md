@@ -58,7 +58,6 @@ Invitefolk; düğün, nişan, kına, sünnet, bebek ve cinsiyet partisi, mevlit,
 - Canlı albüm: davetliler masadaki karekodla fotoğraf, video ve sesli mesaj yüklesin; salon ekranında slayt gösterisi olarak aksın
 - Anı defteri: dilekler ve tebrikler tek defterde, istersen önce sen onayla
 - Aile gruplarına tek link at, davetliler bilgilerini kendisi yazsın
-- Basılı davetiyenin fotoğrafını çek, bilgiler kendiliğinden dolsun; davet metnini yapay zekâ yazsın
 
 **Doğum günü, yemek ve diğer davetler**
 - Tarih anketi: herkese uyan günü bul
@@ -109,7 +108,6 @@ Invitefolk is an invitation and RSVP app for every kind of gathering: weddings, 
 - Live album: guests upload photos, videos and voice messages from the QR code on the table, streaming as a slideshow on the venue screen
 - Guestbook: wishes and congratulations in one place, approved by you first if you like
 - Share one link with family groups and let guests fill in their own details
-- Snap your printed invitation and the details fill in by themselves; let AI write your invitation text
 
 **Birthdays, dinners and more**
 - Date poll: find the day that works for everyone
@@ -159,7 +157,7 @@ Bu sınırlar `public.plan_limits` tablosuyla aynı olmalı. Tabloyu değiştiri
 Notlar:
 - Davetli verilerini organizatör girer; Apple'ın tanımına göre bunlar "üçüncü kişiler hakkında kullanıcı içeriği"dir ve yukarıda beyan edilmiştir.
 - Kamera yalnızca kapıda giriş karekodunu okumak için kullanılır; görüntü cihazdan çıkmaz ve saklanmaz (toplanan veri değildir). Mobil uygulama mikrofon kullanmaz; davetliler sesli mesajı yalnızca web sayfasından, kendi tarayıcılarının izniyle kaydeder.
-- "Basılı davetiyeden doldur" seçilirse fotoğraf, metni okumak için hizmet sağlayıcı olarak yapay zekâ API'sine (Anthropic) gönderilir ve saklanmaz; SMS'ler Netgsm, e-postalar Resend, WhatsApp mesajları Meta üzerinden iletilir. Bunlar veri işleyendir, üçüncü tarafla paylaşım sayılmaz.
+- SMS'ler Netgsm, e-postalar Resend, WhatsApp mesajları Meta üzerinden iletilir. Bunlar veri işleyendir, üçüncü tarafla paylaşım sayılmaz.
 - Hesap silme uygulama içinden yapılır: *Ayarlar → Hesabı sil*. Bu, App Store Yönergesi 5.1.1(v) gereğidir.
 - İnceleme notu: giriş tek kullanımlık e-posta koduyla yapılır. *App Review Information* bölümüne, inceleme ekibinin gelen kodu okuyabileceği bir demo e-posta kutusunun bilgilerini yazın. (ör. paylaşılan bir test posta kutusu).
 

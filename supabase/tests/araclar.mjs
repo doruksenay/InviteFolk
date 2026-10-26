@@ -279,11 +279,7 @@ const leaders = (await one(null, `select public.get_invitation('${t3[0].token}')
 ok(leaders && leaders[0].name === 'Oyuncu 2' && leaders[0].goals === 2, 'gol krallığı');
 ok((await as(EVIL, `select count(*)::int n from public.matches`)).rows[0].n === 0, 'yabancı maç kayıtlarını göremez');
 
-console.log('Yapay zekâ ve medya kotası:');
-const takes = [];
-for (let i = 0; i < 41; i++) takes.push((await svc(`select public.ai_take('${OWN}') t`)).rows[0].t);
-ok(takes.filter(Boolean).length === 40 && takes[40] === false, 'Otomatik pakette günde 40 yapay zekâ isteği');
-ok(await denied(OWN, `select public.ai_take('${OWN}')`), 'kullanıcı yapay zekâ sayacını kendisi çağıramaz');
+console.log('Medya ve önbellek:');
 ok(await denied(OWN, `select * from public.weather_cache`), 'hava durumu önbelleği istemciye kapalı');
 
 console.log('Etkinlik sınırları:');

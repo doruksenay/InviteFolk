@@ -54,18 +54,6 @@ export async function pickPhotos(max: number): Promise<PickedPhoto[]> {
   return out;
 }
 
-export async function pickPhotoBase64(_source: "library" | "camera" = "library"): Promise<{ base64: string; mime: 'image/jpeg' } | null> {
-  const res = await DocumentPicker.getDocumentAsync({ type: ['image/jpeg', 'image/png', 'image/webp'], multiple: false });
-  if (res.canceled || !res.assets?.length) return null;
-  const f = await fileOf(res.assets[0]);
-  if (!f) return null;
-  const r = await toJpeg(f, 1600);
-  const buf = new Uint8Array(await r.blob.arrayBuffer());
-  let bin = '';
-  for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
-  return { base64: btoa(bin), mime: 'image/jpeg' };
-}
-
 export async function pickAudio(): Promise<PickedFile | null> {
   const res = await DocumentPicker.getDocumentAsync({ type: AUDIO_TYPES, multiple: false });
   if (res.canceled || !res.assets?.length) return null;

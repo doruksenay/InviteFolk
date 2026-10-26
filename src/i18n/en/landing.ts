@@ -55,7 +55,7 @@ export const landing: typeof TR = {
     title: 'Ready in',
     titleAccent: 'three steps',
     items: [
-      { icon: 'wand', title: 'Create your event', body: 'Pick a type and a template; add the date, place and your message. AI can write the text for you too.' },
+      { icon: 'wand', title: 'Create your event', body: 'Pick a type and a template; add the date, place and your message.' },
       { icon: 'send', title: 'Send it to your guests', body: 'Add your list and send over WhatsApp one by one or automatically. Everyone gets their own link.' },
       { icon: 'chart', title: 'Watch the replies', body: 'Who’s coming, how many, which table: all live. On the day, the album and guestbook fill up.' },
     ],

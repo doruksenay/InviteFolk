@@ -30,7 +30,6 @@ export async function pickPhotos(max: number): Promise<PickedPhoto[]> {
   return out;
 }
 
-/** Tek fotoğraf, base64 (yapay zekâya gönderim için; en uzun kenar 1600 piksel). */
 export async function pickPhotoBase64(source: 'library' | 'camera' = 'library'): Promise<{ base64: string; mime: 'image/jpeg' } | null> {
   const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], quality: 1, exif: false };
   const res = source === 'camera' ? await ImagePicker.launchCameraAsync(opts) : await ImagePicker.launchImageLibraryAsync(opts);

@@ -8,7 +8,7 @@ Bu belge sunucu tarafındaki otomatik işleri anlatır:
 - Halı saha için haftalık tekrar
 - Organizatöre telefon bildirimi
 - SMS yedeği ve duyurular
-- Yapay zekâ yardımcısı, hava durumu, takvim aboneliği, albüm yükleme
+- Hava durumu, takvim aboneliği, albüm yükleme
 
 ## Fonksiyonlar
 
@@ -20,7 +20,6 @@ Bu belge sunucu tarafındaki otomatik işleri anlatır:
 | `whatsapp-webhook` | Meta | Teslim durumlarını ve davetli cevaplarını işler; ulaşmayan davet/hatırlatma için (açıksa) bir kez SMS yedeği |
 | `send-sms` | Uygulama (organizatör) | SMS ile davet, hatırlatma ya da duyuru (Netgsm) |
 | `cohost-invite` | Uygulama (etkinlik sahibi) | Ortak yönetici davetini oluşturur ve `/katil/<anahtar>` linkini e-postalar |
-| `ai-assist` | Uygulama (giriş yapmış kullanıcı) | `write`: davet metni; `extract`: basılı davetiye fotoğrafından alanlar. Günlük hak `plan_limits.ai_per_day` |
 | `album-upload` | Davetli (girişsiz) | Albüm kodu ile tek kullanımlık imzalı yükleme linki verir, yüklemeyi onaylar, herkese açık albümü listeler |
 | `weather` | Davetli sayfası | Etkinlik 14 gün içindeyse Open-Meteo tahmini (3 saat önbellek, anahtar gerekmez) |
 | `calendar` | Takvim uygulaması | Davet anahtarıyla ICS; haftalık maçlarda `RRULE:FREQ=WEEKLY`, programdaki törenler ayrı etkinlik |
@@ -53,9 +52,6 @@ POST { event_id, invitation_ids?: uuid[], kind?: 'invite' | 'reminder' | 'table'
 | `WHATSAPP_ANNOUNCE_TEMPLATE` | hayır | Varsayılan `davet_duyuru` |
 | `NETGSM_USERCODE`, `NETGSM_PASSWORD`, `NETGSM_HEADER` | SMS için | Netgsm abone numarası, API şifresi ve onaylı gönderici adı |
 | `NETGSM_URL` | hayır | Varsayılan `https://api.netgsm.com.tr/sms/rest/v2/send` |
-| `ANTHROPIC_API_KEY` | yapay zekâ için | console.anthropic.com → API Keys. Yoksa yapay zekâ düğmeleri "şu an kullanılamıyor" der |
-| `AI_MODEL` | hayır | Varsayılan `claude-sonnet-5-5` |
-| `ANTHROPIC_VERSION` | hayır | Varsayılan `2023-06-01` |
 | `WHATSAPP_TEMPLATE_LANG` / `WHATSAPP_TEMPLATE_LANG_EN` | hayır | Varsayılan `tr` / `en` |
 | `RESEND_API_KEY` | e-posta için | resend.com → API Keys (yalnızca "Sending access") |
 | `EMAIL_FROM` | e-posta için | `Invitefolk <hello@invitefolk.app>`; alan adı Resend'de doğrulanmış olmalı (SPF, DKIM) |
@@ -106,12 +102,6 @@ Değişkenler: `{{1}}` davetli adı, `{{2}}` etkinlik adı, `{{3}}` duyuru metni
 - Metinler `supabase/functions/_shared/messages.ts` içinde, etkinlik dilinde; Türkçe karakterler korunur (uzun mesajlar birden fazla SMS sayılır).
 - Davet SMS'i ticari ileti değildir (kişinin davet edildiği etkinlik bilgisi), bu yüzden `iysfilter` `0` gönderilir. Kampanya/pazarlama için kullanılmamalıdır.
 - `_shared/sms.ts` Netgsm REST v2 (`POST /sms/rest/v2/send`, Basic auth) biçimini kullanır; canlıya çıkmadan Netgsm'in güncel dokümanıyla ve bir test numarasıyla doğrulayın.
-
-## Yapay zekâ
-
-- `write`: tür, başlık, ev sahipleri, ton (sıcak/resmî/eğlenceli/kısa) ve isteğe bağlı ipucuyla 400 karakteri aşmayan davet metni. Yalnızca etkinlik başlığı ve ev sahibi adları gider; davetli bilgisi gönderilmez.
-- `extract`: basılı davetiyenin fotoğrafı (JPEG, uzun kenar ≤ 2000 px, ≤ 5 MB) modele gönderilir, JSON olarak başlık, ev sahipleri, tarih, saat, mekân, adres ve metin döner; görsel saklanmaz. Uygulama yalnızca okunan alanları doldurur, kullanıcı kontrol eder.
-- Günlük hak (`ai_per_day`) her başarılı çağrıdan önce veritabanında düşülür (`ai_take`), böylece paralel isteklerle aşılamaz.
 
 ## Albüm, takvim ve hava durumu
 
