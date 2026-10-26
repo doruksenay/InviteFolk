@@ -65,6 +65,7 @@ jobs:
         env:
           CREATE: ${{ inputs.create }}
           REF_OVERRIDE: ${{ vars.SUPABASE_PROJECT_REF }}
+          ORG_OVERRIDE: ${{ vars.SUPABASE_ORG_ID }}
         run: |
           set -euo pipefail
           auth=(-H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json")
@@ -72,8 +73,8 @@ jobs:
           ref="${REF_OVERRIDE:-$(find_ref)}"
           if [ -z "$ref" ]; then
             if [ "$CREATE" != "true" ]; then echo "::error::Supabase projesi yok; önce 'Yayınla'yı çalıştırın."; exit 1; fi
-            org=$(curl -fsS "${auth[@]}" "$API/organizations" | jq -r '.[0].id // empty')
-            [ -n "$org" ] || { echo "::error::Supabase hesabında organizasyon yok (supabase.com'da bir kez giriş yapıp organizasyon oluşturun)."; exit 1; }
+            org="${ORG_OVERRIDE:-$(curl -fsS "${auth[@]}" "$API/organizations" | jq -r '(.[0].slug // .[0].id) // empty')}"
+            [ -n "$org" ] || { echo "::error::Token Supabase organizasyonunu göremiyor. Organizasyon adresindeki kodu (supabase.com/dashboard/org/<kod>) GitHub Variables'a SUPABASE_ORG_ID olarak ekleyin ya da token'a 'Account and organization' yetkisi verin."; exit 1; }
             # Veritabanı şifresi bir kez üretilir ve hiçbir yerde saklanmaz: CLI geçici giriş rolüyle bağlanır.
             pw=$(openssl rand -hex 24); echo "::add-mask::$pw"
             echo "Proje oluşturuluyor: $PROJECT_NAME (eu-central-1)"
