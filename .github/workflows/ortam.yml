@@ -193,8 +193,13 @@ jobs:
           else
             echo "::warning::SMTP_USER/SMTP_PASSWORD yok: giriş kodu e-postaları yalnızca Supabase ekibindeki adreslere ve saatte 2 tane gider."
           fi
-          curl -fsS -X PATCH -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
-            "$API/projects/$REF/config/auth" -d "$cfg" > /dev/null
+          resp=$(curl -sS -w '\n%{http_code}' -X PATCH -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
+            "$API/projects/$REF/config/auth" -d "$cfg")
+          code=${resp##*$'\n'}
+          if [ "$code" -ge 300 ]; then
+            echo "::error::Giriş ayarları yazılamadı (HTTP $code): $(printf '%s' "${resp%$'\n'*}" | tr -d '\r\n' | head -c 400)"
+            exit 1
+          fi
           echo "Giriş ayarları yazıldı."
 
       - name: Özet

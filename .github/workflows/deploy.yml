@@ -131,7 +131,8 @@ jobs:
     timeout-minutes: 20
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ needs.ortam.outputs.cf_account }}
+      # Hesap kimliği secret olarak girildiyse GitHub onu iş çıktısı olarak aktarmaz; doğrudan okunur.
+      CLOUDFLARE_ACCOUNT_ID: ${{ needs.ortam.outputs.cf_account || vars.CLOUDFLARE_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
       PAGES_PROJECT: ${{ needs.ortam.outputs.pages_project }}
       EXPO_PUBLIC_SUPABASE_URL: https://${{ needs.ortam.outputs.ref }}.supabase.co
       EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ needs.ortam.outputs.publishable_key }}
