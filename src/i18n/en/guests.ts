@@ -12,7 +12,7 @@ export const guests: typeof TR = {
     fromPhone: 'Phone contacts',
     fromPhoneHint: 'Pick people',
     fromMine: 'My contacts',
-    fromMineHint: 'From past events',
+    fromMineHint: 'From your contacts or another event’s list',
     manualTitle: 'Add manually',
     name: 'Name or household',
     namePlaceholder: 'Ahmet Yılmaz and family',
@@ -82,6 +82,8 @@ export const guests: typeof TR = {
     empty: 'No matching contacts.',
   },
   mine: {
+    fromEvent: 'Copy the list from another event',
+    allContacts: 'All contacts',
     title: 'Add from',
     titleAccent: 'my contacts',
     subtitle: 'People you’ve added before. Invite the same guests to the henna night and the wedding in one tap.',

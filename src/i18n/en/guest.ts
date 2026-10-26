@@ -54,6 +54,7 @@ export const guest: typeof TR = {
     pending: 'Message received; it will appear once the host approves it.',
     another: 'Write another message',
   },
+  info: { kicker: 'GETTING THERE', directions: 'Directions', parking: 'Parking', stay: 'Accommodation', dress: 'Dress code' },
   calendar: { subscribe: 'Add every week to my calendar' },
   children: {
     question: 'How many of them are children?',

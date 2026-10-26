@@ -87,6 +87,12 @@ export async function listMyContacts(): Promise<Contact[]> {
   return must(await supabase.from('contacts').select('*').order('name', { ascending: true }).limit(5000)) as Contact[];
 }
 
+/** Bir etkinliğe davet edilmiş kişilerin kimlikleri (başka etkinlikten listeyi aktarmak için). */
+export async function contactIdsOfEvent(eventId: string): Promise<Set<string>> {
+  const rows = must(await supabase.from('invitations').select('contact_id').eq('event_id', eventId).limit(5000)) as { contact_id: string }[];
+  return new Set(rows.map((r) => r.contact_id));
+}
+
 /** Bu etkinliğe henüz davet edilmemiş kişiler. */
 export async function listContactsNotIn(eventId: string): Promise<Contact[]> {
   const [all, inv] = await Promise.all([

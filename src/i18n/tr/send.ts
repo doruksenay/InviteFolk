@@ -2,11 +2,19 @@ export const send = {
   title: 'Davetleri',
   titleAccent: 'gönder',
   subtitle: 'Kanalı seç. Her davetliye kendine özel cevap linki gider.',
-  kind: { invite: 'Davet', reminder: 'Hatırlatma' },
+  kind: { invite: 'Davet', reminder: 'Hatırlatma', thanks: 'Teşekkür' },
   kindHint: {
     invite: 'Henüz davet gitmemiş {count} haneye',
     inviteAll: 'Listedeki {count} haneye',
     reminder: 'Cevap vermemiş {count} haneye',
+    thanks: 'Gelen {count} haneye, etkinlikten sonra',
+  },
+  thanks: {
+    body: 'Her davetli için WhatsApp hazır teşekkür mesajıyla açılır; sen gönder’e basarsın. Ücretsizdir. Albüm açıksa mesajda albüm linki de olur.',
+    copyTitle: 'Metni kopyala',
+    copyBody: 'Aile gruplarına ya da sosyal medyaya tek mesaj olarak at.',
+    copy: 'Teşekkür metnini kopyala',
+    copied: 'Teşekkür metni kopyalandı.',
   },
   resendAll: 'Daha önce gönderilenlere de gönder',
   nobody: 'Bu seçime uyan davetli yok.',
@@ -66,5 +74,7 @@ export const send = {
   message: {
     invite: '{name}, {title} davetiniz: {when}\nKatılım durumunuzu buradan bildirebilirsiniz: {link}',
     reminder: '{name}, {title} için cevabınızı bekliyoruz: {when}\nBuradan tek dokunuşla bildirebilirsiniz: {link}',
+    thanks: '{name}, {title} gününde bizimle olduğunuz için çok teşekkür ederiz. Bu güzel anıyı sizinle paylaşmak bizim için çok değerliydi.',
+    thanksAlbum: '{name}, {title} gününde bizimle olduğunuz için çok teşekkür ederiz. O günün fotoğraf ve videolarını buradan görebilir, siz de ekleyebilirsiniz: {link}',
   },
 };

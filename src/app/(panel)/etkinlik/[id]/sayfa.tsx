@@ -66,6 +66,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
   const [message, setMessage] = useState(s0.message ?? '');
   const [envelope, setEnvelope] = useState(!!s0.envelope?.enabled);
   const [seal, setSeal] = useState(s0.envelope?.seal ?? '');
+  const [info, setInfo] = useState({ directions: s0.info?.directions ?? '', parking: s0.info?.parking ?? '', stay: s0.info?.stay ?? '', dress: s0.info?.dress ?? '' });
   const [countdown, setCountdown] = useState(!!s0.countdown);
   const [effect, setEffect] = useState<ThemeEffect | 'auto'>(s0.effect ?? 'auto');
   const [program, setProgram] = useState<ProgramDraft[]>(programToDraft(s0.program));
@@ -157,6 +158,9 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
     else drop.push('message');
     if (prog.length) patch.program = prog;
     else drop.push('program');
+    const infoOut = Object.fromEntries(Object.entries(info).map(([k, v]) => [k, v.trim().slice(0, 400)]).filter(([, v]) => v));
+    if (Object.keys(infoOut).length) patch.info = infoOut;
+    else drop.push('info');
     if (giftOut) patch.gift = giftOut;
     else if (isOwner) drop.push('gift');
     if (pollOn) patch.poll = { options: pollOpts, closed: pollClosed || !!extra?.pollChosen, chosen: extra?.pollChosen ?? s0.poll?.chosen ?? null };
@@ -255,6 +259,22 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
           <ProgramEditor value={program} onChange={setProgram} />
         </Surface>
       )}
+
+      {/* Ulaşım ve konaklama */}
+      <Surface style={{ gap: 12 }}>
+        <SectionHead title={t('tools.page.info.title')} hint={t('tools.page.info.hint')} />
+        {(['directions', 'parking', 'stay', 'dress'] as const).map((k) => (
+          <Field
+            key={k}
+            label={t(`tools.page.info.${k}`)}
+            placeholder={t(`tools.page.info.${k}Placeholder`)}
+            value={info[k]}
+            onChangeText={(v) => setInfo((cur) => ({ ...cur, [k]: v }))}
+            multiline={k !== 'dress'}
+            maxLength={400}
+          />
+        ))}
+      </Surface>
 
       {/* Takı / ödeme */}
       <Surface style={{ gap: 12 }}>

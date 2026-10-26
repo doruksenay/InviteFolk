@@ -3,11 +3,11 @@ import { View } from 'react-native';
 
 import { useI18n } from '@/i18n';
 import { useQuery } from '@/lib/api';
-import { addContactsToEvent, listContactsNotIn } from '@/lib/api-guests';
+import { addContactsToEvent, contactIdsOfEvent, listContactsNotIn, listEvents } from '@/lib/api-guests';
 import { Button, Caption, Notice, Skeleton } from '@/ui/primitives';
 import { Sheet } from '@/ui/Sheet';
 
-import { CheckRow, SearchField } from './common';
+import { CheckRow, OptionChip, SearchField } from './common';
 
 /** Kendi rehberindeki (önceki etkinliklerdeki) kişileri bu etkinliğe ekler. */
 export function MyContactsSheet({ open, onClose, eventId, onAdded }: { open: boolean; onClose: () => void; eventId: string; onAdded: (n: number) => void }) {
@@ -22,12 +22,28 @@ function Inner({ onClose, eventId, onAdded }: { onClose: () => void; eventId: st
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // Başka bir etkinliğin listesini aktarma: etkinlik seçilince yalnızca oradaki kişiler gösterilir ve hepsi seçilir.
+  const others = useQuery(() => listEvents(true).then((l) => l.filter((e) => e.id !== eventId)).catch(() => []), [eventId]);
+  const [from, setFrom] = useState<{ id: string; ids: Set<string> } | null>(null);
+  const pickEvent = async (id: string | null) => {
+    if (!id) {
+      setFrom(null);
+      return;
+    }
+    try {
+      const ids = await contactIdsOfEvent(id);
+      setFrom({ id, ids });
+      setPicked(new Set((q.data ?? []).filter((c) => ids.has(c.id)).map((c) => c.id)));
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    }
+  };
 
   const shown = useMemo(() => {
     const term = search.trim().toLocaleLowerCase(locale);
-    const all = q.data ?? [];
+    const all = (q.data ?? []).filter((c) => !from || from.ids.has(c.id));
     return term ? all.filter((c) => [c.name, c.phone, c.group_label].some((v) => v?.toLocaleLowerCase(locale).includes(term))) : all;
-  }, [q.data, search, locale]);
+  }, [q.data, search, locale, from]);
 
   const toggle = (id: string) => {
     const next = new Set(picked);
@@ -72,6 +88,17 @@ function Inner({ onClose, eventId, onAdded }: { onClose: () => void; eventId: st
         <Caption>{t('guests.mine.empty')}</Caption>
       ) : (
         <View style={{ gap: 10 }}>
+          {(others.data?.length ?? 0) > 0 && (
+            <View style={{ gap: 6 }}>
+              <Caption>{t('guests.mine.fromEvent')}</Caption>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                <OptionChip small label={t('guests.mine.allContacts')} on={!from} onPress={() => pickEvent(null)} />
+                {others.data!.slice(0, 12).map((e) => (
+                  <OptionChip key={e.id} small label={e.title} on={from?.id === e.id} onPress={() => pickEvent(e.id)} />
+                ))}
+              </View>
+            </View>
+          )}
           <SearchField value={search} onChange={setSearch} placeholder={t('guests.mine.search')} />
           <Button
             label={allShownPicked ? t('guests.mine.clear') : t('guests.mine.selectAll')}

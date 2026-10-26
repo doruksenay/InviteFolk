@@ -139,6 +139,11 @@ function build(token: string): PublicInvitation | null {
     program: c.program?.map(([title, mins], i) => ({ id: `p${i}`, title, at: new Date(new Date(starts).getTime() + mins * 60000).toISOString() })),
     guestbook: sport ? undefined : { enabled: true, public: true },
     checkin: type === 'dugun' || type === 'kurumsal' || type === 'mezuniyet',
+    info: wedding
+      ? lang === 'en'
+        ? { directions: 'A 5-minute walk from the nearest bus stop; a shuttle leaves the pier at 6.30pm.', parking: 'The car park next to the venue is free for our guests.', dress: 'Smart / Cocktail' }
+        : { directions: 'En yakın duraktan 5 dakika yürüme; servis 18.30’da iskeleden kalkar.', parking: 'Salonun yanındaki otopark davetlilerimize ücretsizdir.', dress: 'Şık / Kokteyl' }
+      : undefined,
     ...(sport ? { roster_size: 14, fee: 150 } : {}),
   };
   const inv: PublicInvitation = {

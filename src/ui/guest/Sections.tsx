@@ -261,6 +261,30 @@ export function CheckinPass({ theme, code, checkedIn, t }: { theme: InvitationTh
 }
 
 // ---------------------------------------------------------------------------
+// Ulaşım ve konaklama
+// ---------------------------------------------------------------------------
+const INFO_ICONS = { directions: 'map', parking: 'pin', stay: 'star', dress: 'shirt' } as const;
+export function InfoCard({ theme, info, t }: { theme: InvitationTheme; info: NonNullable<GuestSettings['info']>; t: TFn }) {
+  const rows = (['directions', 'parking', 'stay', 'dress'] as const).filter((k) => info[k]?.trim());
+  if (!rows.length) return null;
+  return (
+    <SectionCard theme={theme} kicker={t('guest.info.kicker')} icon="map">
+      {rows.map((k, i) => (
+        <View key={k} style={{ flexDirection: 'row', gap: 12, paddingTop: i ? 12 : 0, borderTopWidth: i ? 1 : 0, borderTopColor: hairline(theme.dark) }}>
+          <Icon name={INFO_ICONS[k]} size={18} color={theme.key_} strokeWidth={2} />
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 14, color: theme.ink }}>{t(`guest.info.${k}`)}</Text>
+            <Text selectable style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: theme.soft }}>
+              {info[k]}
+            </Text>
+          </View>
+        </View>
+      ))}
+    </SectionCard>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Fotoğraf albümü bağlantısı
 // ---------------------------------------------------------------------------
 export function AlbumCard({ theme, onOpen, t }: { theme: InvitationTheme; onOpen: () => void; t: TFn }) {

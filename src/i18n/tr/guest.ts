@@ -54,6 +54,7 @@ export const guest = {
     pending: 'Mesajınız alındı; ev sahibi onaylayınca defterde görünecek.',
     another: 'Bir mesaj daha yaz',
   },
+  info: { kicker: 'ULAŞIM VE KONAKLAMA', directions: 'Yol tarifi', parking: 'Otopark', stay: 'Konaklama', dress: 'Kıyafet' },
   calendar: { subscribe: 'Her hafta takvimime ekle' },
   children: {
     question: 'Bunlardan kaçı çocuk?',

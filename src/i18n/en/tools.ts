@@ -27,6 +27,18 @@ export const tools: typeof TR = {
       hint: 'Shown under the title on the card. Leave it blank to use a ready-made text for this event type.',
       placeholder: 'We would love you to celebrate the happiest day of our lives with us.',
     },
+    info: {
+      title: 'Getting there and staying',
+      hint: 'Shown on the invitation page in its own card. Empty fields are hidden.',
+      directions: 'Directions',
+      directionsPlaceholder: 'A 5-minute walk from the Uzunçayır stop; a shuttle leaves Kadıköy pier at 6.30pm.',
+      parking: 'Parking',
+      parkingPlaceholder: 'The car park opposite the venue is free for our guests.',
+      stay: 'Accommodation',
+      stayPlaceholder: 'For guests travelling in, we have reserved discounted rooms at a nearby hotel: …',
+      dress: 'Dress code',
+      dressPlaceholder: 'Smart / Cocktail',
+    },
     look: {
       title: 'Opening and countdown',
       envelope: 'Envelope opening',

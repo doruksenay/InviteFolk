@@ -279,6 +279,8 @@ export type EventSettings = {
   effect?: import('./themes').ThemeEffect;
   /** Anı defteri: davetliler mesaj bırakır; public ise davetliler de okur, moderate ise organizatör onaylar. */
   guestbook?: { enabled?: boolean; public?: boolean; moderate?: boolean };
+  /** Davetli sayfasında ulaşım ve konaklama: yol tarifi, otopark, konaklama, kıyafet (her biri ≤ 400 karakter). */
+  info?: { directions?: string; parking?: string; stay?: string; dress?: string };
   poll?: { options: PollOption[]; closed?: boolean; chosen?: string | null };
   signup?: SignupItem[];
 };

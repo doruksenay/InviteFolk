@@ -127,5 +127,13 @@ ok(aiGone, 'yapay zekâ sayacı ve sınırı kaldırıldı');
 const lim2 = (await one(OWN, `select public.event_limits('${ev.id}') j`)).j;
 ok(lim2 && !('ai_left' in lim2) && typeof lim2.album_used === 'number', 'etkinlik sınırlarında yapay zekâ yok');
 
+await as(OWN, `update public.events set settings = settings || '{"info":{"directions":"Metrobüs","dress":"Şık"}}'::jsonb where id='${ev.id}'`);
+const gi2 = (await one(null, `select public.get_invitation('${tok}') j`)).j;
+ok(gi2.event.settings.info?.directions === 'Metrobüs' && gi2.event.settings.info?.dress === 'Şık', 'davetli ulaşım ve kıyafet bilgisini görür');
+ok(!(await tryq(OWN, `update public.events set settings = settings || '{"info":{"secret":"x"}}'::jsonb where id='${ev.id}'`)).ok, 'bilinmeyen bilgi alanı reddedilir');
+ok(!(await tryq(OWN, `update public.events set settings = settings || jsonb_build_object('info', jsonb_build_object('stay', repeat('a', 401))) where id='${ev.id}'`)).ok, 'çok uzun bilgi reddedilir');
+
+ok((await tryq(null, `select plan, max_events from public.plan_limits`, 'anon')).r?.rows?.length > 0, 'ziyaretçi paket sınırlarını okur (fiyat kartları)');
+
 console.log(`\nSONUÇ: ${pass} geçti, ${fail} kaldı`);
 process.exit(fail ? 1 : 0);

@@ -28,6 +28,18 @@ export const tools = {
       hint: 'Kartta başlığın altında görünür. Boş bırakırsan türe uygun hazır metin kullanılır.',
       placeholder: 'Hayatımızın en güzel gününde sizi de aramızda görmek istiyoruz.',
     },
+    info: {
+      title: 'Ulaşım ve konaklama',
+      hint: 'Davetli sayfasında ayrı bir kartta görünür. Boş bırakılanlar gösterilmez.',
+      directions: 'Yol tarifi',
+      directionsPlaceholder: 'Metrobüs Uzunçayır durağından 5 dakika yürüme; servis 18.30’da Kadıköy iskeleden kalkar.',
+      parking: 'Otopark',
+      parkingPlaceholder: 'Salonun karşısındaki otopark davetlilerimize ücretsizdir.',
+      stay: 'Konaklama',
+      stayPlaceholder: 'Şehir dışından gelenler için yakındaki otelde indirimli oda ayırttık: …',
+      dress: 'Kıyafet',
+      dressPlaceholder: 'Şık / Kokteyl',
+    },
     look: {
       title: 'Açılış ve sayaç',
       envelope: 'Zarf açılışı',

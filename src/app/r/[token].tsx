@@ -18,7 +18,7 @@ import { Envelope, sealFrom } from '@/ui/guest/Envelope';
 import { PollCard, SahaCards, SignupCard } from '@/ui/guest/Interactive';
 import { Gallery, MusicButton, useInvitationMusic, VideoInvite } from '@/ui/guest/Media';
 import { GuestbookCard } from '@/ui/guest/Guestbook';
-import { AlbumCard, AnnouncementCard, CheckinPass, Countdown, GiftCard, ProgramList, WeatherCard } from '@/ui/guest/Sections';
+import { AlbumCard, AnnouncementCard, InfoCard, CheckinPass, Countdown, GiftCard, ProgramList, WeatherCard } from '@/ui/guest/Sections';
 import { Icon } from '@/ui/Icon';
 import { InvitationCard } from '@/ui/InvitationCard';
 import { CelebrationBurst } from '@/ui/theme/Effects';
@@ -197,6 +197,7 @@ export default function GuestRsvp() {
     <View style={{ gap: 14 }}>
       {weather && weather.available ? <WeatherCard theme={theme} w={weather} t={t} /> : null}
       {settings.program?.length ? <ProgramList theme={theme} items={settings.program} t={t} locale={locale} /> : null}
+      {settings.info ? <InfoCard theme={theme} info={settings.info} t={t} /> : null}
       {media?.gallery?.length ? <Gallery theme={theme} photos={media.gallery} t={t} /> : null}
       {inv.poll ? <PollCard theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
       {inv.signup?.length ? <SignupCard theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}

@@ -4,11 +4,19 @@ export const send: typeof TR = {
   title: 'Send',
   titleAccent: 'invitations',
   subtitle: 'Choose a channel. Every guest gets their own personal reply link.',
-  kind: { invite: 'Invitation', reminder: 'Reminder' },
+  kind: { invite: 'Invitation', reminder: 'Reminder', thanks: 'Thank you' },
   kindHint: {
     invite: 'To {count} households not yet invited',
     inviteAll: 'To all {count} households on the list',
     reminder: 'To {count} households who haven’t replied',
+    thanks: 'To the {count} households who came, after the event',
+  },
+  thanks: {
+    body: 'WhatsApp opens with a ready thank-you message for each guest; you just tap send. It’s free. If the album is on, the message includes the album link.',
+    copyTitle: 'Copy the text',
+    copyBody: 'Post it as one message in family groups or on social media.',
+    copy: 'Copy thank-you text',
+    copied: 'Thank-you text copied.',
   },
   resendAll: 'Also send to those already invited',
   nobody: 'No guests match this selection.',
@@ -67,5 +75,7 @@ export const send: typeof TR = {
   message: {
     invite: "{name}, you're invited to {title}: {when}\nYou can let us know if you're coming here: {link}",
     reminder: "{name}, we'd love to hear from you about {title}: {when}\nYou can reply in one tap here: {link}",
+    thanks: '{name}, thank you so much for being with us at {title}. Sharing that day with you meant a lot to us.',
+    thanksAlbum: '{name}, thank you so much for being with us at {title}. You can see the photos and videos from the day here, and add your own: {link}',
   },
 };

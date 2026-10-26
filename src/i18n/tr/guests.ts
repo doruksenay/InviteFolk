@@ -10,7 +10,7 @@ export const guests = {
     fromPhone: 'Telefon rehberi',
     fromPhoneHint: 'Kişileri seç',
     fromMine: 'Rehberim',
-    fromMineHint: 'Önceki davetlerinden',
+    fromMineHint: 'Rehberinden ya da başka bir etkinliğin listesinden',
     manualTitle: 'Elle ekle',
     name: 'Ad ya da hane',
     namePlaceholder: 'Ahmet Yılmaz ve ailesi',
@@ -80,6 +80,8 @@ export const guests = {
     empty: 'Eşleşen kişi yok.',
   },
   mine: {
+    fromEvent: 'Başka bir etkinliğin listesini aktar',
+    allContacts: 'Tüm rehber',
     title: 'Rehberimden',
     titleAccent: 'ekle',
     subtitle: 'Daha önce eklediğin kişiler. Kına ve düğün gibi etkinliklere aynı kişileri tek dokunuşla davet et.',

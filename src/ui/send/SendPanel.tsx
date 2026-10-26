@@ -3,8 +3,8 @@ import { router } from 'expo-router';
 import { type ReactNode, useMemo, useState } from 'react';
 import { Linking, Text, View } from 'react-native';
 
-import { formatWhen, rsvpUrl, waMeLink } from '@/core/format';
-import type { EventRow, InvitationWithContact } from '@/core/types';
+import { formatWhen, publicUrl, rsvpUrl, waMeLink } from '@/core/format';
+import type { EventRow, EventSettings, InvitationWithContact } from '@/core/types';
 import { eventLang, LOCALE_TAG, makeT, useI18n } from '@/i18n';
 import { useQuery } from '@/lib/api';
 import { emailQuotaLeft, quotaLeft, sendEmail, sendSms, sendWhatsApp, whatsappQuotaLeft } from '@/lib/api-guests';
@@ -15,13 +15,18 @@ import { color, font, radius } from '@/ui/tokens';
 
 import { OptionChip } from '../guests/common';
 
-type Kind = 'invite' | 'reminder';
+type Kind = 'invite' | 'reminder' | 'thanks';
 type Feedback = { tone: 'success' | 'error' | 'info' | 'warning'; text: string } | null;
 
 /** Davetliye giden WhatsApp/kopyalanan metin: her zaman etkinliğin dilinde. */
 export function guestMessage(event: EventRow, inv: InvitationWithContact, kind: Kind) {
   const lang = eventLang(event.settings);
   const et = makeT(lang);
+  if (kind === 'thanks') {
+    const s = (event.settings ?? {}) as EventSettings;
+    const album = s.album?.enabled && event.public_slug ? publicUrl('a', event.public_slug) : null;
+    return et(album ? 'send.message.thanksAlbum' : 'send.message.thanks', { name: inv.contacts.name, title: event.title, link: album ?? '' });
+  }
   return et(kind === 'invite' ? 'send.message.invite' : 'send.message.reminder', {
     name: inv.contacts.name,
     title: event.title,
@@ -50,6 +55,8 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
   const notSent = active.filter((i) => i.delivery === 'not_sent');
   const targets = useMemo(() => {
     if (kind === 'reminder') return invitations.filter((i) => i.status === 'pending');
+    // Teşekkür: kapıda giriş yapıldıysa gelenlere, yoksa katılacağını söyleyenlere.
+    if (kind === 'thanks') return invitations.some((i) => i.checked_in_at) ? invitations.filter((i) => i.checked_in_at) : invitations.filter((i) => i.status === 'yes');
     return resendAll || notSent.length === 0 ? active : notSent;
   }, [kind, invitations, resendAll, active, notSent]);
   const withPhone = targets.filter((i) => i.contacts.phone);
@@ -59,11 +66,13 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
   const smsLeft = smsQuota.data ?? 0;
 
   const hint =
-    kind === 'reminder'
-      ? t('send.kindHint.reminder', { count: targets.length })
-      : resendAll || notSent.length === 0
-        ? t('send.kindHint.inviteAll', { count: targets.length })
-        : t('send.kindHint.invite', { count: targets.length });
+    kind === 'thanks'
+      ? t('send.kindHint.thanks', { count: targets.length })
+      : kind === 'reminder'
+        ? t('send.kindHint.reminder', { count: targets.length })
+        : resendAll || notSent.length === 0
+          ? t('send.kindHint.inviteAll', { count: targets.length })
+          : t('send.kindHint.invite', { count: targets.length });
 
   const report = (r: { sent: number; failed: number; skipped: number; via_sms?: number }) =>
     setFeedback({
@@ -75,7 +84,13 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
     setBusy('wa');
     setFeedback(null);
     try {
-      report(await sendWhatsApp(event.id, kind, withPhone.slice(0, 1000).map((i) => i.id)));
+      report(
+        await sendWhatsApp(
+          event.id,
+          kind === 'thanks' ? 'invite' : kind,
+          withPhone.slice(0, 1000).map((i) => i.id),
+        ),
+      );
       waQuota.reload();
       onSent();
     } catch (e) {
@@ -89,7 +104,13 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
     setBusy('email');
     setFeedback(null);
     try {
-      report(await sendEmail(event.id, kind, withEmail.slice(0, 1000).map((i) => i.id)));
+      report(
+        await sendEmail(
+          event.id,
+          kind === 'thanks' ? 'invite' : kind,
+          withEmail.slice(0, 1000).map((i) => i.id),
+        ),
+      );
       mailQuota.reload();
       onSent();
     } catch (e) {
@@ -103,7 +124,13 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
     setBusy('sms');
     setFeedback(null);
     try {
-      report(await sendSms(event.id, kind, withPhone.slice(0, 1000).map((i) => i.id)));
+      report(
+        await sendSms(
+          event.id,
+          kind === 'thanks' ? 'invite' : kind,
+          withPhone.slice(0, 1000).map((i) => i.id),
+        ),
+      );
       smsQuota.reload();
       onSent();
     } catch (e) {
@@ -123,14 +150,12 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
     <View style={{ gap: 16 }}>
       <View style={{ gap: 10 }}>
         <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-          {(['invite', 'reminder'] as Kind[]).map((k) => (
-            <OptionChip key={k} label={t(`send.kind.${k}`)} on={kind === k} onPress={() => setKind(k)} icon={k === 'invite' ? 'send' : 'bell'} />
+          {(['invite', 'reminder', 'thanks'] as Kind[]).map((k) => (
+            <OptionChip key={k} label={t(`send.kind.${k}`)} on={kind === k} onPress={() => setKind(k)} icon={k === 'invite' ? 'send' : k === 'reminder' ? 'bell' : 'heart'} />
           ))}
         </View>
         <Caption>{hint}</Caption>
-        {kind === 'invite' && notSent.length > 0 && notSent.length < active.length && (
-          <ToggleRow label={t('send.resendAll')} value={resendAll} onChange={setResendAll} />
-        )}
+        {kind === 'invite' && notSent.length > 0 && notSent.length < active.length && <ToggleRow label={t('send.resendAll')} value={resendAll} onChange={setResendAll} />}
       </View>
 
       {feedback && <Notice tone={feedback.tone} text={feedback.text} />}
@@ -138,87 +163,104 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
         <Notice tone="info" text={t('send.nobody')} />
       ) : (
         <View style={{ gap: 12 }}>
-          <Channel
-            icon="whatsapp"
-            tint={color.sageTint}
-            ink={color.sageInk}
-            title={t('send.waAuto.title')}
-            body={t('send.waAuto.body')}
-            meta={[
-              waQuota.data !== null ? t('send.waAuto.quota', { count: waLeft }) : null,
-              targets.length > withPhone.length ? t('send.waAuto.noPhone', { count: targets.length - withPhone.length }) : null,
-            ]}>
-            {waQuota.data !== null && waLeft <= 0 ? (
-              <View style={{ gap: 10 }}>
-                <Caption>{t('send.waAuto.noQuota')}</Caption>
-                <Button label={t('send.plans')} icon="star" variant="secondary" onPress={() => router.push('/paketler')} style={{ alignSelf: 'flex-start' }} />
-              </View>
-            ) : (
-              <Button
-                label={t('send.waAuto.button', { count: Math.min(withPhone.length, waLeft || withPhone.length) })}
-                icon="send"
-                variant="accent"
-                loading={busy === 'wa'}
-                disabled={!withPhone.length || !!busy}
-                onPress={sendWa}
-                style={{ alignSelf: 'flex-start' }}
-              />
-            )}
-          </Channel>
+          {kind === 'thanks' ? (
+            <>
+              <Channel
+                icon="whatsapp"
+                tint={color.sageTint}
+                ink={color.sageInk}
+                title={t('send.waManual.title')}
+                body={t('send.thanks.body')}
+                meta={[targets.length > withPhone.length ? t('send.waAuto.noPhone', { count: targets.length - withPhone.length }) : null]}>
+                <Button label={t('send.waManual.button')} icon="arrowRight" variant="accent" disabled={!withPhone.length} onPress={() => setQueueOpen(true)} style={{ alignSelf: 'flex-start' }} />
+              </Channel>
+              <Channel icon="copy" tint={color.goldTint} ink={color.goldInk} title={t('send.thanks.copyTitle')} body={t('send.thanks.copyBody')} meta={[]}>
+                <Button
+                  label={t('send.thanks.copy')}
+                  icon="copy"
+                  variant="secondary"
+                  onPress={async () => {
+                    await Clipboard.setStringAsync(guestMessage(event, targets[0], 'thanks').replace(targets[0].contacts.name, '…'));
+                    setFeedback({ tone: 'success', text: t('send.thanks.copied') });
+                  }}
+                  style={{ alignSelf: 'flex-start' }}
+                />
+              </Channel>
+            </>
+          ) : (
+            <>
+              <Channel
+                icon="whatsapp"
+                tint={color.sageTint}
+                ink={color.sageInk}
+                title={t('send.waAuto.title')}
+                body={t('send.waAuto.body')}
+                meta={[waQuota.data !== null ? t('send.waAuto.quota', { count: waLeft }) : null, targets.length > withPhone.length ? t('send.waAuto.noPhone', { count: targets.length - withPhone.length }) : null]}>
+                {waQuota.data !== null && waLeft <= 0 ? (
+                  <View style={{ gap: 10 }}>
+                    <Caption>{t('send.waAuto.noQuota')}</Caption>
+                    <Button label={t('send.plans')} icon="star" variant="secondary" onPress={() => router.push('/paketler')} style={{ alignSelf: 'flex-start' }} />
+                  </View>
+                ) : (
+                  <Button
+                    label={t('send.waAuto.button', { count: Math.min(withPhone.length, waLeft || withPhone.length) })}
+                    icon="send"
+                    variant="accent"
+                    loading={busy === 'wa'}
+                    disabled={!withPhone.length || !!busy}
+                    onPress={sendWa}
+                    style={{ alignSelf: 'flex-start' }}
+                  />
+                )}
+              </Channel>
 
-          <Channel icon="whatsapp" tint={color.surfaceSoft} ink={color.ink} title={t('send.waManual.title')} body={t('send.waManual.body')} meta={[]}>
-            <Button label={t('send.waManual.button')} icon="arrowRight" variant="secondary" disabled={!withPhone.length} onPress={() => setQueueOpen(true)} style={{ alignSelf: 'flex-start' }} />
-          </Channel>
+              <Channel icon="whatsapp" tint={color.surfaceSoft} ink={color.ink} title={t('send.waManual.title')} body={t('send.waManual.body')} meta={[]}>
+                <Button label={t('send.waManual.button')} icon="arrowRight" variant="secondary" disabled={!withPhone.length} onPress={() => setQueueOpen(true)} style={{ alignSelf: 'flex-start' }} />
+              </Channel>
 
-          <Channel
-            icon="mail"
-            tint={color.lavenderTint}
-            ink={color.lavenderInk}
-            title={t('send.email.title')}
-            body={t('send.email.body')}
-            meta={[mailQuota.data !== null ? t('send.email.quota', { count: mailLeft }) : null]}>
-            {withEmail.length === 0 ? (
-              <Caption>{t('send.email.noEmail')}</Caption>
-            ) : mailQuota.data !== null && mailLeft <= 0 ? (
-              <Caption>{t('send.email.noQuota')}</Caption>
-            ) : (
-              <Button
-                label={t('send.email.button', { count: withEmail.length })}
+              <Channel
                 icon="mail"
-                variant="secondary"
-                loading={busy === 'email'}
-                disabled={!!busy}
-                onPress={sendMail}
-                style={{ alignSelf: 'flex-start' }}
-              />
-            )}
-          </Channel>
+                tint={color.lavenderTint}
+                ink={color.lavenderInk}
+                title={t('send.email.title')}
+                body={t('send.email.body')}
+                meta={[mailQuota.data !== null ? t('send.email.quota', { count: mailLeft }) : null]}>
+                {withEmail.length === 0 ? (
+                  <Caption>{t('send.email.noEmail')}</Caption>
+                ) : mailQuota.data !== null && mailLeft <= 0 ? (
+                  <Caption>{t('send.email.noQuota')}</Caption>
+                ) : (
+                  <Button label={t('send.email.button', { count: withEmail.length })} icon="mail" variant="secondary" loading={busy === 'email'} disabled={!!busy} onPress={sendMail} style={{ alignSelf: 'flex-start' }} />
+                )}
+              </Channel>
 
-          <Channel
-            icon="message"
-            tint={color.coralTint}
-            ink={color.coralInk}
-            title={t('send.sms.title')}
-            body={t('send.sms.body')}
-            meta={[smsQuota.data !== null && smsLeft > 0 ? t('send.sms.quota', { count: smsLeft }) : null]}>
-            {smsQuota.data !== null && smsLeft <= 0 ? (
-              <Caption>{t('send.sms.noQuota')}</Caption>
-            ) : (
-              <Button
-                label={t('send.sms.button', { count: Math.min(withPhone.length, smsLeft || withPhone.length) })}
+              <Channel
                 icon="message"
-                variant="secondary"
-                loading={busy === 'sms'}
-                disabled={!withPhone.length || !!busy}
-                onPress={sendSmsNow}
-                style={{ alignSelf: 'flex-start' }}
-              />
-            )}
-          </Channel>
+                tint={color.coralTint}
+                ink={color.coralInk}
+                title={t('send.sms.title')}
+                body={t('send.sms.body')}
+                meta={[smsQuota.data !== null && smsLeft > 0 ? t('send.sms.quota', { count: smsLeft }) : null]}>
+                {smsQuota.data !== null && smsLeft <= 0 ? (
+                  <Caption>{t('send.sms.noQuota')}</Caption>
+                ) : (
+                  <Button
+                    label={t('send.sms.button', { count: Math.min(withPhone.length, smsLeft || withPhone.length) })}
+                    icon="message"
+                    variant="secondary"
+                    loading={busy === 'sms'}
+                    disabled={!withPhone.length || !!busy}
+                    onPress={sendSmsNow}
+                    style={{ alignSelf: 'flex-start' }}
+                  />
+                )}
+              </Channel>
 
-          <Channel icon="link" tint={color.goldTint} ink={color.goldInk} title={t('send.links.title')} body={t('send.links.body')} meta={[]}>
-            <Button label={t('send.links.button')} icon="copy" variant="secondary" onPress={copyLinks} style={{ alignSelf: 'flex-start' }} />
-          </Channel>
+              <Channel icon="link" tint={color.goldTint} ink={color.goldInk} title={t('send.links.title')} body={t('send.links.body')} meta={[]}>
+                <Button label={t('send.links.button')} icon="copy" variant="secondary" onPress={copyLinks} style={{ alignSelf: 'flex-start' }} />
+              </Channel>
+            </>
+          )}
         </View>
       )}
       <WaQueueSheet open={queueOpen} onClose={() => setQueueOpen(false)} event={event} targets={withPhone} kind={kind} />
