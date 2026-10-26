@@ -2,7 +2,9 @@
 -- Roller: 'user' (organizatör) ve 'admin' (platform yöneticisi).
 -- Davetliler giriş yapmaz; LCV sayfası kişiye özel token ile güvenlik tanımlı fonksiyonlar üzerinden çalışır.
 
-create extension if not exists pgcrypto;
+-- Supabase'de pgcrypto 'extensions' şemasındadır; burada da oraya kurulur ve şemayla çağrılır.
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
 
 -- ---------------------------------------------------------------------------
 -- Profiller ve roller
@@ -105,7 +107,7 @@ create table public.invitations (
   id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events (id) on delete cascade,
   contact_id uuid not null references public.contacts (id) on delete cascade,
-  token text not null unique default encode(gen_random_bytes(16), 'hex'),
+  token text not null unique default encode(extensions.gen_random_bytes(16), 'hex'),
   status text not null default 'pending' check (status in ('pending', 'yes', 'no', 'maybe', 'waitlist')),
   party_size int check (party_size between 0 and 20),
   menu text,
