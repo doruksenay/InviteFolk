@@ -31,8 +31,11 @@ export const landing = {
     kicker: 'ÖRNEKLER',
     title: 'Her davet için',
     titleAccent: 'hazır bir başlangıç',
-    body: 'Türü seç, örneği aç: davetlinin telefonunda göreceği sayfanın aynısı. Cevap ver, anı defterine yaz, dene.',
+    body: 'Bir tür seç, davetiye anında değişsin. Örneği açınca davetlinin telefonunda göreceği sayfanın aynısıyla karşılaşırsın: cevap ver, anı defterine yaz, dene.',
     see: 'Örneği aç',
+    openThis: 'Bu örneği aç',
+    pickLabel: 'Etkinlik türü',
+    previewLabel: '{name} davetiyesi önizlemesi',
   },
   features: {
     kicker: 'ÖZELLİKLER',
@@ -80,11 +83,6 @@ export const landing = {
       { q: 'Takı ve hediye için para topluyor musunuz?', a: 'Hayır, aracılık yapmıyoruz. IBAN bilgini davetiyede gösteriyoruz; gönderimi davetli kendi bankasından yapar.' },
       { q: 'İngilizce davetiye gönderebilir miyim?', a: 'Evet. Her etkinliğin dilini ayrı seçersin; davetli de sayfada Türkçe ve İngilizce arasında geçebilir.' },
     ],
-  },
-  cta: {
-    title: 'İlk davetini',
-    titleAccent: 'birkaç dakikada hazırla',
-    body: 'Ücretsiz paketle başla; büyüdükçe paketini seç.',
   },
   footer: {
     tagline: 'Bir arada olmanın en kolay yolu.',

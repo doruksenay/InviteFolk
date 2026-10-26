@@ -273,3 +273,9 @@ export async function demoSignGuestbook(token: string, message: string): Promise
   books.set(token, [{ name: get(token).guest_name, message: message.trim().slice(0, 500), at: new Date().toISOString() }, ...list]);
   return { pending: false };
 }
+
+/** Tanıtım sayfasındaki canlı önizleme için örnek içerik (sunucuya gitmez). */
+export function demoPreview(type: EventTypeKey, lang: Lang) {
+  const c = COPY[type][lang];
+  return { title: c.title, hosts: c.hosts, venue: c.venue, address: c.address, message: c.message, guest: c.guest, theme: EVENT_TYPES[type].suggestedTheme };
+}

@@ -28,8 +28,11 @@ export const landing: typeof TR = {
     kicker: 'SAMPLES',
     title: 'A ready start',
     titleAccent: 'for every occasion',
-    body: 'Pick a type and open the sample: it’s exactly the page your guests will see on their phones. Reply, sign the guestbook, try it out.',
+    body: 'Pick a type and watch the invitation change. Open the sample and you get exactly the page your guests will see on their phones: reply, sign the guestbook, try it out.',
     see: 'Open sample',
+    openThis: 'Open this sample',
+    pickLabel: 'Event type',
+    previewLabel: '{name} invitation preview',
   },
   features: {
     kicker: 'FEATURES',
@@ -77,11 +80,6 @@ export const landing: typeof TR = {
       { q: 'Do you collect gift money?', a: 'No, we never handle money. We show your IBAN on the invitation; guests send gifts from their own bank.' },
       { q: 'Can I send invitations in English?', a: 'Yes. You choose the language of each event, and guests can switch between Turkish and English on the page.' },
     ],
-  },
-  cta: {
-    title: 'Make your first invitation',
-    titleAccent: 'in a few minutes',
-    body: 'Start on the free plan; choose a plan as you grow.',
   },
   footer: {
     tagline: 'The easiest way to get together.',

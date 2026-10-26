@@ -5,7 +5,7 @@
 // Böylece bir XSS açığı olsa bile dışarıdan betik yüklenemez ve veri başka bir sunucuya gönderilemez.
 // Kamera ve mikrofon yalnızca kendi sayfalarımızda (kapıda karekod okuma, albüme sesli mesaj); konum kapalı.
 // Ayrıca arama motorları için robots.txt, sitemap.xml ve index.html'e açıklama/OG etiketleri yazılır.
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const out = process.argv[2] ?? 'dist';
@@ -15,6 +15,25 @@ if (!supa || !/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(supa)) {
   process.exit(1);
 }
 const origin = new URL(supa).origin;
+
+// Cloudflare Pages, adında "node_modules" geçen klasörleri yüklemez; Expo ise yazı tiplerini ve bazı görselleri
+// dist/assets/node_modules altına koyar. Klasör "vendor" olarak yeniden adlandırılır ve paketlerdeki yollar güncellenir.
+const nm = join(out, 'assets', 'node_modules');
+if (existsSync(nm)) {
+  renameSync(nm, join(out, 'assets', 'vendor'));
+  const walk = (dir) => {
+    for (const f of readdirSync(dir)) {
+      const p = join(dir, f);
+      if (statSync(p).isDirectory()) walk(p);
+      else if (/\.(js|html|css|json)$/.test(f)) {
+        const src = readFileSync(p, 'utf8');
+        if (src.includes('/assets/node_modules/')) writeFileSync(p, src.replaceAll('/assets/node_modules/', '/assets/vendor/'));
+      }
+    }
+  };
+  walk(out);
+  console.log('assets/node_modules → assets/vendor (Cloudflare Pages node_modules klasörlerini yüklemez)');
+}
 const wss = origin.replace('https://', 'wss://');
 
 const csp = [

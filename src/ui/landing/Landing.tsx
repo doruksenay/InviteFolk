@@ -2,8 +2,8 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, type ScrollViewInstance, Text, useWindowDimensions, View } from 'react-native';
 
-import { EVENT_TYPE_ORDER, EVENT_TYPES, eventCopy } from '@/core/event-types';
-import { getTheme, type ThemeKey } from '@/core/themes';
+import { eventCopy } from '@/core/event-types';
+import { getTheme } from '@/core/themes';
 import { LANGS, type Lang, useI18n } from '@/i18n';
 import { useQuery } from '@/lib/api';
 import { getPlanCatalog, PAID_PLANS, type PaidPlan } from '@/lib/api-billing';
@@ -11,13 +11,12 @@ import { BrandMark, Wordmark } from '@/ui/BrandBar';
 import { Icon } from '@/ui/Icon';
 import { InvitationCard } from '@/ui/InvitationCard';
 import { Body, Button, Display, DisplayAccent } from '@/ui/primitives';
-import { AmbientEffect } from '@/ui/theme/Effects';
-import { ThemeArt } from '@/ui/theme/ThemeArt';
 import { color, font, radius, shadow } from '@/ui/tokens';
+
+import { TypePicker } from './TypePicker';
 
 // Fiyat tablosu okunamazsa (ör. bağlantı yok) gösterilen değerler; asıl fiyat her zaman sunucudadır.
 const FALLBACK_PRICES: Record<PaidPlan, number> = { temel: 500, otomatik: 750, tam: 1000 };
-const SHOWCASE: ThemeKey[] = ['fildisi', 'sakura', 'sehzade', 'isilti', 'bulut', 'kep'];
 const MAX = 1180;
 
 type Section = 'features' | 'pricing' | 'faq';
@@ -175,60 +174,7 @@ export function Landing() {
         <View style={{ backgroundColor: color.surface, paddingVertical: 72 }}>
           <View style={[wrap, { gap: 32 }]}>
             <SectionHead kicker={L.types.kicker} title={L.types.title} accent={L.types.titleAccent} body={L.types.body} accentColor={color.coral} />
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
-              {EVENT_TYPE_ORDER.map((k) => {
-                const cfg = EVENT_TYPES[k];
-                const copy = eventCopy(k, lang);
-                const w = width >= 1100 ? tileW(5, 12) : width >= 680 ? Math.floor((Math.min(width, MAX) - pad * 2 - 24) / 3) : Math.floor((width - pad * 2 - 12) / 2);
-                return (
-                  <Pressable
-                    key={k}
-                    accessibilityRole="link"
-                    accessibilityLabel={`${copy.name}: ${L.types.see}`}
-                    onPress={() => demo(k)}
-                    style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => ({
-                      width: width >= 1100 ? Math.floor((Math.min(width, MAX) - pad * 2 - 48) / 5) : w,
-                      gap: 10,
-                      padding: 16,
-                      borderRadius: radius.lg,
-                      backgroundColor: cfg.tint,
-                      boxShadow: hovered ? shadow.raised : 'none',
-                      transform: [{ translateY: hovered ? -2 : 0 }, { scale: pressed ? 0.98 : 1 }],
-                    })}>
-                    <View style={{ width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: cfg.iconBg }}>
-                      <Icon name={cfg.icon} size={22} color={cfg.accent} strokeWidth={2} />
-                    </View>
-                    <Text style={{ fontFamily: font.display, fontSize: 17, lineHeight: 22, color: color.ink, minHeight: 44 }} numberOfLines={2}>
-                      {copy.name}
-                    </Text>
-                    <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: color.muted, minHeight: 36 }} numberOfLines={2}>
-                      {copy.description}
-                    </Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Text style={{ fontFamily: font.bold, fontSize: 13, color: color.ink }}>{L.types.see}</Text>
-                      <Icon name="arrowRight" size={14} color={color.ink} strokeWidth={2.2} />
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-            {/* Şablon vitrini */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 8 }}>
-              {SHOWCASE.map((k) => {
-                const th = getTheme(k);
-                const c = width >= 1100 ? 6 : width >= 680 ? 3 : 2;
-                const w = Math.floor((Math.min(width, MAX) - pad * 2 - 12 * (c - 1)) / c);
-                return (
-                  <View key={k} style={{ width: w, gap: 8 }}>
-                    <View style={{ width: w, height: Math.round(w * 0.68), borderRadius: radius.md, overflow: 'hidden', backgroundColor: th.bg }}>
-                      <ThemeArt theme={th} width="100%" height="100%" />
-                      <AmbientEffect kind={th.effect} theme={th} count={7} />
-                    </View>
-                    <Text style={{ fontFamily: font.semibold, fontSize: 13, color: color.inkSoft }}>{t(`themes.${k}` as never)}</Text>
-                  </View>
-                );
-              })}
-            </View>
+            <TypePicker lang={lang} wide={wide} onOpen={demo} labels={{ open: L.types.openThis, pick: L.types.pickLabel, preview: L.types.previewLabel }} />
           </View>
         </View>
 
@@ -316,22 +262,6 @@ export function Landing() {
               {L.faq.items.map((f) => (
                 <Faq key={f.q} q={f.q} a={f.a} />
               ))}
-            </View>
-          </View>
-        </View>
-
-        {/* Son çağrı */}
-        <View style={[wrap, { paddingVertical: 80 }]}>
-          <View style={{ gap: 18, alignItems: 'center', padding: mid ? 48 : 28, borderRadius: 36, backgroundColor: color.lavenderTint }}>
-            <Display size={52} center accessibilityRole="header">
-              {L.cta.title} <DisplayAccent style={{ color: color.lavender }}>{L.cta.titleAccent}</DisplayAccent>
-            </Display>
-            <Body center style={{ fontSize: 17 }}>
-              {L.cta.body}
-            </Body>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
-              <Button label={L.hero.primary} size="lg" iconRight="arrowRight" onPress={start} />
-              <Button label={L.hero.secondary} size="lg" variant="secondary" icon="eye" onPress={() => demo('dugun')} />
             </View>
           </View>
         </View>
