@@ -11,11 +11,12 @@ import { deleteEvent, getEventRow, updateEvent } from '@/lib/api-guests';
 import { useSession } from '@/lib/session';
 import { OptionChip } from '@/ui/guests/common';
 import { cleanQuestions, MenuEditor, QuestionsEditor } from '@/ui/eventForm/Editors';
-import { isDate, splitIso, toIso } from '@/ui/eventForm/dates';
+import { isDate, normDate, splitIso, toIso } from '@/ui/eventForm/dates';
 import { LangPicker, ThemePicker } from '@/ui/eventForm/Pickers';
 import { Body, Button, Caption, Display, DisplayAccent, Field, IconButton, Label, Notice, Skeleton, Surface, Title, ToggleRow } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { color, font, radius } from '@/ui/tokens';
+import { DateField, TimeField } from '@/ui/eventForm/DateField';
 
 /** Etkinlik ayrıntıları, davetliye sorulanlar, türe özel ayarlar; arşivleme ve silme. */
 export default function EditEvent() {
@@ -126,7 +127,7 @@ function Form({ event }: { event: EventRow }) {
         starts_at: startsAt,
         venue_name: venue.trim().slice(0, 160) || null,
         venue_address: address.trim().slice(0, 300) || null,
-        rsvp_deadline: deadline.trim() || null,
+        rsvp_deadline: deadline.trim() ? normDate(deadline) : null,
         theme,
         settings,
       });
@@ -183,12 +184,12 @@ function Form({ event }: { event: EventRow }) {
             <Field label={t('wizard.fields.title')} value={title} onChangeText={setTitle} maxLength={120} />
             <Field label={t('wizard.fields.hosts')} placeholder={t('wizard.fields.hostsPlaceholder')} value={hosts} onChangeText={setHosts} maxLength={160} />
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
-              <Field style={{ width: half }} label={t('wizard.fields.date')} placeholder="2027-06-12" value={date} onChangeText={setDate} keyboardType="numbers-and-punctuation" hint={t('wizard.fields.dateHint')} />
-              <Field style={{ width: half }} label={t('wizard.fields.time')} placeholder="19:00" value={time} onChangeText={setTime} keyboardType="numbers-and-punctuation" />
+              <DateField style={{ width: half }} label={t('wizard.fields.date')} value={date} onChange={setDate} />
+              <TimeField style={{ width: half }} label={t('wizard.fields.time')} value={time} onChange={setTime} />
             </View>
             <Field label={t('wizard.fields.venue')} placeholder={t('wizard.fields.venuePlaceholder')} value={venue} onChangeText={setVenue} maxLength={160} />
             <Field label={t('wizard.fields.address')} placeholder={t('wizard.fields.addressPlaceholder')} value={address} onChangeText={setAddress} maxLength={300} />
-            <Field label={t('wizard.fields.deadline')} placeholder="2027-05-01" value={deadline} onChangeText={setDeadline} keyboardType="numbers-and-punctuation" hint={t('wizard.fields.deadlineHint')} />
+            <DateField label={t('wizard.fields.deadline')} value={deadline} onChange={setDeadline} hint={t('wizard.fields.deadlineHint')} />
           </Surface>
 
           <Surface style={{ gap: 16 }}>

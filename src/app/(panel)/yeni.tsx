@@ -8,7 +8,7 @@ import { THEMES, type ThemeKey } from '@/core/themes';
 import type { EventRow } from '@/core/types';
 import { type Lang, LOCALE_TAG, useI18n } from '@/i18n';
 import { createEvent, getEvent, useQuery } from '@/lib/api';
-import { toIso } from '@/ui/eventForm/dates';
+import { normDate, toIso } from '@/ui/eventForm/dates';
 import { LangPicker, ThemePicker } from '@/ui/eventForm/Pickers';
 import { GuestAdder } from '@/ui/guests/GuestAdder';
 import { Icon } from '@/ui/Icon';
@@ -20,6 +20,7 @@ import { SendPanel } from '@/ui/send/SendPanel';
 import { Stepper } from '@/ui/Stepper';
 import { color, font, shadow, WIDE_BREAKPOINT } from '@/ui/tokens';
 import { WhatsAppPreview } from '@/ui/WhatsAppPreview';
+import { DateField, TimeField } from '@/ui/eventForm/DateField';
 
 type PressState = PressableStateCallbackType & { hovered?: boolean };
 
@@ -51,6 +52,7 @@ export default function NewEvent() {
   const [venue, setVenue] = useState('');
   const [address, setAddress] = useState('');
   const [deadline, setDeadline] = useState('');
+  const [more, setMore] = useState(false);
   const [rosterSize, setRosterSize] = useState('14');
   const [weekly, setWeekly] = useState(true);
   const [message, setMessage] = useState('');
@@ -69,7 +71,8 @@ export default function NewEvent() {
   const th = THEMES[theme];
   const startsAt = date ? toIso(date, time) : null;
   const eventLocale = LOCALE_TAG[eventLang];
-  const deadlineText = /^\d{4}-\d{2}-\d{2}$/.test(deadline.trim()) ? formatDayMonth(deadline.trim(), eventLocale) : deadline.trim();
+  const deadlineIso = normDate(deadline);
+  const deadlineText = deadlineIso ? formatDayMonth(deadlineIso, eventLocale) : '';
 
   const copy = useMemo(
     () => ({
@@ -127,7 +130,7 @@ export default function NewEvent() {
         starts_at: startsAt,
         venue_name: venue.trim() || null,
         venue_address: address.trim() || null,
-        rsvp_deadline: /^\d{4}-\d{2}-\d{2}$/.test(deadline) ? deadline : null,
+        rsvp_deadline: deadlineIso,
         settings,
       });
       setCreated(ev);
@@ -274,20 +277,26 @@ export default function NewEvent() {
       <Field label={t('wizard.fields.title')} placeholder={ec.sample.title.replace('\n', ' ')} value={title} onChangeText={setTitle} hint={t('wizard.fields.titleHint')} multiline={false} />
       <Field label={t('wizard.fields.hosts')} placeholder={t('wizard.fields.hostsPlaceholder')} value={hosts} onChangeText={setHosts} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
-        <Field style={{ width: half }} label={t('wizard.fields.date')} placeholder="2027-06-12" value={date} onChangeText={setDate} keyboardType="numbers-and-punctuation" hint={t('wizard.fields.dateHint')} />
-        <Field style={{ width: half }} label={t('wizard.fields.time')} placeholder="19:00" value={time} onChangeText={setTime} keyboardType="numbers-and-punctuation" />
+        <DateField style={{ width: half }} label={t('wizard.fields.date')} value={date} onChange={setDate} />
+        <TimeField style={{ width: half }} label={t('wizard.fields.time')} value={time} onChange={setTime} />
       </View>
       <Field label={t('wizard.fields.venue')} placeholder={t('wizard.fields.venuePlaceholder')} value={venue} onChangeText={setVenue} />
-      <Field label={t('wizard.fields.address')} placeholder={t('wizard.fields.addressPlaceholder')} value={address} onChangeText={setAddress} />
-      <Field
-        label={t('wizard.fields.deadline')}
-        placeholder="2027-05-01"
-        value={deadline}
-        onChangeText={setDeadline}
-        keyboardType="numbers-and-punctuation"
-        hint={t('wizard.fields.deadlineHint')}
-      />
-      <Field label={t('tools.page.message.title')} placeholder={ec.sample.line} value={message} onChangeText={setMessage} multiline maxLength={400} hint={t('tools.page.message.hint')} />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded: more }}
+        onPress={() => setMore((m) => !m)}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', paddingVertical: 4 }}>
+        <Icon name={more ? 'minus' : 'plus'} size={16} color={color.lavenderInk} strokeWidth={2.2} />
+        <Text style={{ fontFamily: font.bold, fontSize: 15, color: color.lavenderInk }}>{more ? t('wizard.lessDetails') : t('wizard.moreDetails')}</Text>
+      </Pressable>
+      {!more && <Caption style={{ marginTop: -10 }}>{t('wizard.moreDetailsHint')}</Caption>}
+      {more && (
+        <>
+          <Field label={t('wizard.fields.address')} placeholder={t('wizard.fields.addressPlaceholder')} value={address} onChangeText={setAddress} />
+          <DateField label={t('wizard.fields.deadline')} value={deadline} onChange={setDeadline} hint={t('wizard.fields.deadlineHint')} />
+          <Field label={t('tools.page.message.title')} placeholder={ec.sample.line} value={message} onChangeText={setMessage} multiline maxLength={400} hint={t('tools.page.message.hint')} />
+        </>
+      )}
       {cfg.questions.roster && <Field label={t('wizard.fields.roster')} value={rosterSize} onChangeText={setRosterSize} keyboardType="number-pad" hint={t('wizard.fields.rosterHint')} />}
       {cfg.tools.recurring && <ToggleRow label={t('wizard.fields.weekly')} hint={t('wizard.fields.weeklyHint')} value={weekly} onChange={setWeekly} />}
     </Surface>

@@ -7,6 +7,7 @@ import { splitIso } from '@/ui/eventForm/dates';
 import { Icon } from '@/ui/Icon';
 import { Button, Caption, Field, Label, ToggleRow } from '@/ui/primitives';
 import { color, font, radius } from '@/ui/tokens';
+import { DateField, TimeField } from '@/ui/eventForm/DateField';
 
 /** Kısa rastgele kimlik (program, anket ve getir listesi öğeleri için; veritabanı ^[a-z0-9]{1,12}$ bekler). */
 export function shortId() {
@@ -46,8 +47,8 @@ export function ProgramEditor({ value, onChange }: { value: ProgramDraft[]; onCh
           </View>
           <Field label={t('tools.page.program.itemTitle')} placeholder={t('tools.page.program.itemTitlePlaceholder')} value={p.title} onChangeText={(v) => set(p.id, { title: v })} maxLength={80} />
           <View style={{ flexDirection: 'row', gap: 10 }}>
-            <Field style={{ flex: 1 }} label={t('tools.page.program.date')} placeholder="2027-06-10" value={p.date} onChangeText={(v) => set(p.id, { date: v })} keyboardType="numbers-and-punctuation" />
-            <Field style={{ width: 110 }} label={t('tools.page.program.time')} placeholder="19:00" value={p.time} onChangeText={(v) => set(p.id, { time: v })} keyboardType="numbers-and-punctuation" />
+            <DateField style={{ flex: 1 }} label={t('tools.page.program.date')} hint="" value={p.date} onChange={(v) => set(p.id, { date: v })} />
+            <TimeField style={{ width: 120 }} label={t('tools.page.program.time')} value={p.time} onChange={(v) => set(p.id, { time: v })} />
           </View>
           <Field label={t('tools.page.program.venue')} value={p.venue} onChangeText={(v) => set(p.id, { venue: v })} maxLength={160} />
           <Field label={t('tools.page.program.address')} value={p.address} onChangeText={(v) => set(p.id, { address: v })} maxLength={300} />
@@ -124,8 +125,8 @@ export function PollEditor({
         return (
           <View key={o.id} style={{ gap: 8, padding: 12, borderRadius: radius.lg, backgroundColor: o.id === chosen ? color.sageTint : color.surfaceSoft }}>
             <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-end' }}>
-              <Field style={{ flex: 1 }} label={`${i + 1}. ${t('tools.page.program.date')}`} placeholder="2027-05-08" value={o.date} onChangeText={(v) => onChange(value.map((x) => (x.id === o.id ? { ...x, date: v } : x)))} keyboardType="numbers-and-punctuation" />
-              <Field style={{ width: 100 }} label={t('tools.page.program.time')} placeholder="20:00" value={o.time} onChangeText={(v) => onChange(value.map((x) => (x.id === o.id ? { ...x, time: v } : x)))} keyboardType="numbers-and-punctuation" />
+              <DateField style={{ flex: 1 }} label={`${i + 1}. ${t('tools.page.program.date')}`} hint="" value={o.date} onChange={(v) => onChange(value.map((x) => (x.id === o.id ? { ...x, date: v } : x)))} />
+              <TimeField style={{ width: 120 }} label={t('tools.page.program.time')} value={o.time} onChange={(v) => onChange(value.map((x) => (x.id === o.id ? { ...x, time: v } : x)))} />
               <View style={{ paddingBottom: 14 }}>
                 <RemoveButton label={t('tools.page.program.remove')} onPress={() => onChange(value.filter((x) => x.id !== o.id))} />
               </View>

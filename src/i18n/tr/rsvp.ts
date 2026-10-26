@@ -1,5 +1,6 @@
 export const rsvp = {
   demo: { label: 'Bu bir örnek davetiye; cevapların hiçbir yere kaydedilmez.', cta: 'Kendininkini oluştur' },
+  openFailed: 'Açılamadı. Bağlantını kontrol edip tekrar dene.',
   notFoundTitle: 'Davet bulunamadı',
   notFoundBody: 'Bu bağlantı geçersiz ya da etkinlik sona ermiş olabilir. Davet edeninle iletişime geçebilirsin.',
   loading: 'Davetiyeniz açılıyor',

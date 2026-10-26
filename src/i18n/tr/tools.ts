@@ -188,6 +188,7 @@ export const tools = {
     done: 'Duyuru yayınlandı.',
     history: 'Önceki duyurular',
     delete: 'Sil',
+    deleteFailed: 'Duyuru silinemedi. Tekrar dene.',
   },
 
   // --- Dışa aktarma

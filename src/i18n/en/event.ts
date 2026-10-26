@@ -1,6 +1,20 @@
 import type { event as TR } from '../tr/event';
 
 export const event: typeof TR = {
+  checklist: {
+    title: 'Getting ready',
+    progress: '{done} of {total} done',
+    guests: 'Add your guests',
+    guestsHint: 'Use the panel below: one by one, from contacts or from Excel.',
+    page: 'Personalise your invitation page',
+    pageHint: 'Invitation text, envelope opening, programme or your own design.',
+    send: 'Send the invitations',
+    sendHint: 'Over WhatsApp one by one or automatically; everyone gets their own link.',
+    seating: 'Set up the seating plan',
+    seatingHint: 'Add tables and seat the guests who are coming.',
+    reminders: 'Turn on automatic reminders',
+    remindersHint: 'Guests who haven’t replied get a reminder before the deadline.',
+  },
   loadError: "We couldn't open this event. It may have been deleted, or there's a connection problem.",
   backToEvents: 'Back to my events',
   invitationLang: 'Invitation: {lang}',

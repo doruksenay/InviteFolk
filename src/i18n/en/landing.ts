@@ -66,6 +66,7 @@ export const landing: typeof TR = {
     titleAccent: 'one-off',
     body: 'A plan lasts a year. When it ends your account returns to the free plan; your data is not deleted.',
     cta: 'See the plans',
+    choose: 'Choose {plan}',
     freeCta: 'Start for free',
   },
   faq: {
@@ -78,6 +79,9 @@ export const landing: typeof TR = {
       { q: 'Can I use my own invitation design?', a: 'Yes. Upload the design from your printer or your own image; each guest’s name is written on it. Video invitations work too.' },
       { q: 'Who can see the photos uploaded to the album?', a: 'By default only you and your co-hosts. You can open the album to guests, or approve every upload first.' },
       { q: 'Do you collect gift money?', a: 'No, we never handle money. We show your IBAN on the invitation; guests send gifts from their own bank.' },
+      { q: 'Why a year? What happens when it ends?', a: 'Wedding planning takes months; a year covers everything from the invitations to the album after the big day. When it ends your account returns to Free; your events, lists and seating plans are kept. Nothing renews automatically.' },
+      { q: 'Can I get an invoice?', a: 'Yes. An invoice is issued for every purchase and emailed to you.' },
+      { q: 'Can I get a refund?', a: 'A plan is a digital service activated on your account right after payment, so the statutory right of withdrawal does not apply. If something goes wrong, write to us and we will sort it out together.' },
       { q: 'Can I send invitations in English?', a: 'Yes. You choose the language of each event, and guests can switch between Turkish and English on the page.' },
     ],
   },

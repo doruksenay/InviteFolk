@@ -1,4 +1,18 @@
 export const event = {
+  checklist: {
+    title: 'Hazırlık listesi',
+    progress: '{done} / {total} tamam',
+    guests: 'Davetlilerini ekle',
+    guestsHint: 'Aşağıdaki panelden tek tek, rehberden ya da Excel’den ekle.',
+    page: 'Davetiye sayfanı kişiselleştir',
+    pageHint: 'Davet metni, zarf açılışı, program ya da kendi tasarımın.',
+    send: 'Davetleri gönder',
+    sendHint: 'WhatsApp’tan tek tek ya da otomatik; herkes kendi linkini alır.',
+    seating: 'Oturma planını kur',
+    seatingHint: 'Masaları ekle, gelenleri yerleştir.',
+    reminders: 'Otomatik hatırlatmayı aç',
+    remindersHint: 'Cevap vermeyenlere son günden önce kendiliğinden hatırlatma gider.',
+  },
   loadError: 'Etkinlik açılamadı. Silinmiş olabilir ya da bağlantı sorunu var.',
   backToEvents: 'Etkinliklerime dön',
   invitationLang: 'Davetiye: {lang}',

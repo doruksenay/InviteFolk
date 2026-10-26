@@ -15,6 +15,7 @@ export const billing: typeof TR = {
   perYear: 'one-time · 1 year',
   popular: 'Most popular',
   yourPlan: 'Your plan',
+  yourChoice: 'Your pick',
   choose: 'Choose this plan',
   buying: 'Getting ready…',
   included: {
@@ -48,7 +49,7 @@ export const billing: typeof TR = {
   legalNote: 'By purchasing you accept the {terms} and {privacy}. As a digital service, your plan is activated right after payment.',
   terms: 'Terms of Use',
   privacy: 'Privacy Policy',
-  webSecure: 'Payment is taken on iyzico’s secure page; your card details never reach us.',
+  webSecure: 'Payment is taken on the payment provider’s secure page; your card details never reach us.',
   storeSecure: 'Payment is taken through your {store} account.',
   appStore: 'App Store',
   playStore: 'Google Play',

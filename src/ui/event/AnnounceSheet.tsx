@@ -110,9 +110,13 @@ export function AnnounceSheet({ open, onClose, eventId, limits, onDone }: { open
                   label={t('tools.announce.delete')}
                   variant="ghost"
                   onPress={async () => {
-                    await deleteAnnouncement(a.id).catch(() => {});
-                    history.reload();
-                    onDone();
+                    try {
+                      await deleteAnnouncement(a.id);
+                      history.reload();
+                      onDone();
+                    } catch (e) {
+                      setMsg({ tone: 'error', text: e instanceof Error ? e.message : t('tools.announce.deleteFailed') });
+                    }
                   }}
                 />
               </View>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Image, KeyboardAvoidingView, Platform, Pressable, Text, View } from 'react-native';
 
 import { useI18n } from '@/i18n';
@@ -10,10 +10,16 @@ import { RichText } from '@/ui/RichText';
 import { Screen } from '@/ui/Screen';
 import { Icon } from '@/ui/Icon';
 import { color, font } from '@/ui/tokens';
+import { setPendingRedirect } from '@/lib/pending';
 
 /** E-postaya gelen 6 haneli kodla giriş: derin bağlantı gerektirmez, iOS/Android/web'de aynı çalışır. */
 export default function SignIn() {
   const { t } = useI18n();
+  // Tanıtım sayfasında bir paket seçildiyse girişten sonra o paketin sayfası açılır.
+  const { plan } = useLocalSearchParams<{ plan?: string }>();
+  useEffect(() => {
+    if (plan === 'temel' || plan === 'otomatik' || plan === 'tam') setPendingRedirect(`/paketler?secim=${plan}`);
+  }, [plan]);
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'email' | 'code'>('email');

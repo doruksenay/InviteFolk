@@ -112,6 +112,7 @@ export function Countdown({ theme, startsAt, t }: { theme: InvitationTheme; star
 // ---------------------------------------------------------------------------
 export function ProgramList({ theme, items, t, locale }: { theme: InvitationTheme; items: ProgramItem[]; t: TFn; locale: string }) {
   const sorted = [...items].sort((a, b) => (a.at ?? '9').localeCompare(b.at ?? '9'));
+  const [mapErr, setMapErr] = useState(false);
   const fmt = (iso: string) =>
     new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' }).format(new Date(iso));
   return (
@@ -130,13 +131,14 @@ export function ProgramList({ theme, items, t, locale }: { theme: InvitationThem
               {where ? <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: theme.soft }}>{where}</Text> : null}
               {where ? (
                 <View style={{ flexDirection: 'row', marginTop: 4 }}>
-                  <SmallButton theme={theme} icon="map" label={t('guest.program.map')} onPress={() => Linking.openURL(mapsUrl(where)).catch(() => {})} />
+                  <SmallButton theme={theme} icon="map" label={t('guest.program.map')} onPress={() => Linking.openURL(mapsUrl(where)).catch(() => setMapErr(true))} />
                 </View>
               ) : null}
             </View>
           </View>
         );
       })}
+      {mapErr ? <Text style={{ fontFamily: font.medium, fontSize: 13, color: theme.dark ? '#FFB4A8' : '#A3332A' }}>{t('rsvp.openFailed')}</Text> : null}
     </SectionCard>
   );
 }

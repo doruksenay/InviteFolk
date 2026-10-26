@@ -13,6 +13,7 @@ export const billing = {
   perYear: 'tek seferlik · 1 yıl',
   popular: 'En çok tercih edilen',
   yourPlan: 'Paketin',
+  yourChoice: 'Seçtiğin paket',
   choose: 'Bu paketi seç',
   buying: 'Hazırlanıyor…',
   included: {
@@ -46,7 +47,7 @@ export const billing = {
   legalNote: 'Satın alarak {terms} ve {privacy} kabul etmiş olursun. Dijital hizmet olduğu için ödeme sonrası paket hemen tanımlanır.',
   terms: 'Kullanım Koşulları',
   privacy: 'Gizlilik Politikası',
-  webSecure: 'Ödeme iyzico güvenli ödeme sayfasında alınır; kart bilgilerin bize ulaşmaz.',
+  webSecure: 'Ödeme, ödeme kuruluşunun güvenli sayfasında alınır; kart bilgilerin bize ulaşmaz.',
   storeSecure: 'Ödeme {store} hesabınla alınır.',
   appStore: 'App Store',
   playStore: 'Google Play',

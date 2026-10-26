@@ -185,6 +185,7 @@ export const tools: typeof TR = {
     done: 'Update published.',
     history: 'Earlier updates',
     delete: 'Delete',
+    deleteFailed: "Couldn't delete the announcement. Try again.",
   },
 
   export: {

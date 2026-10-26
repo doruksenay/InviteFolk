@@ -1,10 +1,30 @@
 // Etkinlik tarih/saatleri Türkiye saatiyle (UTC+3) girilir ve saklanır.
 
+/** "2027-06-12", "12.06.2027", "12/06/2027" ya da "12-06-2027" → "2027-06-12". Geçersizse null. */
+export function normDate(s: string): string | null {
+  const v = s.trim();
+  let y: number, m: number, d: number;
+  let r = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(v);
+  if (r) [y, m, d] = [+r[1], +r[2], +r[3]];
+  else if ((r = /^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/.exec(v))) [d, m, y] = [+r[1], +r[2], +r[3]];
+  else return null;
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) return null;
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+/** "2027-06-12" → "12.06.2027" (uygulamada elle yazılan alanlar için). */
+export function displayDate(iso: string): string {
+  const r = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim());
+  return r ? `${r[3]}.${r[2]}.${r[1]}` : iso;
+}
+
 /** "2027-06-12" + "19:00" → ISO. Geçersizse null. */
 export function toIso(date: string, time: string): string | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date.trim())) return null;
+  const day = normDate(date);
+  if (!day) return null;
   const t = /^\d{1,2}[:.]\d{2}$/.test(time.trim()) ? time.trim().replace('.', ':').padStart(5, '0') : '19:00';
-  const d = new Date(`${date.trim()}T${t}:00+03:00`);
+  const d = new Date(`${day}T${t}:00+03:00`);
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 
@@ -26,4 +46,4 @@ export function splitIso(iso: string | null | undefined): { date: string; time: 
   return { date: `${p('year')}-${p('month')}-${p('day')}`, time: `${p('hour')}:${p('minute')}` };
 }
 
-export const isDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s.trim());
+export const isDate = (s: string) => normDate(s) !== null;

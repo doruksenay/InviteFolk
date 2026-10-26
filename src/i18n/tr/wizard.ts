@@ -1,4 +1,7 @@
 export const wizard = {
+  moreDetails: 'Daha fazla ayrıntı',
+  lessDetails: 'Ayrıntıları gizle',
+  moreDetailsHint: 'Adres, son cevap tarihi ve davet metni; sonra da ekleyebilirsin.',
   steps: { type: 'Tür ve tema', details: 'Bilgiler', guests: 'Davetliler', send: 'Gönderim' },
   stepA11y: 'Adım {n} / {total}: {name}',
   stepPill: 'ADIM {n} / {total}',
@@ -91,7 +94,9 @@ export const wizard = {
     hosts: 'Davet edenler',
     hostsPlaceholder: 'Yılmaz ve Kaya aileleri',
     date: 'Tarih',
-    dateHint: 'YYYY-AA-GG',
+    dateHint: 'Takvimden seç',
+    dateFormat: 'Gün.Ay.Yıl (ör. 12.06.2027)',
+    datePlaceholder: 'GG.AA.YYYY',
     time: 'Saat',
     venue: 'Mekân',
     venuePlaceholder: 'Kalamış Davet Salonu',

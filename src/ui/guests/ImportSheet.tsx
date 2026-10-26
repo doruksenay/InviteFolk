@@ -63,7 +63,7 @@ export function ImportSheet({ open, onClose, eventId, eventType, onImported }: {
     setBusy(t('guests.import.reading'));
     try {
       const bytes = await readPicked(asset);
-      const tbl = parseFile(bytes, asset.name).slice(0, 2001);
+      const tbl = (await parseFile(bytes, asset.name)).slice(0, 2001);
       if (!tbl.length) {
         setErr(t('guests.import.empty'));
         return;

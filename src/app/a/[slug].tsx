@@ -138,9 +138,9 @@ export default function AlbumPage() {
         <View style={{ gap: 10 }}>
           <Text style={{ fontFamily: font.bold, fontSize: 12, letterSpacing: 1.4, color: theme.key_ }}>{t('pub.album.galleryTitle').toLocaleUpperCase()}</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-            {items.map((p) =>
+            {items.map((p, i) =>
               p.kind === 'photo' ? (
-                <Image key={p.url} source={{ uri: p.url }} accessibilityIgnoresInvertColors style={{ width: tile, height: tile, borderRadius: 12, backgroundColor: theme.shapeC }} resizeMode="cover" />
+                <Image key={p.url} source={{ uri: p.url }} accessibilityLabel={t('guest.gallery.photo', { n: i + 1 })} accessibilityIgnoresInvertColors style={{ width: tile, height: tile, borderRadius: 12, backgroundColor: theme.shapeC }} resizeMode="cover" />
               ) : (
                 <Pressable
                   key={p.url}

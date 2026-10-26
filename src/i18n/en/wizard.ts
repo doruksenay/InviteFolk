@@ -1,6 +1,9 @@
 import type { wizard as TR } from '../tr/wizard';
 
 export const wizard: typeof TR = {
+  moreDetails: 'More details',
+  lessDetails: 'Hide details',
+  moreDetailsHint: 'Address, reply-by date and invitation text; you can add them later too.',
   steps: { type: 'Type & theme', details: 'Details', guests: 'Guests', send: 'Send' },
   stepA11y: 'Step {n} of {total}: {name}',
   stepPill: 'STEP {n} / {total}',
@@ -93,7 +96,9 @@ export const wizard: typeof TR = {
     hosts: 'Hosted by',
     hostsPlaceholder: 'The Yılmaz and Kaya families',
     date: 'Date',
-    dateHint: 'YYYY-MM-DD',
+    dateHint: 'Pick from the calendar',
+    dateFormat: 'Day.Month.Year (e.g. 12.06.2027)',
+    datePlaceholder: 'DD.MM.YYYY',
     time: 'Time',
     venue: 'Venue',
     venuePlaceholder: 'Kalamış Davet Salonu',

@@ -63,6 +63,21 @@ export function Landing() {
   };
   const demo = (type: string) => router.push({ pathname: '/demo/[type]', params: lang === 'en' ? { type, lang: 'en' } : { type } });
   const start = () => router.push('/giris');
+  // Paket kartlarındaki öne çıkan maddeler (sınırlar veritabanından; okunamazsa yalnızca açıklama görünür).
+  const nf = (v: number) => new Intl.NumberFormat(locale).format(v);
+  const perksOf = (p: 'free' | PaidPlan): string[] => {
+    const l = catalog.data?.limits.find((x) => x.plan === p);
+    if (!l) return [];
+    return [
+      t('billing.included.events', { count: l.max_events }),
+      t('billing.included.guests', { count: nf(l.max_guests_per_event) }),
+      l.whatsapp_per_day > 0 ? t('billing.included.whatsappAuto', { count: nf(l.whatsapp_per_day) }) : t('billing.included.whatsappManual'),
+      t('billing.included.seating'),
+      ...(l.album_photos > 0 ? [t('billing.included.album', { count: nf(l.album_photos) })] : []),
+      ...(l.checkin ? [t('billing.included.checkin')] : []),
+      ...(l.max_cohosts > 0 ? [t('billing.included.cohosts', { count: l.max_cohosts })] : []),
+    ].slice(0, 6);
+  };
   const heroTheme = getTheme('fildisi');
   const year = new Date().getFullYear();
 
@@ -247,7 +262,19 @@ export function Landing() {
                   <Text style={{ fontFamily: font.black, fontSize: 38, letterSpacing: -1, color: popular ? '#FFFFFF' : color.ink }}>{p === 'free' ? t('billing.freePrice') : priceOf(p)}</Text>
                   <Text style={{ fontFamily: font.medium, fontSize: 13, color: popular ? 'rgba(255,255,255,0.7)' : color.muted }}>{p === 'free' ? ' ' : t('billing.perYear')}</Text>
                   <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: popular ? 'rgba(255,255,255,0.86)' : color.inkSoft, minHeight: 66 }}>{t(`billing.planBlurb.${p}` as never)}</Text>
-                  <Button label={p === 'free' ? L.pricing.freeCta : L.pricing.cta} variant={popular ? 'accent' : 'secondary'} onPress={start} />
+                  <View style={{ gap: 8, flexGrow: 1 }}>
+                    {perksOf(p).map((line) => (
+                      <View key={line} style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start' }}>
+                        <Icon name="check" size={15} color={popular ? color.gold : color.sage} strokeWidth={2.4} />
+                        <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, lineHeight: 20, color: popular ? 'rgba(255,255,255,0.9)' : color.inkSoft }}>{line}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  <Button
+                    label={p === 'free' ? L.pricing.freeCta : L.pricing.choose.replace('{plan}', t(`status.plan.${p}` as never))}
+                    variant={popular ? 'accent' : 'secondary'}
+                    onPress={() => (p === 'free' ? start() : router.push({ pathname: '/giris', params: { plan: p } }))}
+                  />
                 </View>
               );
             })}

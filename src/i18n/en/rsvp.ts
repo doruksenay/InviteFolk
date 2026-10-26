@@ -2,6 +2,7 @@ import type { rsvp as TR } from '../tr/rsvp';
 
 export const rsvp: typeof TR = {
   demo: { label: 'This is a sample invitation; your answers are not saved anywhere.', cta: 'Create yours' },
+  openFailed: "Couldn't open it. Check your connection and try again.",
   notFoundTitle: 'Invitation not found',
   notFoundBody: 'This link may be invalid, or the event may have ended. Please get in touch with your host.',
   loading: 'Opening your invitation',

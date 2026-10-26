@@ -2,6 +2,9 @@ import type { guests as TR } from '../tr/guests';
 
 export const guests: typeof TR = {
   adder: {
+    limitLeft: { one: 'You can add {count} more guest on this plan.', other: 'You can add {count} more guests on this plan.' },
+    limitReached: 'This event has reached the guest limit of your plan. Upgrade to add more guests.',
+    upgrade: 'See plans',
     title: 'Add guests',
     subtitle: 'Type them in one by one, or bring your whole list at once.',
     fromFile: 'Excel / CSV',

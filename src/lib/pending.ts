@@ -4,7 +4,7 @@ let memory: string | null = null;
 const KEY = 'invitefolk.next';
 
 export function setPendingRedirect(path: string) {
-  if (!/^\/[a-z0-9/_-]{1,120}$/i.test(path)) return;
+  if (!/^\/[a-z0-9/_-]{1,120}(\?[a-z0-9=&_-]{1,60})?$/i.test(path)) return;
   memory = path;
   try {
     globalThis.sessionStorage?.setItem(KEY, path);
@@ -22,5 +22,5 @@ export function takePendingRedirect(): string | null {
     // yoksay
   }
   memory = null;
-  return v && /^\/[a-z0-9/_-]{1,120}$/i.test(v) ? v : null;
+  return v && /^\/[a-z0-9/_-]{1,120}(\?[a-z0-9=&_-]{1,60})?$/i.test(v) ? v : null;
 }

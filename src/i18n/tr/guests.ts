@@ -1,5 +1,8 @@
 export const guests = {
   adder: {
+    limitLeft: { one: 'Bu pakette {count} davetli daha ekleyebilirsin.', other: 'Bu pakette {count} davetli daha ekleyebilirsin.' },
+    limitReached: 'Bu etkinlik paketindeki davetli sınırına ulaştı. Daha fazla davetli için paketini yükselt.',
+    upgrade: 'Paketleri gör',
     title: 'Davetli ekle',
     subtitle: 'Tek tek yaz ya da listeni bir seferde getir.',
     fromFile: 'Excel / CSV',

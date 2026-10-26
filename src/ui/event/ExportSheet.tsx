@@ -77,7 +77,7 @@ export function ExportSheet({ open, onClose, event, invitations }: { open: boole
       const header = cols.map((c) => c.label);
       const data = rows.map((i) => cols.map((c) => c.get(i)));
       if (kind === 'xlsx') {
-        const bytes = buildXlsx(t('tools.export.sheetName'), header, data, cols.map((c) => c.width));
+        const bytes = await buildXlsx(t('tools.export.sheetName'), header, data, cols.map((c) => c.width));
         await shareBinaryFile(`${base}.xlsx`, bytes, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'org.openxmlformats.spreadsheetml.sheet');
       } else if (kind === 'csv') {
         await shareTextFile(`${base}.csv`, buildCsv(header, data, locale.startsWith('tr') ? ';' : ','));

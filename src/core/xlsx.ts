@@ -1,6 +1,5 @@
 // En küçük .xlsx yazıcı (tek sayfa, kalın başlık satırı). Excel, Numbers ve Google E-Tablolar açar.
 // Hücreler satır içi metin ya da sayı; formül yok. fflate ile zip'lenir.
-import { strToU8, zipSync } from 'fflate';
 
 export type Cell = string | number | null | undefined;
 
@@ -29,7 +28,9 @@ export function safeText(v: string) {
   return /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
 }
 
-export function buildXlsx(sheetName: string, header: string[], rows: Cell[][], widths?: number[]): Uint8Array {
+/** fflate (zip) yalnızca dışa aktarırken yüklenir. */
+export async function buildXlsx(sheetName: string, header: string[], rows: Cell[][], widths?: number[]): Promise<Uint8Array> {
+  const { strToU8, zipSync } = await import('fflate');
   const all = [header, ...rows];
   const sheetRows = all
     .map((r, ri) => {

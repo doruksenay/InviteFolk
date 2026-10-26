@@ -31,7 +31,7 @@ export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'sunnet' | 'bebek' 
     features: [
       { title: 'Aile grupları', detail: 'Gelin ve damat tarafını ayrı takip et.' },
       { title: 'Kişi sınırı', detail: 'Her haneye en fazla kaç kişi gelebileceğini belirle.' },
-      { title: 'Otomatik hatırlatma', detail: 'Cevap vermeyenlere kendiliğinden hatırlatır.' },
+      { title: 'Otomatik hatırlatma', detail: 'Cevap vermeyen ailelere nazik bir hatırlatma gider.' },
     ],
     sample: { greet: 'Sayın Ahmet Yılmaz ve ailesi', kicker: 'Söz veriyoruz', title: 'Ayşe\n& Mehmet', line: 'Ailelerimizle birlikte bu mutlu anı paylaşmak istiyoruz.', when: '20 Mart 2027, Cumartesi · 17.00', where: '[Mekân adı], Üsküdar', deadline: '1 Mart', host: 'A', wa: 'Ayşe ve Mehmet sizi nişanlarına davet ediyor.' },
   },
@@ -43,7 +43,7 @@ export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'sunnet' | 'bebek' 
     features: [
       { title: 'Düğün rehberinden ekle', detail: 'Aynı davetlileri ikinci etkinliğe tek dokunuşla çağır.' },
       { title: 'Kendi davetiye tasarımın', detail: 'Görselini yükle, her davetlinin adı üstüne yazılsın.' },
-      { title: 'Otomatik hatırlatma', detail: 'Cevap vermeyenlere kendiliğinden hatırlatır.' },
+      { title: 'Otomatik hatırlatma', detail: 'Kına gününden önce cevap vermeyenlere haber gider.' },
     ],
     sample: { greet: 'Sayın Ahmet Yılmaz ve ailesi', kicker: 'Kına gecesi', title: "Ayşe'nin\nkınası", line: 'Kınamızı yakarken sevdiklerimiz yanımızda olsun istiyoruz.', when: '11 Haziran 2027, Cuma · 20.00', where: '[Mekân adı], Üsküdar', deadline: '25 Mayıs', host: 'A', wa: 'Ayşe sizi kına gecesine davet ediyor.' },
   },
@@ -79,7 +79,7 @@ export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'sunnet' | 'bebek' 
     features: [
       { title: 'Kişi sayısı', detail: 'İkram için kaç kişi geleceğini önceden bil.' },
       { title: 'Yol tarifi', detail: 'Cami ya da ev, adres tek dokunuşla haritada açılır.' },
-      { title: 'Hatırlatma', detail: 'Cevap vermeyenlere kendiliğinden hatırlatır.' },
+      { title: 'Hatırlatma', detail: 'Cevap vermeyenlere mevlitten önce kibar bir hatırlatma gider.' },
     ],
     sample: { greet: 'Sayın [Davetli adı]', kicker: 'Mevlid-i Şerif', title: 'Mevlüt\ndavetimiz', line: 'Merhum babamız Hasan Yılmaz’ın ruhuna okunacak mevlüdümüze teşriflerinizi rica ederiz.', when: '10 Nisan 2027, Cumartesi · ikindi namazından sonra', where: '[Cami adı], Üsküdar', deadline: '8 Nisan', host: 'Y', wa: 'Yılmaz ailesi sizi mevlüde davet ediyor.' },
   },
@@ -186,7 +186,7 @@ export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'sunnet' | 'bebek' 
     menu: null,
     features: [
       { title: 'Kendi soruların', detail: 'Davetlilere istediğin soruyu sor.' },
-      { title: 'Otomatik hatırlatma', detail: 'Cevap vermeyenlere kendiliğinden gider.' },
+      { title: 'Otomatik hatırlatma', detail: 'Son güne doğru cevap vermeyenlere bir kez daha haber verilir.' },
       { title: 'WhatsApp ve e-posta', detail: 'Herkese en kolay kanaldan ulaş.' },
     ],
     sample: { greet: 'Sayın [Davetli adı]', kicker: 'Davetlisiniz', title: '[Etkinlik\nadı]', line: 'Bu güzel günde sizi de aramızda görmek isteriz.', when: '[Tarih] · [Saat]', where: '[Mekân]', deadline: '[Tarih]', host: 'D', wa: '[Ev sahibi] sizi davet ediyor.' },

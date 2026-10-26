@@ -14,6 +14,7 @@ import { getEventLimits } from '@/lib/api-tools';
 import { AnnounceSheet } from '@/ui/event/AnnounceSheet';
 import { ExportSheet } from '@/ui/event/ExportSheet';
 import { type ToolTile, ToolsGrid } from '@/ui/event/ToolsGrid';
+import { Checklist } from '@/ui/event/Checklist';
 import { GuestAdder } from '@/ui/guests/GuestAdder';
 import { GuestEditSheet } from '@/ui/guests/GuestEditSheet';
 import { Icon, type IconName } from '@/ui/Icon';
@@ -203,6 +204,24 @@ export default function EventDetail() {
 
       {feedback && <Notice tone={feedback.tone} text={feedback.text} />}
 
+      {!archived && (
+        <Checklist
+          steps={[
+            { key: 'guests', label: t('event.checklist.guests'), hint: t('event.checklist.guestsHint'), done: counts.all > 0 },
+            ...(saha
+              ? []
+              : [{ key: 'page', label: t('event.checklist.page'), hint: t('event.checklist.pageHint'), done: !!(settings.message || settings.design || settings.program?.length || settings.envelope?.enabled), onPress: () => go('/etkinlik/[id]/sayfa') }]),
+            { key: 'send', label: t('event.checklist.send'), hint: t('event.checklist.sendHint'), done: invitations.some((i) => i.delivery !== 'not_sent'), onPress: counts.all ? () => setSendOpen(true) : undefined },
+            ...(cfg.tools.seating
+              ? [{ key: 'seating', label: t('event.checklist.seating'), hint: t('event.checklist.seatingHint'), done: invitations.some((i) => i.table_id), onPress: () => router.push({ pathname: '/etkinlik/[id]/oturma', params: { id: event.id } }) }]
+              : []),
+            ...(saha
+              ? []
+              : [{ key: 'reminders', label: t('event.checklist.reminders'), hint: t('event.checklist.remindersHint'), done: !!settings.reminders?.auto, onPress: () => router.push({ pathname: '/etkinlik/[id]/duzenle', params: { id: event.id } }) }]),
+          ]}
+        />
+      )}
+
       {/* Özet */}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
         {roster ? (
@@ -271,7 +290,7 @@ export default function EventDetail() {
       </View>
 
       <View style={{ flexDirection: wide ? 'row' : 'column', gap: 20, alignItems: 'flex-start' }}>
-        <View style={{ width: wide ? 380 : '100%' }}>{!archived && <GuestAdder event={event} onAdded={reload} />}</View>
+        <View style={{ width: wide ? 380 : '100%' }}>{!archived && <GuestAdder event={event} onAdded={reload} remaining={L ? L.max_guests_per_event - counts.all : null} />}</View>
 
         {/* Liste */}
         <Surface style={{ flex: wide ? 1 : undefined, width: wide ? undefined : '100%', gap: 16 }}>

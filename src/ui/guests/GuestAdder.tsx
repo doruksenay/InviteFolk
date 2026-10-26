@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Platform, View } from 'react-native';
+import { router } from 'expo-router';
+import { Platform, Text, View } from 'react-native';
 
 import { getEventType } from '@/core/event-types';
 import { normalizePhone } from '@/core/format';
@@ -8,7 +9,7 @@ import type { EventRow, Side } from '@/core/types';
 import { useI18n } from '@/i18n';
 import { importGuests, type ImportResult } from '@/lib/api-guests';
 import { Button, Caption, Field, Label, Notice, Surface, Title } from '@/ui/primitives';
-import { color } from '@/ui/tokens';
+import { color, font } from '@/ui/tokens';
 
 import { NumberStepper, SideOrGroup, SourceTile, usesSides } from './common';
 import { ImportSheet } from './ImportSheet';
@@ -21,7 +22,7 @@ type Feedback = { tone: 'success' | 'error' | 'info'; text: string } | null;
  * Davetli ekleme: elle, Excel/CSV'den, telefon rehberinden ya da kendi rehberinden.
  * Sihirbazın 3. adımında ve etkinlik sayfasında kullanılır.
  */
-export function GuestAdder({ event, onAdded, style }: { event: EventRow; onAdded: () => void; style?: object }) {
+export function GuestAdder({ event, onAdded, style, remaining }: { event: EventRow; onAdded: () => void; style?: object; remaining?: number | null }) {
   const { t } = useI18n();
   const cfg = getEventType(event.type);
   const [sheet, setSheet] = useState<'file' | 'phone' | 'mine' | null>(null);
@@ -89,6 +90,15 @@ export function GuestAdder({ event, onAdded, style }: { event: EventRow; onAdded
         {Platform.OS !== 'web' && <SourceTile icon="phone" title={t('guests.adder.fromPhone')} hint={t('guests.adder.fromPhoneHint')} accent={color.coral} onPress={() => setSheet('phone')} />}
         <SourceTile icon="users" title={t('guests.adder.fromMine')} hint={t('guests.adder.fromMineHint')} accent={color.lavender} onPress={() => setSheet('mine')} />
       </View>
+
+      {typeof remaining === 'number' && remaining <= 20 && (
+        <View style={{ gap: 8, padding: 14, borderRadius: 16, backgroundColor: remaining <= 0 ? color.coralTint : color.goldTint }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 14, lineHeight: 20, color: remaining <= 0 ? color.coralInk : color.goldInk }}>
+            {remaining <= 0 ? t('guests.adder.limitReached') : t('guests.adder.limitLeft', { count: remaining })}
+          </Text>
+          <Button label={t('guests.adder.upgrade')} variant="secondary" icon="star" onPress={() => router.push('/paketler')} style={{ alignSelf: 'flex-start' }} />
+        </View>
+      )}
 
       {feedback && <Notice tone={feedback.tone} text={feedback.text} />}
 

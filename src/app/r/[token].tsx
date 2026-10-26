@@ -217,6 +217,7 @@ export default function GuestRsvp() {
       calEvent={calEvent}
       mapQuery={where || null}
       feedUrl={settings.recurring === 'weekly' ? calendarFeedUrl(token) : null}
+      onError={() => setErr(t('rsvp.openFailed'))}
     />
   );
 
@@ -483,6 +484,7 @@ function EventExtras({
   calEvent,
   mapQuery,
   feedUrl,
+  onError,
 }: {
   theme: InvitationTheme;
   t: TFn;
@@ -491,6 +493,7 @@ function EventExtras({
   calEvent: CalEvent | null;
   mapQuery: string | null;
   feedUrl: string | null;
+  onError: () => void;
 }) {
   if (!fee && !giftNote && !calEvent && !mapQuery) return null;
   const soft = theme.dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.75)';
@@ -510,17 +513,17 @@ function EventExtras({
       )}
       {(calEvent || mapQuery) && (
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          {calEvent && <SmallPill theme={theme} icon="calendar" label={t('rsvp.addToCalendar')} onPress={() => addToCalendar(calEvent).catch(() => {})} />}
-          {mapQuery && <SmallPill theme={theme} icon="map" label={t('rsvp.openMap')} onPress={() => Linking.openURL(mapsUrl(mapQuery)).catch(() => {})} />}
+          {calEvent && <SmallPill theme={theme} icon="calendar" label={t('rsvp.addToCalendar')} onPress={() => addToCalendar(calEvent).catch(onError)} />}
+          {mapQuery && <SmallPill theme={theme} icon="map" label={t('rsvp.openMap')} onPress={() => Linking.openURL(mapsUrl(mapQuery)).catch(onError)} />}
         </View>
       )}
       {calEvent && Platform.OS === 'web' && (
-        <Pressable accessibilityRole="link" onPress={() => Linking.openURL(googleCalendarUrl(calEvent)).catch(() => {})} style={{ alignSelf: 'center', paddingVertical: 2 }}>
+        <Pressable accessibilityRole="link" onPress={() => Linking.openURL(googleCalendarUrl(calEvent)).catch(onError)} style={{ alignSelf: 'center', paddingVertical: 2 }}>
           <Text style={{ fontFamily: font.medium, fontSize: 12, color: theme.soft, textDecorationLine: 'underline' }}>{t('rsvp.googleCalendar')}</Text>
         </Pressable>
       )}
       {feedUrl && (
-        <Pressable accessibilityRole="link" onPress={() => Linking.openURL(feedUrl).catch(() => {})} style={{ alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 2 }}>
+        <Pressable accessibilityRole="link" onPress={() => Linking.openURL(feedUrl).catch(onError)} style={{ alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 2 }}>
           <Icon name="refresh" size={13} color={theme.soft} strokeWidth={2} />
           <Text style={{ fontFamily: font.medium, fontSize: 12, color: theme.soft, textDecorationLine: 'underline' }}>{t('guest.calendar.subscribe')}</Text>
         </Pressable>

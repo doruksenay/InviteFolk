@@ -23,7 +23,7 @@ export const eventTypes: typeof TR = {
     features: [
       { title: 'Family groups', detail: 'Track the bride\'s and groom\'s sides separately.' },
       { title: 'Guest limit', detail: 'Set how many people each household can bring.' },
-      { title: 'Automatic reminders', detail: 'Nudges guests who haven\'t replied yet.' },
+      { title: 'Automatic reminders', detail: 'A gentle nudge to families who haven\'t replied.' },
     ],
     sample: { greet: 'Dear Ahmet Yılmaz and family', kicker: "We're engaged", title: 'Ayşe\n& Mehmet', line: 'We would like to share this happy moment with you and our families.', when: 'Saturday, 20 March 2027 · 5 pm', where: '[Venue], Üsküdar', deadline: '1 March', host: 'A', wa: 'Ayşe and Mehmet invite you to their engagement.' },
   },
@@ -35,7 +35,7 @@ export const eventTypes: typeof TR = {
     features: [
       { title: 'Add from the wedding list', detail: 'Invite the same guests to a second event in one tap.' },
       { title: 'Your own invitation design', detail: 'Upload your image and each guest\'s name is written on it.' },
-      { title: 'Automatic reminders', detail: 'Nudges guests who haven\'t replied yet.' },
+      { title: 'Automatic reminders', detail: 'Guests who haven\'t replied hear from you before the henna night.' },
     ],
     sample: { greet: 'Dear Ahmet Yılmaz and family', kicker: 'Henna night', title: "Ayşe's\nhenna night", line: 'We want our loved ones by our side as we light the henna.', when: 'Friday, 11 June 2027 · 8 pm', where: '[Venue], Üsküdar', deadline: '25 May', host: 'A', wa: 'Ayşe invites you to her henna night.' },
   },
@@ -71,7 +71,7 @@ export const eventTypes: typeof TR = {
     features: [
       { title: 'Guest count', detail: 'Know how many are coming for the refreshments.' },
       { title: 'Directions', detail: 'Mosque or home, the address opens on the map in one tap.' },
-      { title: 'Reminders', detail: "Automatic reminders for guests who haven't replied." },
+      { title: 'Reminders', detail: 'A polite reminder goes to anyone who hasn\'t replied before the day.' },
     ],
     sample: { greet: 'Dear [Guest name]', kicker: 'Mevlid-i Şerif', title: 'Mevlit\ninvitation', line: 'We kindly invite you to the mevlit in memory of our late father Hasan Yılmaz.', when: 'Saturday, 10 April 2027 · after afternoon prayer', where: '[Mosque], Üsküdar', deadline: '8 April', host: 'Y', wa: 'The Yılmaz family invites you to a mevlit.' },
   },
@@ -178,7 +178,7 @@ export const eventTypes: typeof TR = {
     menu: null,
     features: [
       { title: 'Your own questions', detail: 'Ask guests whatever you need.' },
-      { title: 'Automatic reminders', detail: 'Goes out to anyone who hasn\'t replied.' },
+      { title: 'Automatic reminders', detail: 'Anyone who hasn\'t replied hears from you once more near the deadline.' },
       { title: 'WhatsApp and email', detail: 'Reach everyone on their easiest channel.' },
     ],
     sample: { greet: 'Dear [Guest name]', kicker: "You're invited", title: '[Event\nname]', line: 'We would love to have you with us on this lovely day.', when: '[Date] · [Time]', where: '[Venue]', deadline: '[Date]', host: 'H', wa: '[Host] is inviting you.' },

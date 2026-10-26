@@ -1,9 +1,10 @@
 // Excel (XLSX) ve CSV'den davetli listesi okuma. Harici Excel kütüphanesi yok: XLSX bir zip arşividir,
 // fflate ile açılır ve iki XML (paylaşılan metinler + ilk sayfa) okunur. Tamamen istemcide çalışır.
-import { strFromU8, unzipSync } from 'fflate';
-
 import { normalizePhone } from './format';
 import type { Side } from './types';
+
+// fflate (zip) yalnızca dosya okunurken yüklenir; ana pakete girmez.
+type Fflate = typeof import('fflate');
 
 export type Table = string[][];
 
@@ -22,7 +23,7 @@ function decodeCp1254(bytes: Uint8Array): string {
   return out;
 }
 
-export function decodeText(bytes: Uint8Array): string {
+export function decodeText(bytes: Uint8Array, { strFromU8 }: Pick<Fflate, 'strFromU8'>): string {
   let start = 0;
   if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) start = 3;
   const body = bytes.subarray(start);
@@ -115,7 +116,7 @@ function numberText(v: string): string {
   return String(n);
 }
 
-export function parseXlsx(bytes: Uint8Array): Table {
+export function parseXlsx(bytes: Uint8Array, { strFromU8, unzipSync }: Pick<Fflate, 'strFromU8' | 'unzipSync'>): Table {
   const files = unzipSync(bytes, {
     filter: (f) => f.name === 'xl/workbook.xml' || f.name === 'xl/_rels/workbook.xml.rels' || f.name === 'xl/sharedStrings.xml' || f.name.startsWith('xl/worksheets/sheet'),
   });
@@ -175,9 +176,10 @@ export function isXlsx(bytes: Uint8Array): boolean {
   return bytes[0] === 0x50 && bytes[1] === 0x4b; // "PK" zip imzası
 }
 
-export function parseFile(bytes: Uint8Array, name = ''): Table {
-  if (isXlsx(bytes) || /\.xlsx$/i.test(name)) return parseXlsx(bytes);
-  return parseCsv(decodeText(bytes));
+export async function parseFile(bytes: Uint8Array, name = ''): Promise<Table> {
+  const fflate = await import('fflate');
+  if (isXlsx(bytes) || /\.xlsx$/i.test(name)) return parseXlsx(bytes, fflate);
+  return parseCsv(decodeText(bytes, fflate));
 }
 
 // ---------------------------------------------------------------------------

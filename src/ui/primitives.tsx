@@ -192,6 +192,7 @@ export function Field({ label, hint, error, style, ...rest }: TextInputProps & {
       <Label>{label}</Label>
       <TextInput
         placeholderTextColor={color.faint}
+        accessibilityLabel={label}
         {...rest}
         style={[styles.input, error ? { boxShadow: `inset 0 0 0 1.5px ${color.coral}` } : null, rest.multiline && { height: 96, paddingTop: 14, textAlignVertical: 'top' }] as TextStyle[]}
       />

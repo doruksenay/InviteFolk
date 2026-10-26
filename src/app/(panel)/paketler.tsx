@@ -42,7 +42,7 @@ export default function PlansScreen() {
   const { width } = useWindowDimensions();
   const wide = width >= 980;
   const { profile, refreshProfile } = useSession();
-  const params = useLocalSearchParams<{ durum?: string; paket?: string }>();
+  const params = useLocalSearchParams<{ durum?: string; paket?: string; secim?: string }>();
 
   const catalog = useQuery(getPlanCatalog, []);
   const mine = useQuery(getMyPlan, []);
@@ -176,7 +176,7 @@ export default function PlansScreen() {
           borderRadius: radius.xl,
           padding: 24,
           gap: 16,
-          boxShadow: dark ? '0px 24px 50px rgba(36,33,43,0.28)' : isCurrent ? `inset 0 0 0 2px ${color.lavender}, ${shadow.card}` : shadow.card,
+          boxShadow: params.secim === p ? `inset 0 0 0 3px ${color.coral}, ${shadow.raised}` : dark ? '0px 24px 50px rgba(36,33,43,0.28)' : isCurrent ? `inset 0 0 0 2px ${color.lavender}, ${shadow.card}` : shadow.card,
           transform: [{ translateY: dark && wide ? -8 : 0 }],
         }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, minHeight: 26 }}>
@@ -186,7 +186,9 @@ export default function PlansScreen() {
               {p === 'free' ? t('billing.free') : planName(p)}
             </Text>
           </View>
-          {isCurrent ? (
+          {params.secim === p && !isCurrent ? (
+            <Pill label={t('billing.yourChoice')} bg={color.coralTint} fg={color.coralInk} />
+          ) : isCurrent ? (
             <Pill label={t('billing.yourPlan')} bg={dark ? 'rgba(255,255,255,0.16)' : color.lavenderTint} fg={dark ? '#FFFFFF' : color.lavenderInk} />
           ) : dark ? (
             <Pill label={t('billing.popular')} bg={color.coralInk} fg="#FFFFFF" />
