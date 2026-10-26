@@ -67,7 +67,7 @@ Boş bırakılan özellik kapalı kalır, uygulamanın geri kalanı çalışır.
 | Gmail yerine başka e-posta servisi (ör. Brevo: `smtp-relay.brevo.com`, 587) | `SMTP_USER`, `SMTP_PASSWORD` (servisin SMTP bilgileri) | `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM` (serviste doğrulanmış gönderen adresi) |
 | Var olan bir Supabase projesini kullan | | `SUPABASE_PROJECT_REF` |
 | Token organizasyonu göremiyorsa | | `SUPABASE_ORG_ID` (supabase.com/dashboard/org/`<kod>`) |
-| Kendi alan adın | | `WEB_URL`, `CLOUDFLARE_PAGES_PROJECT` |
+| Kendi alan adın (Cloudflare'de; token'a ayrıca *Zone · DNS · Edit* izni) | | `WEB_URL` = `https://alanadin.com` |
 
 ## Telefonda deneme
 

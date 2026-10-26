@@ -159,5 +159,38 @@ jobs:
       - name: Yayınla
         run: npx --yes wrangler@4 pages deploy dist --project-name "$PAGES_PROJECT" --branch main --commit-dirty=true
 
+      - name: Kendi alan adı (WEB_URL verildiyse)
+        # Alan adı Cloudflare'de olmalı (Cloudflare'den alınmış ya da ad sunucuları Cloudflare'e taşınmış).
+        # Pages'e alan adı ve www eklenir; token'da "Zone · DNS · Edit" izni varsa DNS kayıtları da kendiliğinden açılır.
+        if: vars.WEB_URL != ''
+        env:
+          WEB_URL: ${{ vars.WEB_URL }}
+        run: |
+          set -uo pipefail
+          host=$(printf '%s' "$WEB_URL" | sed -E 's#^https?://##; s#/.*$##' | tr '[:upper:]' '[:lower:]')
+          apex=${host#www.}
+          CF=https://api.cloudflare.com/client/v4
+          cf=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json")
+          for d in "$apex" "www.$apex"; do
+            r=$(curl -sS -X POST "${cf[@]}" "$CF/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PAGES_PROJECT/domains" -d "$(jq -n --arg n "$d" '{name: $n}')")
+            if [ "$(printf '%s' "$r" | jq -r '.success')" = "true" ]; then echo "Pages alan adı eklendi: $d"
+            else echo "Pages alan adı ($d): $(printf '%s' "$r" | jq -c '.errors' | head -c 200)"; fi
+          done
+          zone=$(curl -sS "${cf[@]}" "$CF/zones?name=$apex" | jq -r '.result[0].id // empty')
+          if [ -z "$zone" ]; then
+            echo "::warning::$apex Cloudflare'de bulunamadı ya da token'ın 'Zone · DNS · Edit' izni yok. DNS'te $apex ve www için $PAGES_PROJECT.pages.dev'e CNAME kaydını elle açın."
+            exit 0
+          fi
+          for d in "$apex" "www.$apex"; do
+            n=$(curl -sS "${cf[@]}" "$CF/zones/$zone/dns_records?name=$d" | jq -r '.result | length')
+            if [ "${n:-0}" = "0" ]; then
+              r=$(curl -sS -X POST "${cf[@]}" "$CF/zones/$zone/dns_records" \
+                -d "$(jq -n --arg n "$d" --arg c "$PAGES_PROJECT.pages.dev" '{type: "CNAME", name: $n, content: $c, proxied: true, ttl: 1}')")
+              echo "DNS $d → $(printf '%s' "$r" | jq -r 'if .success then "açıldı" else (.errors | tostring) end')"
+            else
+              echo "DNS $d zaten var, dokunulmadı."
+            fi
+          done
+
       - name: Adres
         run: echo "### Yayında → $EXPO_PUBLIC_WEB_URL" >> "$GITHUB_STEP_SUMMARY"
