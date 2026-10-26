@@ -79,8 +79,9 @@ export function Landing() {
     <View style={{ flex: 1, backgroundColor: color.bg }}>
       <ScrollView ref={setScroll} contentContainerStyle={{ paddingBottom: 0 }}>
         {/* Arka plan ışıltısı */}
-        <View pointerEvents="none" style={{ position: 'absolute', left: -240, top: -260, width: 640, height: 640, borderRadius: 320, backgroundColor: 'rgba(160,140,235,0.16)' }} />
-        <View pointerEvents="none" style={{ position: 'absolute', right: -260, top: 120, width: 560, height: 560, borderRadius: 280, backgroundColor: 'rgba(242,132,111,0.12)' }} />
+        {/* Dar ekranda yazının arkasına düşüp okunurluğu bozmasın diye küçülür ve kenara çekilir */}
+        <View pointerEvents="none" style={{ position: 'absolute', left: wide ? -240 : -200, top: wide ? -260 : -300, width: wide ? 640 : 420, height: wide ? 640 : 420, borderRadius: 320, backgroundColor: wide ? 'rgba(160,140,235,0.16)' : 'rgba(160,140,235,0.10)' }} />
+        {wide && <View pointerEvents="none" style={{ position: 'absolute', right: -260, top: 120, width: 560, height: 560, borderRadius: 280, backgroundColor: 'rgba(242,132,111,0.12)' }} />}
 
         {/* Üst çubuk */}
         <View style={[wrap, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 18, gap: 12 }]}>
@@ -114,10 +115,10 @@ export function Landing() {
 
         {/* Kahraman alanı */}
         <View style={[wrap, { flexDirection: wide ? 'row' : 'column', alignItems: wide ? 'center' : 'stretch', gap: wide ? 56 : 36, paddingTop: wide ? 48 : 20, paddingBottom: 72 }]}>
-          <View style={{ flex: wide ? 1.1 : undefined, gap: 22 }}>
+          <View style={{ flex: wide ? 1.35 : undefined, gap: 22 }}>
             <Kicker tone={color.coralInk}>{L.hero.kicker}</Kicker>
-            <Display size={wide ? 86 : mid ? 70 : 54} accessibilityRole="header">
-              {L.hero.title} <DisplayAccent style={{ color: color.lavender }}>{L.hero.titleAccent}</DisplayAccent>
+            <Display size={wide ? 82 : mid ? 70 : 54} accessibilityRole="header">
+              {L.hero.title}{'\n'}<DisplayAccent style={{ color: color.lavender }}>{L.hero.titleAccent}</DisplayAccent>
             </Display>
             <Body style={{ fontSize: 18, lineHeight: 28, maxWidth: 560 }}>{L.hero.body}</Body>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 4 }}>
@@ -134,7 +135,7 @@ export function Landing() {
               ))}
             </View>
           </View>
-          <View style={{ flex: wide ? 0.9 : undefined, alignItems: 'center' }}>
+          <View style={{ flex: wide ? 0.85 : undefined, alignItems: 'center' }}>
             <View style={{ width: '100%', maxWidth: 400, transform: wide ? [{ rotate: '1.5deg' }] : undefined }}>
               <InvitationCard
                 theme={heroTheme}

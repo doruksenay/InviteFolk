@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Image, KeyboardAvoidingView, Platform, View } from 'react-native';
+import { router } from 'expo-router';
+import { Image, KeyboardAvoidingView, Platform, Pressable, Text, View } from 'react-native';
 
 import { useI18n } from '@/i18n';
 import { supabase } from '@/lib/supabase';
@@ -7,7 +8,8 @@ import logoFull from '../../assets/images/logo-full.png';
 import { Body, Button, Caption, Display, DisplayAccent, Field, Notice, Surface } from '@/ui/primitives';
 import { RichText } from '@/ui/RichText';
 import { Screen } from '@/ui/Screen';
-import { color } from '@/ui/tokens';
+import { Icon } from '@/ui/Icon';
+import { color, font } from '@/ui/tokens';
 
 /** E-postaya gelen 6 haneli kodla giriş: derin bağlantı gerektirmez, iOS/Android/web'de aynı çalışır. */
 export default function SignIn() {
@@ -51,6 +53,12 @@ export default function SignIn() {
   return (
     <Screen maxWidth={520} contentStyle={{ flexGrow: 1, justifyContent: 'center', paddingVertical: 40 }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ gap: 28 }}>
+        {Platform.OS === 'web' && (
+          <Pressable accessibilityRole="link" onPress={() => router.replace('/')} hitSlop={8} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', marginBottom: -12 }}>
+            <Icon name="arrowLeft" size={16} color={color.inkSoft} strokeWidth={2} />
+            <Text style={{ fontFamily: font.semibold, fontSize: 14, color: color.inkSoft }}>{t('auth.home')}</Text>
+          </Pressable>
+        )}
         <Image source={logoFull} accessibilityLabel="Invitefolk" resizeMode="contain" style={{ width: 200, height: 164, alignSelf: 'flex-start', marginBottom: -6 }} />
         <View style={{ gap: 10 }}>
           <Display size={52}>
