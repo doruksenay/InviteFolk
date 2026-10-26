@@ -5,6 +5,7 @@
 import '@/lib/storage-polyfill';
 
 import { getLocales } from 'expo-localization';
+import { Platform } from 'react-native';
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { en } from './en';
@@ -103,6 +104,8 @@ function storeLang(lang: Lang) {
 }
 
 export function deviceLang(): Lang {
+  // Web sitesi her zaman Türkçe açılır; ziyaretçi EN'e geçerse tercihi saklanır. Uygulama cihaz dilini izler.
+  if (Platform.OS === 'web') return 'tr';
   try {
     for (const l of getLocales()) {
       if (l.languageCode === 'tr') return 'tr';

@@ -35,7 +35,7 @@ export const billing = {
     checkin: 'Kapıda karekodla giriş',
     album: 'Canlı albüm: {count} fotoğraf/video, anı defteri, salon ekranı',
     collector: 'Bilgi toplama linki',
-    ai: 'Yapay zekâ: günde {count} metin ya da okuma',
+    ai: 'Yapay zekâ: günde {count} kez davet metni yazdırma ya da basılı davetiyenin fotoğrafından bilgileri doldurma',
     export: 'Excel/PDF liste, duyuru, tarih anketi',
   },
   planBlurb: {

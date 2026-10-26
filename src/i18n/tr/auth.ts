@@ -11,6 +11,7 @@ export const auth = {
   newAccountHint: 'Hesabın yoksa ilk girişte otomatik oluşturulur.',
   codeSent: '{email} adresine bir giriş e-postası gönderdik. İçindeki 6 haneli kodu buraya yaz ya da e-postadaki bağlantıya bu tarayıcıda dokun.',
   code: 'Giriş kodu',
+  codePlaceholder: 'Kodu buraya yaz',
   codeTooShort: 'E-postadaki 6 haneli kodu yaz.',
   verifyFailed: 'Kod doğrulanamadı. Kodu kontrol et ya da yenisini iste.',
   signIn: 'Giriş yap',

@@ -37,7 +37,7 @@ export const billing: typeof TR = {
     checkin: 'QR check-in at the door',
     album: 'Live album: {count} photos/videos, guestbook, venue screen',
     collector: 'Guest info collection link',
-    ai: 'AI: {count} texts or scans a day',
+    ai: 'AI: write invitation text or fill details from a photo of a printed invitation, {count} times a day',
     export: 'Excel/PDF list, announcements, date poll',
   },
   planBlurb: {

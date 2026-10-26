@@ -93,7 +93,7 @@ export default function SignIn() {
               <Notice tone="info" text={t('auth.codeSent', { email })} />
               <Field
                 label={t('auth.code')}
-                placeholder="123456"
+                placeholder={t('auth.codePlaceholder')}
                 keyboardType="number-pad"
                 autoComplete="one-time-code"
                 maxLength={6}
