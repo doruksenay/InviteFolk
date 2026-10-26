@@ -140,6 +140,8 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           SMTP_HOST: ${{ vars.SMTP_HOST || 'smtp.gmail.com' }}
           SMTP_PORT: ${{ vars.SMTP_PORT || '465' }}
+          # Gmail dışı servislerde (ör. Brevo) giriş adı gönderen adresi değildir; gönderen ayrıca verilir.
+          SMTP_FROM: ${{ vars.SMTP_FROM }}
         run: |
           set -euo pipefail
           read -r -d '' BODY_TR <<'HTML' || true
@@ -163,8 +165,8 @@ jobs:
             mfa_totp_verify_enabled: true
           }')
           if [ -n "$SMTP_USER" ] && [ -n "$SMTP_PASSWORD" ]; then
-            cfg=$(echo "$cfg" | jq --arg u "$SMTP_USER" --arg p "$SMTP_PASSWORD" --arg h "$SMTP_HOST" --arg port "$SMTP_PORT" \
-              '. + {smtp_admin_email: $u, smtp_user: $u, smtp_pass: $p, smtp_host: $h, smtp_port: $port, smtp_sender_name: "Invitefolk", smtp_max_frequency: 30, rate_limit_email_sent: 30}')
+            cfg=$(echo "$cfg" | jq --arg u "$SMTP_USER" --arg f "${SMTP_FROM:-$SMTP_USER}" --arg p "$SMTP_PASSWORD" --arg h "$SMTP_HOST" --arg port "$SMTP_PORT" \
+              '. + {smtp_admin_email: $f, smtp_user: $u, smtp_pass: $p, smtp_host: $h, smtp_port: $port, smtp_sender_name: "Invitefolk", smtp_max_frequency: 30, rate_limit_email_sent: 30}')
           else
             echo "::warning::SMTP_USER/SMTP_PASSWORD yok: giriş kodu e-postaları yalnızca Supabase ekibindeki adreslere ve saatte 2 tane gider."
           fi

@@ -64,6 +64,7 @@ Boş bırakılan özellik kapalı kalır, uygulamanın geri kalanı çalışır.
 | Web ödemesi (iyzico sandbox ücretsiz) | `IYZICO_API_KEY`, `IYZICO_SECRET_KEY` | `IYZICO_BASE_URL` = `https://sandbox-api.iyzipay.com` |
 | Android APK | `EXPO_TOKEN` (expo.dev → Account settings → Access tokens) | |
 | Farklı yönetici adresi | `ADMIN_EMAIL` | |
+| Gmail yerine başka e-posta servisi (ör. Brevo: `smtp-relay.brevo.com`, 587) | `SMTP_USER`, `SMTP_PASSWORD` (servisin SMTP bilgileri) | `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM` (serviste doğrulanmış gönderen adresi) |
 | Var olan bir Supabase projesini kullan | | `SUPABASE_PROJECT_REF` |
 | Kendi alan adın | | `WEB_URL`, `CLOUDFLARE_PAGES_PROJECT` |
 
