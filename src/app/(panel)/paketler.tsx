@@ -232,7 +232,7 @@ export default function PlansScreen() {
   return (
     <Screen maxWidth={1240}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-        <IconButton icon="arrowLeft" label={t('billing.back')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+        <IconButton icon="arrowLeft" label={t('billing.back')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/etkinlikler'))} />
         <Pill label={t('billing.kicker')} bg={color.lavenderTint} fg={color.lavenderInk} />
       </View>
 

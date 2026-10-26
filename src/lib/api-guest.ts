@@ -1,10 +1,12 @@
 // Davetli (girişsiz) işlemleri: tümü 128 bitlik davet anahtarıyla, veritabanının tanımlı fonksiyonları üzerinden.
-import type { PollVote, PublicEvent, PublicInvitation } from '@/core/types';
+import type { AlbumKind, PollVote, PublicEvent, PublicEventExtra, PublicGuestbookEntry, PublicInvitation } from '@/core/types';
 
 import { friendlyError, must, supabase } from './api';
+import { demoClaimPaid, demoClaimSignup, demoGuestbook, demoSignGuestbook, demoVotePoll, isDemoToken } from './demo';
 
 /** Davetli sayfayı açtı (organizatörün önizlemesi sayılmaz; hata davetliye gösterilmez). */
 export async function markOpened(token: string) {
+  if (isDemoToken(token)) return;
   await supabase.rpc('mark_invitation_opened', { p_token: token }).then(
     () => undefined,
     () => undefined,
@@ -12,24 +14,55 @@ export async function markOpened(token: string) {
 }
 
 export async function votePoll(token: string, votes: Record<string, PollVote>) {
+  if (isDemoToken(token)) return demoVotePoll(token, votes);
   return must(await supabase.rpc('vote_poll', { p_token: token, p_votes: votes })) as PublicInvitation;
 }
 
 export async function claimSignup(token: string, item: string, qty: number) {
+  if (isDemoToken(token)) return demoClaimSignup(token, item, qty);
   return must(await supabase.rpc('claim_signup', { p_token: token, p_item: item, p_qty: qty })) as PublicInvitation;
 }
 
 export async function voteMvp(token: string, match: string, target: string) {
+  if (isDemoToken(token)) throw new Error('demo');
   return must(await supabase.rpc('vote_mvp', { p_token: token, p_match: match, p_target: target })) as PublicInvitation;
 }
 
 export async function claimPaid(token: string) {
+  if (isDemoToken(token)) return demoClaimPaid(token);
   return must(await supabase.rpc('claim_paid', { p_token: token })) as PublicInvitation;
+}
+
+// ---------------------------------------------------------------------------
+// Anı defteri
+// ---------------------------------------------------------------------------
+/** Davetli kendi linkinden mesaj bırakır; `pending` true ise organizatör onayından sonra görünür. */
+export async function signGuestbook(token: string, message: string): Promise<{ pending: boolean }> {
+  if (isDemoToken(token)) return demoSignGuestbook(token, message);
+  return must(await supabase.rpc('guestbook_sign', { p_token: token, p_message: message.trim().slice(0, 500) })) as { pending: boolean };
+}
+
+export async function signGuestbookPublic(slug: string, name: string, message: string): Promise<{ pending: boolean }> {
+  return must(await supabase.rpc('guestbook_sign_slug', { p_slug: slug, p_name: name.trim().slice(0, 80), p_message: message.trim().slice(0, 500) })) as { pending: boolean };
+}
+
+export async function guestbookForGuest(token: string): Promise<PublicGuestbookEntry[]> {
+  if (isDemoToken(token)) return demoGuestbook(token);
+  return (must(await supabase.rpc('guestbook_for_guest', { p_token: token })) as PublicGuestbookEntry[] | null) ?? [];
+}
+
+export async function guestbookForSlug(slug: string): Promise<PublicGuestbookEntry[]> {
+  return (must(await supabase.rpc('guestbook_for_slug', { p_slug: slug })) as PublicGuestbookEntry[] | null) ?? [];
+}
+
+export async function getPublicEventExtra(slug: string): Promise<PublicEventExtra | null> {
+  return must(await supabase.rpc('get_public_event_extra', { p_slug: slug })) as PublicEventExtra | null;
 }
 
 export type Weather = { available: false } | { available: true; date: string; code: number; tmax: number; tmin: number; rain: number | null; place: string };
 
 export async function getWeather(token: string): Promise<Weather> {
+  if (isDemoToken(token)) return { available: false };
   const { data, error } = await supabase.functions.invoke('weather', { body: { token } });
   if (error || !data) return { available: false };
   return data as Weather;
@@ -73,15 +106,20 @@ async function albumCall<T>(body: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-/** Albüme tek fotoğraf yükler: sunucudan tek seferlik link alınır, dosya yüklenir, sunucu doğrular. */
-export async function uploadAlbumPhoto(slug: string, photo: { data: Blob | ArrayBuffer; mime: string }, uploader: string | null) {
-  const r = await albumCall<{ id: string; path: string; token: string }>({ action: 'reserve', slug, type: photo.mime, uploader });
-  const up = await supabase.storage.from('album').uploadToSignedUrl(r.path, r.token, photo.data, { contentType: photo.mime });
+/**
+ * Albüme fotoğraf, video ya da sesli mesaj yükler: sunucudan tek seferlik link alınır, dosya yüklenir, sunucu doğrular.
+ * `pending` true ise organizatör onayladıktan sonra albümde görünür.
+ */
+export async function uploadAlbumItem(slug: string, item: { data: Blob | ArrayBuffer; mime: string }, uploader: string | null): Promise<{ pending: boolean }> {
+  const r = await albumCall<{ id: string; path: string; token: string }>({ action: 'reserve', slug, type: item.mime, uploader });
+  const up = await supabase.storage.from('album').uploadToSignedUrl(r.path, r.token, item.data, { contentType: item.mime });
   if (up.error) throw friendlyError(up.error);
-  await albumCall({ action: 'confirm', slug, id: r.id });
+  const c = await albumCall<{ ok: boolean; pending?: boolean }>({ action: 'confirm', slug, id: r.id });
+  return { pending: !!c.pending };
 }
+export const uploadAlbumPhoto = uploadAlbumItem;
 
-export async function listPublicAlbum(slug: string): Promise<{ url: string }[]> {
-  const r = await albumCall<{ photos: { url: string }[] }>({ action: 'list', slug });
-  return r.photos ?? [];
+export async function listPublicAlbum(slug: string): Promise<{ url: string; kind: AlbumKind }[]> {
+  const r = await albumCall<{ photos: { url: string; kind?: AlbumKind }[] }>({ action: 'list', slug });
+  return (r.photos ?? []).map((p) => ({ url: p.url, kind: p.kind ?? 'photo' }));
 }

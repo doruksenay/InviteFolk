@@ -36,6 +36,10 @@ function RootNavigator() {
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
+      {/* Kök: web'de tanıtım sayfası, giriş yapınca etkinlikler (src/app/index.tsx) */}
+      <Stack.Screen name="index" />
+      {/* Örnek davetiyeler: sahte verilerle davetli sayfası */}
+      <Stack.Screen name="demo/[type]" />
       {/* Davetlinin LCV sayfası: herkese açık, kişiye özel token ile */}
       <Stack.Screen name="r/[token]" />
       {/* Yasal metinler: giriş gerektirmez (mağaza incelemesi, davetliler ve ziyaretçiler için) */}

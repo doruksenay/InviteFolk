@@ -59,7 +59,7 @@ export default function AcceptCohost() {
         ) : !data ? (
           <>
             <Notice tone="error" text={t('pub.katil.invalid')} />
-            <Button label={t('pub.katil.goHome')} variant="secondary" onPress={() => router.replace('/')} style={{ alignSelf: 'flex-start' }} />
+            <Button label={t('pub.katil.goHome')} variant="secondary" onPress={() => router.replace('/etkinlikler')} style={{ alignSelf: 'flex-start' }} />
           </>
         ) : (
           <>

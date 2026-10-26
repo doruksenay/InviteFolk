@@ -145,7 +145,7 @@ export function MfaGate() {
         )}
       </Surface>
 
-      <Button label={t('settings.mfa.backToPanel')} variant="ghost" icon="arrowLeft" onPress={() => router.replace('/')} style={{ alignSelf: 'center' }} />
+      <Button label={t('settings.mfa.backToPanel')} variant="ghost" icon="arrowLeft" onPress={() => router.replace('/etkinlikler')} style={{ alignSelf: 'center' }} />
     </Screen>
   );
 }

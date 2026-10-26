@@ -48,7 +48,7 @@ export function BrandBar({ area }: { area: 'panel' | 'admin' }) {
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         {isAdmin && area === 'panel' && (wide ? <Button label={t('common.adminPanel')} variant="secondary" icon="shield" onPress={() => router.push('/admin')} /> : <IconButton icon="shield" label={t('common.adminPanel')} onPress={() => router.push('/admin')} />)}
-        {area === 'admin' && <Button label={t('common.userPanel')} variant="secondary" icon="calendar" onPress={() => router.push('/')} />}
+        {area === 'admin' && <Button label={t('common.userPanel')} variant="secondary" icon="calendar" onPress={() => router.push('/etkinlikler')} />}
         {area === 'panel' &&
           (wide ? (
             <>

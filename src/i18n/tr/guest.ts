@@ -40,9 +40,19 @@ export const guest = {
     code: 'Kod: {code}',
   },
   album: {
-    kicker: 'FOTOĞRAF ALBÜMÜ',
-    body: 'Etkinlikte çektiğiniz fotoğrafları ortak albüme yükleyin.',
+    kicker: 'CANLI ALBÜM',
+    body: 'Etkinlikte çektiğiniz fotoğraf ve videoları ortak albüme yükleyin, sesli mesaj bırakın.',
     open: 'Albüme yükle',
+  },
+  guestbook: {
+    kicker: 'ANI DEFTERİ',
+    body: 'Güzel bir dilek, bir anı ya da tebrik bırakın; ev sahibi hepsini saklasın.',
+    name: 'Adınız',
+    placeholder: 'Mesajınız…',
+    send: 'Bırak',
+    thanks: 'Mesajınız deftere eklendi. Teşekkürler!',
+    pending: 'Mesajınız alındı; ev sahibi onaylayınca defterde görünecek.',
+    another: 'Bir mesaj daha yaz',
   },
   calendar: { subscribe: 'Her hafta takvimime ekle' },
   children: {

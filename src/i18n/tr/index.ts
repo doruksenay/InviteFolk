@@ -22,5 +22,6 @@ import { notifications } from './notifications';
 import { guest } from './guest';
 import { pub } from './pub';
 import { tools } from './tools';
+import { landing } from './landing';
 
-export const tr = { common, status, themes, errors, eventTypes, hall, auth, home, wizard, event, seating, rsvp, admin, layout, settings, guests, send, design, billing, legal, notifications, guest, pub, tools };
+export const tr = { common, status, themes, errors, eventTypes, hall, auth, home, wizard, event, seating, rsvp, admin, layout, settings, guests, send, design, billing, legal, notifications, guest, pub, tools, landing };

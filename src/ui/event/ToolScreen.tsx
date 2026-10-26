@@ -43,7 +43,7 @@ export function ToolError() {
   return (
     <Screen maxWidth={640}>
       <Notice tone="error" text={t('event.loadError')} />
-      <Button label={t('event.backToEvents')} variant="secondary" onPress={() => router.replace('/')} />
+      <Button label={t('event.backToEvents')} variant="secondary" onPress={() => router.replace('/etkinlikler')} />
     </Screen>
   );
 }

@@ -91,7 +91,7 @@ export default function TeamScreen() {
     if (!me) return;
     try {
       await leaveEvent(event.id, me);
-      router.replace('/');
+      router.replace('/etkinlikler');
     } catch (err) {
       setMsg({ tone: 'error', text: err instanceof Error ? err.message : String(err) });
     }

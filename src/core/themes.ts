@@ -6,17 +6,23 @@ export type ThemeKey =
   | 'adacayi' | 'lavanta' | 'mercan' | 'altin' | 'gece'
   | 'fildisi' | 'gul' | 'zumrut' | 'lacivert' | 'okaliptus' | 'sampanya' | 'bordo' | 'beyaz' | 'pudra' | 'zeytin'
   | 'kina_kirmizi' | 'mor_gece'
-  | 'konfeti' | 'limon' | 'deniz' | 'pembe' | 'gokkusagi' | 'kurumsal' | 'saha_yesil' | 'parke' | 'file';
+  | 'konfeti' | 'limon' | 'deniz' | 'pembe' | 'gokkusagi' | 'kurumsal' | 'saha_yesil' | 'parke' | 'file'
+  | 'sakura' | 'lale' | 'sehzade' | 'nur' | 'bulut' | 'pamuk' | 'kep' | 'isilti';
 
 /** Görsel alandaki desen. */
 export type Motif =
   | 'arch' | 'botanical' | 'frame' | 'deco' | 'confetti' | 'waves' | 'stars' | 'sun' | 'rainbow' | 'petals'
-  | 'ottoman' | 'minimal' | 'pitch' | 'balloons' | 'court' | 'net';
+  | 'ottoman' | 'minimal' | 'pitch' | 'balloons' | 'court' | 'net'
+  | 'sakura' | 'tulips' | 'crown' | 'geometric' | 'clouds' | 'caps' | 'disco';
+
+/** Davetiye görselinin üstünde süzülen hareket (davetli sayfası ve önizleme). */
+export type ThemeEffect = 'none' | 'petals' | 'confetti' | 'sparkles' | 'stars' | 'bubbles' | 'hearts';
+export const THEME_EFFECTS: ThemeEffect[] = ['petals', 'confetti', 'sparkles', 'stars', 'bubbles', 'hearts', 'none'];
 
 /** Başlık yazısı: serif (Instrument Serif), formal (Playfair Display), script (Great Vibes), sans (Nunito). */
 export type ThemeFont = 'serif' | 'formal' | 'script' | 'sans';
 
-export type ThemeGroup = 'wedding' | 'celebration' | 'everyday';
+export type ThemeGroup = 'wedding' | 'tradition' | 'celebration' | 'everyday';
 
 export type InvitationTheme = {
   key: ThemeKey;
@@ -34,9 +40,18 @@ export type InvitationTheme = {
   group: ThemeGroup;
   /** Konfeti, gökkuşağı ve balon gibi çok renkli desenler için (yazı için kullanılmaz). */
   palette: string[];
+  /** Varsayılan hareket (organizatör davetiye sayfasında değiştirebilir). */
+  effect: ThemeEffect;
 };
 
-type Def = Omit<InvitationTheme, 'key' | 'chip'> & { chip?: string };
+type Def = Omit<InvitationTheme, 'key' | 'chip' | 'effect'> & { chip?: string; effect?: ThemeEffect };
+
+/** Desene göre varsayılan hareket. */
+const MOTIF_EFFECT: Record<Motif, ThemeEffect> = {
+  arch: 'sparkles', botanical: 'petals', frame: 'sparkles', deco: 'sparkles', confetti: 'confetti', waves: 'bubbles', stars: 'stars',
+  sun: 'sparkles', rainbow: 'confetti', petals: 'petals', ottoman: 'sparkles', minimal: 'none', pitch: 'none', balloons: 'bubbles',
+  court: 'none', net: 'none', sakura: 'petals', tulips: 'petals', crown: 'sparkles', geometric: 'stars', clouds: 'bubbles', caps: 'confetti', disco: 'sparkles',
+};
 
 const LIGHT_CHIP = 'rgba(255,255,255,0.82)';
 
@@ -70,20 +85,32 @@ const DEFS: Record<ThemeKey, Def> = {
   gokkusagi: { bg: '#FFF9F4', shapeA: '#6C5CE7', shapeB: '#FF6B6B', shapeC: '#FBBF24', ink: '#1F1B2E', soft: '#5B566A', key_: '#5A49D6', dark: false, motif: 'rainbow', font: 'sans', group: 'celebration', palette: ['#6C5CE7', '#FF6B6B', '#FBBF24', '#22C55E'] },
 
   // İş, yemek, spor
-  kurumsal: { bg: '#F4F5F7', shapeA: '#4E5A72', shapeB: '#A9B4C8', shapeC: '#E3E6EE', ink: '#1E2430', soft: '#586174', key_: '#3D4A63', dark: false, motif: 'deco', font: 'sans', group: 'everyday', palette: ['#4E5A72', '#A9B4C8'] },
+  kurumsal: { bg: '#F4F5F7', shapeA: '#4E5A72', shapeB: '#A9B4C8', shapeC: '#E3E6EE', ink: '#1E2430', soft: '#586174', key_: '#3D4A63', dark: false, motif: 'deco', font: 'sans', group: 'everyday', palette: ['#4E5A72', '#A9B4C8'], effect: 'none' },
   saha_yesil: { bg: '#EEF6EF', shapeA: '#3F8F55', shapeB: '#358049', shapeC: '#D4EAD9', ink: '#183223', soft: '#4A6555', key_: '#2A6B3C', dark: false, motif: 'pitch', font: 'sans', group: 'everyday', palette: ['#3F8F55', '#358049'] },
   parke: { bg: '#FBF3EA', shapeA: '#D9A066', shapeB: '#CF955A', shapeC: '#F4DFC6', ink: '#3A2414', soft: '#6E5240', key_: '#A84D17', dark: false, motif: 'court', font: 'sans', group: 'everyday', palette: ['#E8772E', '#2F4B7C'] },
   file: { bg: '#EEF4FB', shapeA: '#2F6DB5', shapeB: '#2A63A6', shapeC: '#D6E4F5', ink: '#14263D', soft: '#4A5E78', key_: '#1F5598', dark: false, motif: 'net', font: 'sans', group: 'everyday', palette: ['#F2C230', '#2F6DB5'] },
+  // Düğün: süzülen yapraklarla
+  sakura: { bg: '#FFF5F7', shapeA: '#F4B6C6', shapeB: '#E68AA5', shapeC: '#FDE3EA', ink: '#3A1F28', soft: '#6B4C57', key_: '#A8466A', dark: false, motif: 'sakura', font: 'serif', group: 'wedding', palette: ['#F4B6C6', '#E68AA5', '#FDE3EA'] },
+  lale: { bg: '#FBF4EE', shapeA: '#C8414B', shapeB: '#3F7A4F', shapeC: '#F3E0D4', ink: '#2E1A16', soft: '#614A44', key_: '#A3313A', dark: false, motif: 'tulips', font: 'formal', group: 'wedding', palette: ['#C8414B', '#E8A13A', '#F3E0D4'] },
+  // Sünnet, mevlüt ve gelenek
+  sehzade: { bg: '#EEF3FB', shapeA: '#2E4C8C', shapeB: '#D4A93C', shapeC: '#D8E3F5', ink: '#13213F', soft: '#4B5876', key_: '#2E4C8C', dark: false, motif: 'crown', font: 'formal', group: 'tradition', palette: ['#2E4C8C', '#D4A93C', '#D8E3F5'] },
+  nur: { bg: '#F2F6F1', shapeA: '#2F6B57', shapeB: '#C9A44C', shapeC: '#DCE9E1', ink: '#17302A', soft: '#4E625B', key_: '#2F6B57', dark: false, motif: 'geometric', font: 'formal', group: 'tradition', palette: ['#2F6B57', '#C9A44C', '#DCE9E1'] },
+  // Kutlama: bebek, mezuniyet, bekârlığa veda
+  bulut: { bg: '#EEF6FC', shapeA: '#BFDDF2', shapeB: '#F9D976', shapeC: '#FFFFFF', ink: '#1E3247', soft: '#4F6375', key_: '#2E6E9E', dark: false, motif: 'clouds', font: 'sans', group: 'celebration', palette: ['#9CCBEA', '#F9D976', '#F7B6C8'] },
+  pamuk: { bg: '#FDF0F4', shapeA: '#F6C9D8', shapeB: '#BFDDF2', shapeC: '#FFFFFF', ink: '#3B2230', soft: '#6E5361', key_: '#A8406B', dark: false, motif: 'clouds', font: 'sans', group: 'celebration', palette: ['#F6B3C9', '#9CCBEA', '#F9D976'], effect: 'hearts' },
+  kep: { bg: '#EEF0F7', shapeA: '#1F2A55', shapeB: '#E3B341', shapeC: '#D7DCEE', ink: '#141B38', soft: '#4D5470', key_: '#2B3A78', dark: false, motif: 'caps', font: 'sans', group: 'celebration', palette: ['#E3B341', '#1F2A55', '#E86A5A', '#5BB3A0'] },
+  isilti: { bg: '#1D1430', shapeA: '#B57BE8', shapeB: '#F5C86A', shapeC: '#2E2148', ink: '#F8F1FF', soft: '#CDBEDF', key_: '#F5C86A', chip: 'rgba(29,20,48,0.6)', dark: true, motif: 'disco', font: 'script', group: 'celebration', palette: ['#B57BE8', '#F5C86A', '#FF8FB1'] },
 };
 
 export const THEMES = Object.fromEntries(
-  (Object.keys(DEFS) as ThemeKey[]).map((k) => [k, { ...DEFS[k], key: k, chip: DEFS[k].chip ?? LIGHT_CHIP }]),
+  (Object.keys(DEFS) as ThemeKey[]).map((k) => [k, { ...DEFS[k], key: k, chip: DEFS[k].chip ?? LIGHT_CHIP, effect: DEFS[k].effect ?? MOTIF_EFFECT[DEFS[k].motif] }]),
 ) as Record<ThemeKey, InvitationTheme>;
 
 /** Seçicideki sıra: düğüne uygunlar önce. */
 export const THEME_ORDER: ThemeKey[] = [
-  'fildisi', 'adacayi', 'gul', 'okaliptus', 'pudra', 'sampanya', 'beyaz', 'zeytin', 'bordo', 'zumrut', 'lacivert', 'lavanta', 'mor_gece', 'kina_kirmizi',
-  'konfeti', 'gokkusagi', 'pembe', 'limon', 'deniz', 'mercan', 'altin',
+  'fildisi', 'sakura', 'adacayi', 'gul', 'okaliptus', 'pudra', 'sampanya', 'beyaz', 'lale', 'zeytin', 'bordo', 'zumrut', 'lacivert', 'lavanta', 'mor_gece', 'kina_kirmizi',
+  'sehzade', 'nur',
+  'konfeti', 'gokkusagi', 'pembe', 'bulut', 'pamuk', 'kep', 'isilti', 'limon', 'deniz', 'mercan', 'altin',
   'kurumsal', 'gece', 'saha_yesil', 'parke', 'file',
 ];
 

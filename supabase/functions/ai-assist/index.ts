@@ -14,7 +14,7 @@ import { adminClient, corsHeaders, json, readBody, userClient } from '../_shared
 const MODEL = () => Deno.env.get('AI_MODEL') ?? 'claude-sonnet-5-5';
 const VERSION = () => Deno.env.get('ANTHROPIC_VERSION') ?? '2023-06-01';
 const TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
-const EVENT_TYPES = new Set(['dugun', 'nisan', 'kina', 'dogum', 'yemek', 'kurumsal', 'saha', 'basket', 'voleybol', 'diger']);
+const EVENT_TYPES = new Set(['dugun', 'nisan', 'kina', 'sunnet', 'bebek', 'mevlut', 'mezuniyet', 'veda', 'dogum', 'yemek', 'kurumsal', 'saha', 'basket', 'voleybol', 'diger']);
 
 const clip = (v: unknown, n: number) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, n) : '');
 
@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
     'You read a photo of a printed invitation and extract its details. Reply with one JSON object only, no prose, with these keys (use null when absent): ' +
     '{"title": string (e.g. couple names "Ayşe & Mehmet" or the event name), "host_names": string (families or hosts inviting), ' +
     '"date": "YYYY-MM-DD", "time": "HH:MM" (24h), "venue_name": string, "venue_address": string, "message": string (the invitation sentence, max 300 chars), ' +
-    '"type": one of dugun|nisan|kina|dogum|yemek|kurumsal|saha|basket|voleybol|diger (saha = football)}. Keep the original language and spelling.';
+    '"type": one of dugun|nisan|kina|sunnet|bebek|mevlut|mezuniyet|veda|dogum|yemek|kurumsal|saha|basket|voleybol|diger (saha = football, sunnet = circumcision feast, bebek = baby shower or gender reveal, veda = hen/stag party)}. Keep the original language and spelling.';
   const text = await claude(
     [
       { type: 'image', source: { type: 'base64', media_type: body.media_type, data: body.image } },

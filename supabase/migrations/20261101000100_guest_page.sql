@@ -394,6 +394,7 @@ declare
   v_gift boolean;
   v_collector boolean;
   v_album boolean;
+  v_guestbook boolean;
 begin
   if p_slug is null or p_slug !~ '^[0-9a-f]{32}$' then
     return null;
@@ -406,7 +407,8 @@ begin
   v_gift := jsonb_typeof(v_ev.settings -> 'gift') = 'object' and coalesce((v_ev.settings -> 'gift' ->> 'public')::boolean, false);
   v_collector := coalesce((v_ev.settings ->> 'collector')::boolean, false) and v_lim.collector;
   v_album := coalesce((v_ev.settings -> 'album' ->> 'enabled')::boolean, false) and v_lim.album_photos > 0;
-  if not (v_gift or v_collector or v_album) then
+  v_guestbook := coalesce((v_ev.settings -> 'guestbook' ->> 'enabled')::boolean, false);
+  if not (v_gift or v_collector or v_album or v_guestbook) then
     return null;
   end if;
   return json_build_object(
@@ -416,7 +418,10 @@ begin
     'gift', case when v_gift then (v_ev.settings -> 'gift') - 'public' end,
     'collector', v_collector,
     'album', v_album,
-    'album_public', v_album and coalesce((v_ev.settings -> 'album' ->> 'public')::boolean, false)
+    'album_public', v_album and coalesce((v_ev.settings -> 'album' ->> 'public')::boolean, false),
+    'album_moderate', v_album and coalesce((v_ev.settings -> 'album' ->> 'moderate')::boolean, false),
+    'guestbook', v_guestbook,
+    'guestbook_public', v_guestbook and coalesce((v_ev.settings -> 'guestbook' ->> 'public')::boolean, false)
   );
 end;
 $$;

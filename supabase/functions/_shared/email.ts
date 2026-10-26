@@ -50,6 +50,14 @@ const THEME: Record<string, { bg: string; ink: string; soft: string; accent: str
   saha_yesil: { bg: '#EEF6EF', ink: '#183223', soft: '#4A6555', accent: '#2A6B3C', button: '#183223', buttonInk: '#FFFFFF', shape: '#3F8F55' },
   parke: { bg: '#FBF3EA', ink: '#3A2414', soft: '#6E5240', accent: '#A84D17', button: '#3A2414', buttonInk: '#FFFFFF', shape: '#D9A066' },
   file: { bg: '#EEF4FB', ink: '#14263D', soft: '#4A5E78', accent: '#1F5598', button: '#14263D', buttonInk: '#FFFFFF', shape: '#2F6DB5' },
+  sakura: { bg: '#FFF5F7', ink: '#3A1F28', soft: '#6B4C57', accent: '#A8466A', button: '#3A1F28', buttonInk: '#FFFFFF', shape: '#F4B6C6' },
+  lale: { bg: '#FBF4EE', ink: '#2E1A16', soft: '#614A44', accent: '#A3313A', button: '#2E1A16', buttonInk: '#FFFFFF', shape: '#C8414B' },
+  sehzade: { bg: '#EEF3FB', ink: '#13213F', soft: '#4B5876', accent: '#2E4C8C', button: '#13213F', buttonInk: '#FFFFFF', shape: '#D4A93C' },
+  nur: { bg: '#F2F6F1', ink: '#17302A', soft: '#4E625B', accent: '#2F6B57', button: '#17302A', buttonInk: '#FFFFFF', shape: '#C9A44C' },
+  bulut: { bg: '#EEF6FC', ink: '#1E3247', soft: '#4F6375', accent: '#2E6E9E', button: '#1E3247', buttonInk: '#FFFFFF', shape: '#BFDDF2' },
+  pamuk: { bg: '#FDF0F4', ink: '#3B2230', soft: '#6E5361', accent: '#A8406B', button: '#3B2230', buttonInk: '#FFFFFF', shape: '#F6C9D8' },
+  kep: { bg: '#EEF0F7', ink: '#141B38', soft: '#4D5470', accent: '#2B3A78', button: '#141B38', buttonInk: '#FFFFFF', shape: '#E3B341' },
+  isilti: { bg: '#1D1430', ink: '#F8F1FF', soft: '#CDBEDF', accent: '#F5C86A', button: '#F5C86A', buttonInk: '#1D1430', shape: '#B57BE8' },
 };
 
 const COPY = {

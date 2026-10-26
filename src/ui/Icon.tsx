@@ -5,6 +5,11 @@ import type { IconName as EventIconName } from '@/core/event-types';
 export type IconName =
   | EventIconName
   | 'check'
+  | 'mic'
+  | 'stop'
+  | 'book'
+  | 'monitor'
+  | 'maximize'
   | 'plus'
   | 'arrowRight'
   | 'arrowLeft'
@@ -135,6 +140,31 @@ export function Icon({ name, size = 22, color = '#1F1B2E', strokeWidth = 1.7 }: 
                 <Path d="M12 8l3 2.2-1.1 3.6h-3.8L9 10.2z" {...p} />
               </>
             );
+          case 'crown':
+            return <Path d="M4 18h16M5 18l-1.5-10 5 4L12 5l3.5 7 5-4L19 18" {...p} />;
+          case 'baby':
+            return (
+              <>
+                <Circle cx={10} cy={9} r={5.5} {...p} />
+                <Path d="M14 13l6 6M17.5 19.5l2-2M8.5 8.5h.01M11.5 8.5h.01M8.5 11c1 .8 2 .8 3 0" {...p} />
+              </>
+            );
+          case 'moon':
+            return (
+              <>
+                <Path d="M15 4.5A8 8 0 1 0 19.5 16 6.5 6.5 0 1 1 15 4.5z" {...p} />
+                <Path d="M18 6.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" {...p} />
+              </>
+            );
+          case 'gradcap':
+            return (
+              <>
+                <Path d="M2.5 9.5L12 5l9.5 4.5L12 14z" {...p} />
+                <Path d="M6.5 11.5V16c3 2.5 8 2.5 11 0v-4.5M21.5 9.5V15" {...p} />
+              </>
+            );
+          case 'glass':
+            return <Path d="M7 3h10l-1 6.5a4 4 0 0 1-8 0zM12 13.5V20M8.5 20h7M7.6 7h8.8" {...p} />;
           case 'basketball':
             return (
               <>
@@ -345,6 +375,26 @@ export function Icon({ name, size = 22, color = '#1F1B2E', strokeWidth = 1.7 }: 
                 <Circle cx={17.5} cy={16} r={2.5} {...p} />
               </>
             );
+          case 'mic':
+            return (
+              <>
+                <Rect x={9} y={3} width={6} height={11} rx={3} {...p} />
+                <Path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" {...p} />
+              </>
+            );
+          case 'stop':
+            return <Rect x={6} y={6} width={12} height={12} rx={2} {...p} />;
+          case 'book':
+            return <Path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5zM5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M9 7.5h6M9 11h4" {...p} />;
+          case 'monitor':
+            return (
+              <>
+                <Rect x={3} y={4} width={18} height={12} rx={2} {...p} />
+                <Path d="M8.5 20h7M12 16v4" {...p} />
+              </>
+            );
+          case 'maximize':
+            return <Path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" {...p} />;
           case 'play':
             return <Path d="M7 4.5v15l12-7.5z" {...p} />;
           case 'pause':

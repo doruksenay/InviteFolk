@@ -6,3 +6,7 @@ export const MAX_AUDIO_BYTES = 10 * 1024 * 1024;
 export const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // Supabase ücretsiz planında dosya başına üst sınır 50 MB
 export const AUDIO_TYPES = ['audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'audio/aac', 'audio/m4a'];
 export const VIDEO_TYPES = ['video/mp4', 'video/quicktime'];
+
+/** Albüme yüklenecek öğe (fotoğraf küçültülmüş JPEG; video olduğu gibi). Büyük dosyalar `skipped` sayılır. */
+export type AlbumUpload = { data: Blob | ArrayBuffer; mime: string; kind: 'photo' | 'video' };
+export const ALBUM_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm'];

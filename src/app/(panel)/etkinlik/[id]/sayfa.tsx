@@ -5,7 +5,7 @@ import { Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { eventCopy, getEventType, sportOf } from '@/core/event-types';
 import { formatWhen, publicUrl } from '@/core/format';
 import { formatIban, ibanValid, normalizeIban } from '@/core/iban';
-import { getTheme } from '@/core/themes';
+import { getTheme, THEME_EFFECTS, type ThemeEffect } from '@/core/themes';
 import type { EventRow, EventSettings, GiftInfo, InvitationWithContact } from '@/core/types';
 import { eventLang, LOCALE_TAG, makeT, useI18n } from '@/i18n';
 import { getEvent, useQuery } from '@/lib/api';
@@ -18,7 +18,7 @@ import { OptionChip } from '@/ui/guests/common';
 import { InvitationCard } from '@/ui/InvitationCard';
 import { type GiftDraft, GiftEditor, pollToDraft, PollEditor, type PollDraft, ProgramEditor, type ProgramDraft, programToDraft, SectionHead, shortId, SignupEditor } from '@/ui/page/Editors';
 import { MediaEditor } from '@/ui/page/MediaEditor';
-import { Body, Button, Caption, Display, DisplayAccent, Field, IconButton, Notice, Skeleton, Surface, Title, ToggleRow } from '@/ui/primitives';
+import { Body, Button, Caption, Label, Display, DisplayAccent, Field, IconButton, Notice, Skeleton, Surface, Title, ToggleRow } from '@/ui/primitives';
 import { buildQrCardsHtml } from '@/ui/print/qrCards';
 import { printHtml } from '@/ui/seating/printCards';
 import { Screen } from '@/ui/Screen';
@@ -43,7 +43,7 @@ export default function InvitationPageEditor() {
     return (
       <Screen maxWidth={640}>
         <Notice tone="error" text={t('event.loadError')} />
-        <Button label={t('event.backToEvents')} variant="secondary" onPress={() => router.replace('/')} />
+        <Button label={t('event.backToEvents')} variant="secondary" onPress={() => router.replace('/etkinlikler')} />
       </Screen>
     );
   }
@@ -71,6 +71,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
   const [envelope, setEnvelope] = useState(!!s0.envelope?.enabled);
   const [seal, setSeal] = useState(s0.envelope?.seal ?? '');
   const [countdown, setCountdown] = useState(!!s0.countdown);
+  const [effect, setEffect] = useState<ThemeEffect | 'auto'>(s0.effect ?? 'auto');
   const [program, setProgram] = useState<ProgramDraft[]>(programToDraft(s0.program));
   const [gift, setGift] = useState<GiftDraft>({ holder: s0.gift?.holder ?? '', iban: s0.gift?.iban ? formatIban(s0.gift.iban) : '', bank: s0.gift?.bank ?? '', note: s0.gift?.note ?? '', public: !!s0.gift?.public });
   const [askChildren, setAskChildren] = useState(!!s0.ask_children);
@@ -83,6 +84,10 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
   const [collector, setCollector] = useState(!!s0.collector);
   const [albumOn, setAlbumOn] = useState(!!s0.album?.enabled);
   const [albumPublic, setAlbumPublic] = useState(!!s0.album?.public);
+  const [albumModerate, setAlbumModerate] = useState(!!s0.album?.moderate);
+  const [gbOn, setGbOn] = useState(!!s0.guestbook?.enabled);
+  const [gbPublic, setGbPublic] = useState(s0.guestbook ? !!s0.guestbook.public : true);
+  const [gbModerate, setGbModerate] = useState(!!s0.guestbook?.moderate);
   const [smsFallback, setSmsFallback] = useState(!!s0.sms_fallback);
 
   const [saving, setSaving] = useState(false);
@@ -153,16 +158,19 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
     const items = signup.filter((it) => it.label.trim()).map((it) => ({ id: it.id, label: it.label.trim().slice(0, 60), qty: it.qty }));
 
     const patch: Partial<EventSettings> = {
+      ...(effect !== 'auto' ? { effect } : {}),
       envelope: { enabled: envelope, ...(seal.trim() ? { seal: seal.trim().slice(0, 6) } : {}) },
       countdown,
       ask_children: askChildren,
       ask_names: askNames,
       checkin,
       collector,
-      album: { enabled: albumOn, public: albumPublic },
+      album: { enabled: albumOn, public: albumPublic, moderate: albumModerate },
+      guestbook: { enabled: gbOn, public: gbPublic, moderate: gbModerate },
       sms_fallback: smsFallback,
     };
     const drop: (keyof EventSettings)[] = [];
+    if (effect === 'auto') drop.push('effect');
     if (message.trim()) patch.message = message.trim().slice(0, 400);
     else drop.push('message');
     if (prog.length) patch.program = prog;
@@ -205,6 +213,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
       <Caption>{t('tools.page.preview')}</Caption>
       <InvitationCard
         theme={theme}
+        effect={effect === 'auto' ? theme.effect : effect}
         lang={evLang}
         copy={{
           greet: copy.sample.greet,
@@ -253,6 +262,15 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
         <ToggleRow label={t('tools.page.look.envelope')} hint={t('tools.page.look.envelopeHint')} value={envelope} onChange={setEnvelope} />
         {envelope && <Field label={t('tools.page.look.seal')} hint={t('tools.page.look.sealHint')} value={seal} onChangeText={setSeal} maxLength={6} autoCapitalize="characters" style={{ maxWidth: 260 }} />}
         <ToggleRow label={t('tools.page.look.countdown')} hint={t('tools.page.look.countdownHint')} value={countdown} onChange={setCountdown} />
+        <View style={{ gap: 8 }}>
+          <Label>{t('tools.page.look.effect')}</Label>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+            {(['auto', ...THEME_EFFECTS] as const).map((k) => (
+              <OptionChip key={k} small label={t(`tools.page.look.effects.${k}`)} on={effect === k} onPress={() => setEffect(k)} />
+            ))}
+          </View>
+          <Caption>{t('tools.page.look.effectHint')}</Caption>
+        </View>
       </Surface>
 
       {/* Program */}
@@ -286,7 +304,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
       )}
 
       {/* Tarih anketi (düğün ve kınada tarih baştan bellidir) */}
-      {((!saha && !['dugun', 'kina'].includes(event.type)) || pollOn) && (
+      {((!saha && !['dugun', 'kina', 'sunnet', 'mevlut'].includes(event.type)) || pollOn) && (
         <Surface style={{ gap: 12 }}>
           <SectionHead title={t('tools.page.poll.title')} hint={t('tools.page.poll.hint')} />
           {pollOn ? (
@@ -325,7 +343,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
       )}
 
       {/* Getir listesi */}
-      {['dogum', 'yemek', 'diger', 'kurumsal'].includes(event.type) && (
+      {['dogum', 'yemek', 'diger', 'kurumsal', 'bebek', 'veda', 'mezuniyet'].includes(event.type) && (
         <Surface style={{ gap: 12 }}>
           <SectionHead title={t('tools.page.signup.title')} hint={t('tools.page.signup.hint')} />
           <SignupEditor value={signup} onChange={setSignup} claims={claims.data ?? []} />
@@ -339,6 +357,10 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
         <ToggleRow label={t('tools.page.tools.collector')} hint={L && !L.collector && !collector ? locked('Temel') : t('tools.page.tools.collectorHint')} value={collector} onChange={setCollector} disabled={!!L && !L.collector && !collector} />
         <ToggleRow label={t('tools.page.tools.album')} hint={L && L.album_photos <= 0 && !albumOn ? locked('Otomatik') : t('tools.page.tools.albumHint')} value={albumOn} onChange={setAlbumOn} disabled={!!L && L.album_photos <= 0 && !albumOn} />
         {albumOn && <ToggleRow label={t('tools.page.tools.albumPublic')} value={albumPublic} onChange={setAlbumPublic} />}
+        {albumOn && <ToggleRow label={t('tools.page.tools.albumModerate')} hint={t('tools.page.tools.albumModerateHint')} value={albumModerate} onChange={setAlbumModerate} />}
+        <ToggleRow label={t('tools.page.tools.guestbook')} hint={t('tools.page.tools.guestbookHint')} value={gbOn} onChange={setGbOn} />
+        {gbOn && <ToggleRow label={t('tools.page.tools.guestbookPublic')} value={gbPublic} onChange={setGbPublic} />}
+        {gbOn && <ToggleRow label={t('tools.page.tools.guestbookModerate')} value={gbModerate} onChange={setGbModerate} />}
         <ToggleRow label={t('tools.page.tools.sms')} hint={L && L.sms_per_day <= 0 && !smsFallback ? locked('Otomatik') : t('tools.page.tools.smsHint')} value={smsFallback} onChange={setSmsFallback} disabled={!!L && L.sms_per_day <= 0 && !smsFallback} />
       </Surface>
     </View>

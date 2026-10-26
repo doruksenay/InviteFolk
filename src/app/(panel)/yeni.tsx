@@ -166,7 +166,7 @@ export default function NewEvent() {
       </View>
       <View style={{ paddingVertical: 24, paddingHorizontal: 16, borderRadius: 26, backgroundColor: th.dark ? '#3A3757' : th.shapeC }}>
         {view === 'page' ? (
-          <InvitationCard theme={th} copy={copy} lang={eventLang} />
+          <InvitationCard theme={th} copy={copy} lang={eventLang} effect={th.effect} />
         ) : (
           <WhatsAppPreview
             theme={th}
@@ -406,7 +406,7 @@ export default function NewEvent() {
         <IconButton
           icon="arrowLeft"
           label={created ? t('wizard.goToEvent') : t('wizard.backToEvents')}
-          onPress={() => (created ? goToEvent() : router.canGoBack() ? router.back() : router.replace('/'))}
+          onPress={() => (created ? goToEvent() : router.canGoBack() ? router.back() : router.replace('/etkinlikler'))}
         />
         <Stepper steps={STEPS} current={step} />
         <View style={{ width: 42 }} />

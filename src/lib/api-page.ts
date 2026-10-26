@@ -4,6 +4,7 @@
 import type { EventSettings, EventVideo, GalleryPhoto, GuestSettings, DesignOverlay } from '@/core/types';
 
 import { friendlyError, must, supabase } from './api';
+import { isDemoToken } from './demo';
 import type { PickedFile, PickedPhoto } from './media-types';
 
 const BUCKET = 'media';
@@ -122,6 +123,7 @@ export function guestNeedsMedia(s: GuestSettings | undefined) {
 }
 
 export async function getGuestMedia(token: string): Promise<GuestMedia> {
+  if (isDemoToken(token)) return {};
   const { data, error } = await supabase.functions.invoke('invitation-design', { body: { token } });
   if (error || !data) throw friendlyError(error ?? { message: 'not_found' });
   return data as GuestMedia;

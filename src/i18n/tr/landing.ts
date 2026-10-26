@@ -1,0 +1,93 @@
+// Tanıtım sayfası (web'de giriş yapmamış ziyaretçinin gördüğü ana sayfa).
+import type { IconName } from '@/ui/Icon';
+
+type Item = { icon: IconName; title: string; body: string };
+
+export const landing = {
+  meta: {
+    title: 'Invitefolk · Dijital davetiye ve LCV',
+    description: 'Düğün, nişan, sünnet, doğum günü ve halı saha için WhatsApp ile gönderilen şık davetiye, canlı LCV, oturma planı ve canlı albüm.',
+  },
+  nav: { signIn: 'Giriş yap', start: 'Ücretsiz başla', features: 'Özellikler', pricing: 'Fiyatlar', faq: 'Sorular' },
+  hero: {
+    kicker: 'DİJİTAL DAVETİYE VE LCV',
+    title: 'Davetini gönder,',
+    titleAccent: 'kim geliyor anında gör.',
+    body: 'Düğünden halı saha maçına: WhatsApp ile giden şık davetiye, kişi sayısı ve menü, oturma planı, canlı albüm. Davetlilerin uygulama indirmez.',
+    primary: 'Ücretsiz başla',
+    secondary: 'Örnek davetiyeyi aç',
+    note: 'Kart gerekmez · ücretsiz paketle hemen dene',
+    stats: { templates: '34 şablon', types: '15 etkinlik türü', langs: 'Türkçe ve İngilizce' },
+    cardGreet: 'Sayın Selin ve ailesi',
+    cardTitle: 'Ayşe & Mehmet',
+    cardKicker: 'Evleniyoruz',
+    cardLine: 'Hayatımızın en güzel gününde sizi de aramızda görmek istiyoruz.',
+    cardWhen: '12 Haziran 2027, Cumartesi · 19.00',
+    cardWhere: 'Bahçe Davet Salonu, Kadıköy',
+    cardDeadline: '1 Mayıs',
+    live: 'Az önce: Selin ve ailesi, 4 kişi katılıyor',
+  },
+  types: {
+    kicker: 'ÖRNEKLER',
+    title: 'Her davet için',
+    titleAccent: 'hazır bir başlangıç',
+    body: 'Türü seç, örneği aç: davetlinin telefonunda göreceği sayfanın aynısı. Cevap ver, anı defterine yaz, dene.',
+    see: 'Örneği aç',
+  },
+  features: {
+    kicker: 'ÖZELLİKLER',
+    title: 'Davetten sonrası da',
+    titleAccent: 'tek yerde',
+    items: [
+      { icon: 'send', title: 'WhatsApp ve e-postayla gönder', body: 'Herkese kişiye özel link. Rehberden seç ya da Excel’den yüz kişiyi tek seferde ekle.' },
+      { icon: 'users', title: 'Canlı LCV', body: 'Kim geliyor, kaç kişi, hangi menü, çocuk var mı. Cevap vermeyenlere hatırlatma kendiliğinden gider.' },
+      { icon: 'table', title: 'Oturma planı', body: 'Salonu çiz, masaları ve davetlileri sürükle; masa kartlarını ve karekodları yazdır.' },
+      { icon: 'camera', title: 'Canlı albüm ve salon ekranı', body: 'Masadaki karekodla fotoğraf, video ve sesli mesaj. Projeksiyonda slayt gösterisi olarak canlı aksın.' },
+      { icon: 'book', title: 'Anı defteri', body: 'Dilekler ve tebrikler davetiyeden tek dokunuşla deftere. İstersen yayınlamadan önce sen onayla.' },
+      { icon: 'sparkle', title: '34 hareketli şablon', body: 'Süzülen yapraklar, konfeti, kalpler, yıldızlar; zarf açılışı ve geri sayım. Ya da kendi tasarımını yükle.' },
+      { icon: 'qr', title: 'Kapıda karekodla giriş', body: 'Katılan her davetliye giriş kartı. Kapıda okut, kim geldi ve masası hemen görünsün.' },
+      { icon: 'ball', title: 'Halı saha, basket, voleybol', body: 'Kadro ve yedek listesi, dengeli takım kurma, haftalık tekrar, ücret takibi ve maçın oyuncusu.' },
+      { icon: 'shield', title: 'Verilerin sende kalır', body: 'Davetli listen yalnızca sana ve ortak yöneticilerine açık. İki adımlı doğrulama, reklam yok.' },
+    ] as Item[],
+  },
+  steps: {
+    kicker: 'NASIL ÇALIŞIR',
+    title: 'Üç adımda',
+    titleAccent: 'davet hazır',
+    items: [
+      { icon: 'wand', title: 'Etkinliğini oluştur', body: 'Türü ve şablonu seç; tarih, yer ve mesajını yaz. Yapay zekâ metni senin için de yazabilir.' },
+      { icon: 'send', title: 'Davetlilerine gönder', body: 'Listeni ekle, WhatsApp’tan tek tek ya da otomatik gönder. Herkes kendi linkini alır.' },
+      { icon: 'chart', title: 'Cevapları izle', body: 'Kim geldi, kaç kişi, hangi masa: hepsi canlı. Etkinlik günü albüm ve anı defteri dolsun.' },
+    ] as Item[],
+  },
+  pricing: {
+    kicker: 'FİYATLAR',
+    title: 'Abonelik yok,',
+    titleAccent: 'tek seferlik',
+    body: 'Paket bir yıl geçerli. Süre bitince hesabın ücretsiz pakete döner, verilerin silinmez.',
+    cta: 'Paketleri incele',
+    freeCta: 'Ücretsiz başla',
+  },
+  faq: {
+    kicker: 'SORULAR',
+    title: 'Merak',
+    titleAccent: 'edilenler',
+    items: [
+      { q: 'Davetlilerin uygulama indirmesi gerekiyor mu?', a: 'Hayır. Davetli WhatsApp’tan gelen linke dokunur, davetiye telefonunun tarayıcısında açılır; cevabı iki dokunuşla verir.' },
+      { q: 'WhatsApp mesajları nasıl gidiyor?', a: 'Ücretsiz pakette her davetliye hazır mesajı tek dokunuşla kendi WhatsApp’ından gönderirsin. Otomatik paketlerde mesajlar resmî WhatsApp Business altyapısıyla kendiliğinden gider.' },
+      { q: 'Kendi davetiye tasarımımı kullanabilir miyim?', a: 'Evet. Matbaadan gelen tasarımı ya da kendi görselini yükle; davetlinin adı üzerine yazılır. Video davetiye de olur.' },
+      { q: 'Albüme yüklenen fotoğrafları kimler görür?', a: 'Varsayılan olarak yalnızca sen ve ortak yöneticilerin. İstersen albümü davetlilere açarsın, istersen her yüklemeyi önce sen onaylarsın.' },
+      { q: 'Takı ve hediye için para topluyor musunuz?', a: 'Hayır, aracılık yapmıyoruz. IBAN bilgini davetiyede gösteriyoruz; gönderimi davetli kendi bankasından yapar.' },
+      { q: 'İngilizce davetiye gönderebilir miyim?', a: 'Evet. Her etkinliğin dilini ayrı seçersin; davetli de sayfada Türkçe ve İngilizce arasında geçebilir.' },
+    ],
+  },
+  cta: {
+    title: 'İlk davetini',
+    titleAccent: 'birkaç dakikada hazırla',
+    body: 'Ücretsiz paketle başla; büyüdükçe paketini seç.',
+  },
+  footer: {
+    tagline: 'Bir arada olmanın en kolay yolu.',
+    rights: '© {year} Invitefolk',
+  },
+};

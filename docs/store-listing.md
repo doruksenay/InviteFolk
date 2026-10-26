@@ -25,10 +25,10 @@ Karakter sınırları App Store'a göre verilmiştir (Google Play kısa açıkla
 
 ### Türkçe
 
-Invitefolk; düğün, nişan, kına, doğum günü, yemek daveti, kurumsal etkinlik ve halı saha maçı gibi her tür buluşma için davetiye ve katılım (LCV) uygulamasıdır.
+Invitefolk; düğün, nişan, kına, sünnet, bebek ve cinsiyet partisi, mevlit, mezuniyet, bekârlığa veda, doğum günü, yemek daveti, kurumsal etkinlik ve halı saha maçı gibi her tür buluşma için davetiye ve katılım (LCV) uygulamasıdır.
 
 **Davetiyeni hazırla**
-- Etkinlik türüne göre hazırlanan şık temalar ya da kendi tasarımını yükleme
+- 34 şablon: süzülen yapraklar, konfeti, kalpler, yıldızlar; ya da kendi tasarımını yükle
 - Her davetliye adıyla hitap eden kişisel davetiye
 - Türkçe ve İngilizce davetiye
 
@@ -55,7 +55,8 @@ Invitefolk; düğün, nişan, kına, doğum günü, yemek daveti, kurumsal etkin
 - Eşin ya da ailen ortak yönetici olarak birlikte yönetsin
 - Saat ya da yer değişti mi? Tek duyuruyla herkese haber ver
 - Kapıda karekodla karşıla, kim geldi anında gör
-- Davetliler masadaki karekodla fotoğraflarını albüme yüklesin
+- Canlı albüm: davetliler masadaki karekodla fotoğraf, video ve sesli mesaj yüklesin; salon ekranında slayt gösterisi olarak aksın
+- Anı defteri: dilekler ve tebrikler tek defterde, istersen önce sen onayla
 - Aile gruplarına tek link at, davetliler bilgilerini kendisi yazsın
 - Basılı davetiyenin fotoğrafını çek, bilgiler kendiliğinden dolsun; davet metnini yapay zekâ yazsın
 
@@ -75,10 +76,10 @@ Davetlilerinin bilgileri yalnızca sana görünür. Şifre yok: e-postana gelen 
 
 ### English
 
-Invitefolk is an invitation and RSVP app for every kind of gathering: weddings, engagements, henna nights, birthdays, dinner parties, corporate events and weekly football.
+Invitefolk is an invitation and RSVP app for every kind of gathering: weddings, engagements, henna nights, circumcision celebrations, baby showers and gender reveals, mevlit, graduations, hen and stag nights, birthdays, dinner parties, corporate events and weekly football.
 
 **Design your invitation**
-- Elegant themes for each event type, or upload your own design
+- 34 templates with drifting petals, confetti, hearts and stars, or upload your own design
 - A personal invitation that greets every guest by name
 - Invitations in Turkish or English
 
@@ -105,7 +106,8 @@ Invitefolk is an invitation and RSVP app for every kind of gathering: weddings, 
 - Plan together: add your partner or family as co-hosts
 - Time or venue changed? Tell everyone with one announcement
 - Welcome guests with QR check-in and see who has arrived
-- Guests upload their photos to a shared album from the QR code on the table
+- Live album: guests upload photos, videos and voice messages from the QR code on the table, streaming as a slideshow on the venue screen
+- Guestbook: wishes and congratulations in one place, approved by you first if you like
 - Share one link with family groups and let guests fill in their own details
 - Snap your printed invitation and the details fill in by themselves; let AI write your invitation text
 
@@ -148,15 +150,15 @@ Bu sınırlar `public.plan_limits` tablosuyla aynı olmalı. Tabloyu değiştiri
 | E-posta adresi | Evet | Evet | Uygulama işlevselliği (giriş) |
 | Telefon numarası | Evet (isteğe bağlı; davetli telefonları) | Evet | Uygulama işlevselliği |
 | Kişiler | Evet (yalnızca kullanıcının seçtiği kişiler) | Evet | Uygulama işlevselliği |
-| Fotoğraflar ve videolar | Evet (yalnızca kullanıcının seçtiği davetiye tasarımı, galeri fotoğrafları, video davetiye ve davetlilerin albüme yüklediği fotoğraflar) | Evet | Uygulama işlevselliği |
-| Diğer kullanıcı içeriği | Evet (etkinlikler, davetli listeleri, cevaplar, yüklenen müzik dosyası, duyurular) | Evet | Uygulama işlevselliği |
+| Fotoğraflar ve videolar | Evet (yalnızca kullanıcının seçtiği davetiye tasarımı, galeri fotoğrafları, video davetiye ve davetlilerin albüme yüklediği fotoğraf ve videolar) | Evet | Uygulama işlevselliği |
+| Diğer kullanıcı içeriği | Evet (etkinlikler, davetli listeleri, cevaplar, yüklenen müzik dosyası, duyurular, anı defteri mesajları, davetlilerin web'den bıraktığı sesli mesajlar) | Evet | Uygulama işlevselliği |
 | Satın alma geçmişi | Evet | Evet | Uygulama işlevselliği |
 | Kullanıcı kimliği | Evet | Evet | Uygulama işlevselliği |
 | Konum, sağlık, finans (kart), tarama geçmişi, arama geçmişi, teşhis verileri | Hayır | | |
 
 Notlar:
 - Davetli verilerini organizatör girer; Apple'ın tanımına göre bunlar "üçüncü kişiler hakkında kullanıcı içeriği"dir ve yukarıda beyan edilmiştir.
-- Kamera yalnızca kapıda giriş karekodunu okumak için kullanılır; görüntü cihazdan çıkmaz ve saklanmaz (toplanan veri değildir). Mikrofon kullanılmaz.
+- Kamera yalnızca kapıda giriş karekodunu okumak için kullanılır; görüntü cihazdan çıkmaz ve saklanmaz (toplanan veri değildir). Mobil uygulama mikrofon kullanmaz; davetliler sesli mesajı yalnızca web sayfasından, kendi tarayıcılarının izniyle kaydeder.
 - "Basılı davetiyeden doldur" seçilirse fotoğraf, metni okumak için hizmet sağlayıcı olarak yapay zekâ API'sine (Anthropic) gönderilir ve saklanmaz; SMS'ler Netgsm, e-postalar Resend, WhatsApp mesajları Meta üzerinden iletilir. Bunlar veri işleyendir, üçüncü tarafla paylaşım sayılmaz.
 - Hesap silme uygulama içinden yapılır: *Ayarlar → Hesabı sil*. Bu, App Store Yönergesi 5.1.1(v) gereğidir.
 - İnceleme notu: giriş tek kullanımlık e-posta koduyla yapılır. *App Review Information* bölümüne, inceleme ekibinin gelen kodu okuyabileceği bir demo e-posta kutusunun bilgilerini yazın. (ör. paylaşılan bir test posta kutusu).
@@ -166,8 +168,8 @@ Notlar:
 - **Toplanan veriler:**
   - Kişisel bilgiler: ad, e-posta, telefon.
   - Kişiler.
-  - Fotoğraflar ve videolar: kullanıcının yüklediği davetiye görseli, galeri, video; davetlilerin albüme yüklediği fotoğraflar.
-  - Ses dosyaları: organizatörün yüklediği fon müziği (isteğe bağlı).
+  - Fotoğraflar ve videolar: kullanıcının yüklediği davetiye görseli, galeri, video; davetlilerin albüme yüklediği fotoğraf ve videolar.
+  - Ses dosyaları: organizatörün yüklediği fon müziği ve davetlilerin web'den albüme bıraktığı sesli mesajlar (isteğe bağlı).
   - Uygulama etkinliği: diğer kullanıcı içeriği.
   - Finansal bilgiler: satın alma geçmişi.
 - **Paylaşım:** Üçüncü taraflarla paylaşılmıyor. Hizmet sağlayıcılar (veri işleyenler) Google'ın tanımına göre "paylaşım" sayılmaz.

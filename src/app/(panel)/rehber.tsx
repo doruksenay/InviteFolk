@@ -53,7 +53,7 @@ export default function ContactBook() {
   return (
     <Screen maxWidth={1100}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-        <IconButton icon="arrowLeft" label={t('guests.book.back')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+        <IconButton icon="arrowLeft" label={t('guests.book.back')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/etkinlikler'))} />
         <Display size={wide ? 52 : 40}>
           {t('guests.book.title')} <DisplayAccent style={{ color: color.lavender }}>{t('guests.book.titleAccent')}</DisplayAccent>
         </Display>

@@ -769,7 +769,10 @@ begin
     'ask_children', s -> 'ask_children',
     'ask_names', s -> 'ask_names',
     'album_slug', case when coalesce((s -> 'album' ->> 'enabled')::boolean, false) and v_lim.album_photos > 0
-                       then to_jsonb(v_ev.public_slug) end
+                       then to_jsonb(v_ev.public_slug) end,
+    'effect', s -> 'effect',
+    'guestbook', case when coalesce((s -> 'guestbook' ->> 'enabled')::boolean, false)
+                      then jsonb_build_object('enabled', true, 'public', coalesce((s -> 'guestbook' ->> 'public')::boolean, false)) end
   ));
 
   return json_build_object(

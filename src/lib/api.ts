@@ -15,6 +15,7 @@ import type {
 
 import { currentLang, dict, type Lang, makeT } from '@/i18n';
 
+import { demoInvitation, demoRespond, isDemoToken } from './demo';
 import { supabase } from './supabase';
 
 export { supabase };
@@ -160,6 +161,7 @@ export async function assignTables(pairs: { id: string; table_id: string | null 
 // Davetli (girişsiz)
 // ---------------------------------------------------------------------------
 export async function getPublicInvitation(token: string): Promise<PublicInvitation | null> {
+  if (isDemoToken(token)) return demoInvitation(token);
   return must(await supabase.rpc('get_invitation', { p_token: token })) as PublicInvitation | null;
 }
 
@@ -172,6 +174,7 @@ export async function respondInvitation(
   answers?: Record<string, string> | null,
   extra?: { children?: number | null; companions?: string[] | null },
 ) {
+  if (isDemoToken(token)) return demoRespond(token, status, partySize, menu, note, answers, extra);
   return must(
     await supabase.rpc('respond_invitation', {
       p_token: token,

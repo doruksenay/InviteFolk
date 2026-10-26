@@ -151,7 +151,7 @@ export function formatIban(iban: string) {
 export function GiftCard({ theme, gift, type, t }: { theme: InvitationTheme; gift: NonNullable<GuestSettings['gift']>; type: string; t: TFn }) {
   const [copied, setCopied] = useState(false);
   const sport = !!sportOf(type);
-  const kickerKey = (sport ? 'saha' : ['dugun', 'nisan', 'kina'].includes(type) ? type : 'other') as 'dugun';
+  const kickerKey = (sport ? 'saha' : ['dugun', 'nisan', 'kina', 'sunnet'].includes(type) ? (type === 'sunnet' ? 'dugun' : type) : 'other') as 'dugun';
   return (
     <SectionCard theme={theme} kicker={t(`guest.gift.kicker.${kickerKey}`)} icon={sport ? 'creditCard' : 'gift'}>
       {gift.note ? <Text style={[themeProse(theme, 20), { color: theme.ink }]}>{gift.note}</Text> : null}

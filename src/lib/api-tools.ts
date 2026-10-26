@@ -1,6 +1,6 @@
 // Etkinlik araçları (organizatör/ortak yönetici): duyurular, bilgi toplama başvuruları, fotoğraf albümü,
 // kapıda giriş, halı saha maçları ve takımlar, herkese açık bağlantı. Tümü kullanıcının oturumuyla, RLS altında.
-import type { AlbumPhoto, Announcement, GuestRequest, InvitationWithContact, MatchRow } from '@/core/types';
+import type { AlbumPhoto, Announcement, GuestbookEntry, GuestRequest, InvitationWithContact, MatchRow } from '@/core/types';
 
 import { friendlyError, must, supabase } from './api';
 
@@ -41,6 +41,36 @@ export async function listAlbum(eventId: string): Promise<AlbumItem[]> {
   const signed = await supabase.storage.from('album').createSignedUrls(rows.map((r) => r.path), 3600);
   const urls = new Map((signed.data ?? []).filter((x) => x.path && x.signedUrl).map((x) => [x.path as string, x.signedUrl as string]));
   return rows.map((r) => ({ ...r, url: urls.get(r.path) ?? null }));
+}
+
+/** Salon ekranı için: yayındaki (onaylı, gizlenmemiş) son 200 fotoğraf ve video, imzalı adresleriyle. */
+export async function listAlbumForScreen(eventId: string): Promise<AlbumItem[]> {
+  const rows = must(
+    await supabase.from('album_photos').select('*').eq('event_id', eventId).eq('confirmed', true).eq('approved', true).eq('hidden', false).in('kind', ['photo', 'video']).order('created_at', { ascending: false }).limit(200),
+  ) as AlbumPhoto[];
+  if (!rows.length) return [];
+  const signed = await supabase.storage.from('album').createSignedUrls(rows.map((r) => r.path), 3 * 3600);
+  const urls = new Map((signed.data ?? []).filter((x) => x.path && x.signedUrl).map((x) => [x.path as string, x.signedUrl as string]));
+  return rows.map((r) => ({ ...r, url: urls.get(r.path) ?? null }));
+}
+
+export async function setAlbumApproved(ids: string[], approved: boolean) {
+  if (!ids.length) return;
+  must(await supabase.from('album_photos').update({ approved }).in('id', ids).select('id'));
+}
+
+// --- Anı defteri
+export async function listGuestbook(eventId: string): Promise<GuestbookEntry[]> {
+  return must(await supabase.from('guestbook_entries').select('*').eq('event_id', eventId).order('created_at', { ascending: false }).limit(3000)) as GuestbookEntry[];
+}
+
+export async function setGuestbookFlags(ids: string[], patch: Partial<Pick<GuestbookEntry, 'approved' | 'hidden'>>) {
+  if (!ids.length) return;
+  must(await supabase.from('guestbook_entries').update(patch).in('id', ids).select('id'));
+}
+
+export async function deleteGuestbookEntry(id: string) {
+  must(await supabase.from('guestbook_entries').delete().eq('id', id).select('id'));
 }
 
 export async function setAlbumHidden(id: string, hidden: boolean) {

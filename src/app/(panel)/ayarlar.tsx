@@ -71,7 +71,7 @@ export default function SettingsScreen() {
   return (
     <Screen maxWidth={980}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-        <IconButton icon="arrowLeft" label={t('settings.back')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+        <IconButton icon="arrowLeft" label={t('settings.back')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/etkinlikler'))} />
         <Display size={wide ? 52 : 40}>
           {t('settings.title')} <DisplayAccent style={{ color: color.lavender }}>{t('settings.titleItalic')}</DisplayAccent>
         </Display>

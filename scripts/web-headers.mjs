@@ -3,8 +3,9 @@
 //
 // CSP: betikler yalnızca kendi alan adımızdan; ağ istekleri yalnızca kendi Supabase projemize.
 // Böylece bir XSS açığı olsa bile dışarıdan betik yüklenemez ve veri başka bir sunucuya gönderilemez.
-// Kamera yalnızca kendi sayfalarımızda (kapıda karekod okuma); mikrofon ve konum kapalı.
-import { writeFileSync } from 'node:fs';
+// Kamera ve mikrofon yalnızca kendi sayfalarımızda (kapıda karekod okuma, albüme sesli mesaj); konum kapalı.
+// Ayrıca arama motorları için robots.txt, sitemap.xml ve index.html'e açıklama/OG etiketleri yazılır.
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const out = process.argv[2] ?? 'dist';
@@ -41,7 +42,7 @@ const headers = `/*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: no-referrer
-  Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Permissions-Policy: camera=(self), microphone=(self), geolocation=(), payment=(), usb=(), interest-cohort=()
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
 
@@ -71,4 +72,33 @@ const headers = `/*
 
 writeFileSync(join(out, '_headers'), headers);
 writeFileSync(join(out, '_redirects'), '/* /index.html 200\n');
+// Arama motorları: yalnızca tanıtım sayfası ve yasal metinler dizine girer; kişisel sayfalar zaten noindex.
+const site = (process.env.EXPO_PUBLIC_WEB_URL || '').replace(/\/+$/, '');
+if (/^https:\/\/[^\s"<>]+$/.test(site)) {
+  const pages = ['/', '/yasal/gizlilik', '/yasal/kosullar', '/yasal/kvkk'];
+  writeFileSync(join(out, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /r/\nDisallow: /a/\nDisallow: /h/\nDisallow: /k/\nDisallow: /katil/\nDisallow: /etkinlik\nDisallow: /admin\nSitemap: ${site}/sitemap.xml\n`);
+  writeFileSync(
+    join(out, 'sitemap.xml'),
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.map((p) => `  <url><loc>${site}${p}</loc></url>`).join('\n')}\n</urlset>\n`,
+  );
+}
+const indexFile = join(out, 'index.html');
+if (existsSync(indexFile)) {
+  const title = 'Invitefolk · Dijital davetiye ve LCV';
+  const desc = 'Düğün, nişan, sünnet, doğum günü ve halı saha için WhatsApp ile gönderilen şık davetiye, canlı LCV, oturma planı ve canlı albüm.';
+  const tags = [
+    `<meta name="description" content="${desc}">`,
+    `<meta property="og:type" content="website">`,
+    `<meta property="og:site_name" content="Invitefolk">`,
+    `<meta property="og:title" content="${title}">`,
+    `<meta property="og:description" content="${desc}">`,
+    ...(site ? [`<meta property="og:url" content="${site}/">`, `<link rel="canonical" href="${site}/">`] : []),
+    `<meta name="twitter:card" content="summary">`,
+  ].join('');
+  let html = readFileSync(indexFile, 'utf8');
+  if (!html.includes('name="description"')) html = html.replace('</head>', `${tags}</head>`);
+  html = html.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`).replace(/<html lang="[^"]*"/, '<html lang="tr"');
+  writeFileSync(indexFile, html);
+}
+
 console.log(`_headers ve _redirects yazıldı → ${out}/ (Supabase: ${origin})`);

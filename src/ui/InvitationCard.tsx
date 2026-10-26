@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
-import type { InvitationTheme } from '@/core/themes';
+import type { InvitationTheme, ThemeEffect } from '@/core/themes';
 import { type Lang, LOCALE_TAG, makeT } from '@/i18n';
 
 import { Icon } from './Icon';
+import { AmbientEffect } from './theme/Effects';
 import { ThemeArt } from './theme/ThemeArt';
 import { themeTitle } from './theme/typography';
 import { font } from './tokens';
@@ -33,6 +34,7 @@ export function InvitationCard({
   style,
   artHeight = 196,
   lang = 'tr',
+  effect,
 }: {
   theme: InvitationTheme;
   copy: InvitationCopy;
@@ -40,6 +42,8 @@ export function InvitationCard({
   style?: ViewStyle;
   artHeight?: number;
   lang?: Lang;
+  /** Görsel alanındaki hareket (verilmezse hareketsiz; davetli sayfası ve önizlemeler verir). */
+  effect?: ThemeEffect;
 }) {
   const t = makeT(lang);
   return (
@@ -48,6 +52,7 @@ export function InvitationCard({
         <View style={StyleSheet.absoluteFill}>
           <ThemeArt theme={theme} width="100%" height="100%" />
         </View>
+        {effect ? <AmbientEffect kind={effect} theme={theme} /> : null}
         <View style={[styles.greet, { backgroundColor: theme.chip }]}>
           <Text style={[styles.greetText, { color: theme.ink }]} numberOfLines={1}>
             {copy.greet}

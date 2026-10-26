@@ -7,7 +7,9 @@ import type { EventTypeCopy } from '@/i18n/tr/eventTypes';
 import type { ThemeKey } from './themes';
 import type { PlayerPosition } from './types';
 
-export type EventTypeKey = 'dugun' | 'nisan' | 'kina' | 'dogum' | 'yemek' | 'kurumsal' | 'saha' | 'basket' | 'voleybol' | 'diger';
+export type EventTypeKey =
+  | 'dugun' | 'nisan' | 'kina' | 'sunnet' | 'bebek' | 'mevlut' | 'mezuniyet' | 'veda'
+  | 'dogum' | 'yemek' | 'kurumsal' | 'saha' | 'basket' | 'voleybol' | 'diger';
 
 /** Takım sporları: kadro/yedek, haftalık tekrar, ücret, dengeli takım, maç kaydı ve maçın oyuncusu. */
 export type SportKey = 'futbol' | 'basket' | 'voleybol';
@@ -27,7 +29,9 @@ export const SPORTS: Record<SportKey, SportConfig> = {
   voleybol: { key: 'voleybol', defaultRoster: 12, positions: ['pasor', 'smacor', 'orta_oyuncu', 'libero'], spread: ['pasor', 'libero'], hours: 2 },
 };
 
-export type IconName = 'rings' | 'ring' | 'lantern' | 'cake' | 'plate' | 'briefcase' | 'ball' | 'basketball' | 'volleyball' | 'sparkle';
+export type IconName =
+  | 'rings' | 'ring' | 'lantern' | 'cake' | 'plate' | 'briefcase' | 'ball' | 'basketball' | 'volleyball' | 'sparkle'
+  | 'crown' | 'baby' | 'moon' | 'gradcap' | 'glass';
 
 export type EventTypeConfig = {
   key: EventTypeKey;
@@ -67,6 +71,36 @@ export const EVENT_TYPES: Record<EventTypeKey, EventTypeConfig> = {
     accent: '#C9573A', tint: '#FFF5EF', iconBg: '#FCE0D3', glow: 'rgba(201,87,58,0.15)', suggestedTheme: 'kina_kirmizi', sport: null,
     questions: { partySize: true, menu: false, roster: false },
     tools: { seating: true, recurring: false, payments: false, companyFields: false },
+  },
+  sunnet: {
+    key: 'sunnet', icon: 'crown',
+    accent: '#2E4C8C', tint: '#F2F6FD', iconBg: '#DCE6F7', glow: 'rgba(46,76,140,0.16)', suggestedTheme: 'sehzade', sport: null,
+    questions: { partySize: true, menu: true, roster: false },
+    tools: { seating: true, recurring: false, payments: false, companyFields: false },
+  },
+  bebek: {
+    key: 'bebek', icon: 'baby',
+    accent: '#3E86B8', tint: '#F1F8FD', iconBg: '#D9ECF8', glow: 'rgba(62,134,184,0.16)', suggestedTheme: 'bulut', sport: null,
+    questions: { partySize: true, menu: false, roster: false },
+    tools: { seating: false, recurring: false, payments: false, companyFields: false },
+  },
+  mevlut: {
+    key: 'mevlut', icon: 'moon',
+    accent: '#2F6B57', tint: '#F2F7F4', iconBg: '#D8EAE1', glow: 'rgba(47,107,87,0.16)', suggestedTheme: 'nur', sport: null,
+    questions: { partySize: true, menu: false, roster: false },
+    tools: { seating: false, recurring: false, payments: false, companyFields: false },
+  },
+  mezuniyet: {
+    key: 'mezuniyet', icon: 'gradcap',
+    accent: '#2B3A78', tint: '#F3F4FA', iconBg: '#DEE2F2', glow: 'rgba(43,58,120,0.16)', suggestedTheme: 'kep', sport: null,
+    questions: { partySize: true, menu: true, roster: false },
+    tools: { seating: true, recurring: false, payments: false, companyFields: false },
+  },
+  veda: {
+    key: 'veda', icon: 'glass',
+    accent: '#8A4FC4', tint: '#F8F3FD', iconBg: '#EBDDF8', glow: 'rgba(138,79,196,0.16)', suggestedTheme: 'isilti', sport: null,
+    questions: { partySize: false, menu: false, roster: false },
+    tools: { seating: false, recurring: false, payments: false, companyFields: false },
   },
   dogum: {
     key: 'dogum', icon: 'cake',
@@ -112,7 +146,9 @@ export const EVENT_TYPES: Record<EventTypeKey, EventTypeConfig> = {
   },
 };
 
-export const EVENT_TYPE_ORDER: EventTypeKey[] = ['dugun', 'nisan', 'kina', 'dogum', 'yemek', 'kurumsal', 'saha', 'basket', 'voleybol', 'diger'];
+export const EVENT_TYPE_ORDER: EventTypeKey[] = [
+  'dugun', 'nisan', 'kina', 'sunnet', 'bebek', 'dogum', 'mezuniyet', 'veda', 'mevlut', 'yemek', 'kurumsal', 'saha', 'basket', 'voleybol', 'diger',
+];
 
 /** Etkinlik türünün sporu (halı saha, basketbol, voleybol); spor değilse null. */
 export function sportOf(type: string | null | undefined): SportConfig | null {

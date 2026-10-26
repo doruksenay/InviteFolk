@@ -35,7 +35,7 @@ export default function EditEvent() {
     return (
       <Screen maxWidth={640}>
         <Notice tone="error" text={t('event.loadError')} />
-        <Button label={t('event.backToEvents')} variant="secondary" onPress={() => router.replace('/')} />
+        <Button label={t('event.backToEvents')} variant="secondary" onPress={() => router.replace('/etkinlikler')} />
       </Screen>
     );
   }
@@ -144,7 +144,7 @@ function Form({ event }: { event: EventRow }) {
     try {
       await updateEvent(event.id, { status: archived ? 'active' : 'archived' });
       if (archived) back();
-      else router.replace('/');
+      else router.replace('/etkinlikler');
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     }
@@ -155,7 +155,7 @@ function Form({ event }: { event: EventRow }) {
     setErr(null);
     try {
       await deleteEvent(event.id);
-      router.replace('/');
+      router.replace('/etkinlikler');
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
       setDeleting(false);

@@ -9,6 +9,7 @@ import { getTheme, type InvitationTheme } from '@/core/themes';
 import type { GuestSettings, PublicInvitation } from '@/core/types';
 import { eventLang, LANG_NAMES, LANGS, type Lang, LOCALE_TAG, makeT, type TFn, useI18n } from '@/i18n';
 import { getPublicInvitation, respondInvitation, useQuery } from '@/lib/api';
+import { isDemoToken } from '@/lib/demo';
 import { calendarFeedUrl, getWeather, markOpened, type Weather } from '@/lib/api-guest';
 import { getGuestMedia, type GuestMedia, guestNeedsMedia } from '@/lib/api-page';
 import { addToCalendar, type CalEvent, googleCalendarUrl, mapsUrl } from '@/ui/design/calendar';
@@ -16,9 +17,11 @@ import { GuestDesignCard } from '@/ui/design/GuestDesignCard';
 import { Envelope, sealFrom } from '@/ui/guest/Envelope';
 import { PollCard, SahaCards, SignupCard } from '@/ui/guest/Interactive';
 import { Gallery, MusicButton, useInvitationMusic, VideoInvite } from '@/ui/guest/Media';
+import { GuestbookCard } from '@/ui/guest/Guestbook';
 import { AlbumCard, AnnouncementCard, CheckinPass, Countdown, GiftCard, ProgramList, WeatherCard } from '@/ui/guest/Sections';
 import { Icon } from '@/ui/Icon';
 import { InvitationCard } from '@/ui/InvitationCard';
+import { CelebrationBurst } from '@/ui/theme/Effects';
 import { tapFeedback } from '@/ui/primitives';
 import { ThemeArt } from '@/ui/theme/ThemeArt';
 import { themeProse, themeTitle } from '@/ui/theme/typography';
@@ -50,6 +53,7 @@ export default function GuestRsvp() {
   const [mediaFailed, setMediaFailed] = useState(false);
   const [weather, setWeather] = useState<Weather | null>(null);
   const [envelopeDone, setEnvelopeDone] = useState(false);
+  const [burst, setBurst] = useState(0);
   const device = useI18n();
 
   const gs = data?.event.settings as GuestSettings | undefined;
@@ -145,6 +149,7 @@ export default function GuestRsvp() {
         companions: askNames && status === 'yes' ? companions : null,
       });
       setData(updated);
+      if (status === 'yes') setBurst((n) => n + 1);
       setStep('done');
     } catch {
       setErr(t('rsvp.sendFailed'));
@@ -199,6 +204,7 @@ export default function GuestRsvp() {
       {settings.gift?.iban ? <GiftCard theme={theme} gift={settings.gift} type={inv.event.type} t={t} /> : null}
       {inv.checkin_code ? <CheckinPass theme={theme} code={inv.checkin_code} checkedIn={!!inv.checked_in} t={t} /> : null}
       {settings.album_slug ? <AlbumCard theme={theme} t={t} onOpen={() => router.push({ pathname: '/a/[slug]', params: { slug: settings.album_slug! } })} /> : null}
+      {settings.guestbook?.enabled ? <GuestbookCard theme={theme} t={t} locale={locale} source={{ token }} isPublic={settings.guestbook.public} /> : null}
     </View>
   );
 
@@ -218,6 +224,15 @@ export default function GuestRsvp() {
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.dark ? theme.bg : '#F6F1E8' }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', padding: 20, paddingBottom: 96 }}>
         <View style={{ width: '100%', maxWidth: 420, gap: 20, flexGrow: 1 }}>
+          {isDemoToken(token) && (
+            <Pressable
+              accessibilityRole="link"
+              onPress={() => router.push('/')}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 16, backgroundColor: theme.ink }}>
+              <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 13, color: theme.bg }}>{t('rsvp.demo.label')}</Text>
+              <Text style={{ fontFamily: font.bold, fontSize: 13, color: theme.bg, textDecorationLine: 'underline' }}>{t('rsvp.demo.cta')}</Text>
+            </Pressable>
+          )}
           <LangToggle theme={theme} lang={lang} onChange={setLangPick} t={t} />
           {inv.announcement ? <AnnouncementCard theme={theme} body={inv.announcement.body} at={inv.announcement.at} t={t} locale={locale} /> : null}
           {step === 'invite' && (
@@ -253,6 +268,7 @@ export default function GuestRsvp() {
                   theme={theme}
                   lang={lang}
                   artHeight={240}
+                  effect={settings.effect ?? theme.effect}
                   copy={{
                     greet: t('rsvp.greet', { name: inv.guest_name }),
                     kicker: copyText.sample.kicker,
@@ -402,6 +418,7 @@ export default function GuestRsvp() {
           <Footer theme={theme} t={t} />
         </View>
       </ScrollView>
+      <CelebrationBurst trigger={burst} theme={theme} />
       {hasMusic && !envelopeOn ? <MusicButton theme={theme} player={player} title={media?.music?.title ?? null} t={t} /> : null}
       {envelopeOn && (
         <Envelope

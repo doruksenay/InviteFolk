@@ -370,6 +370,199 @@ const MOTIFS: Record<InvitationTheme['motif'], Draw> = {
     );
   },
 
+  // Kiraz çiçeği dalı
+  sakura: (t) => {
+    const blossom = (cx: number, cy: number, s: number, k: string, c: string) => {
+      const ps: ReactElement[] = [];
+      for (let i = 0; i < 5; i++) {
+        ps.push(<Ellipse key={`${k}${i}`} cx={cx} cy={cy - 9 * s} rx={6 * s} ry={9 * s} fill={c} transform={`rotate(${i * 72} ${cx} ${cy})`} />);
+      }
+      ps.push(<Circle key={`${k}c`} cx={cx} cy={cy} r={3 * s} fill={t.shapeB} />);
+      return ps;
+    };
+    const r = rng(19);
+    const loose: ReactElement[] = [];
+    for (let i = 0; i < 10; i++) {
+      const x = 20 + r() * 320;
+      const y = 30 + r() * 190;
+      loose.push(<Ellipse key={`l${i}`} cx={x} cy={y} rx={5} ry={3} fill={i % 2 ? t.shapeA : t.shapeB} opacity={0.7} transform={`rotate(${r() * 180} ${x} ${y})`} />);
+    }
+    return (
+      <G>
+        <Circle cx={70} cy={60} r={90} fill={t.shapeC} />
+        <Path d="M370 18 C 300 30 250 60 200 70 S 120 90 80 130" stroke="#7A5560" strokeWidth={4} fill="none" strokeLinecap="round" />
+        <Path d="M260 52 C 250 80 236 96 214 110" stroke="#7A5560" strokeWidth={2.6} fill="none" strokeLinecap="round" />
+        <Path d="M160 82 C 150 66 150 50 158 36" stroke="#7A5560" strokeWidth={2.2} fill="none" strokeLinecap="round" />
+        {blossom(300, 34, 1.3, 'a', t.shapeA)}
+        {blossom(232, 64, 1.1, 'b', t.shapeB)}
+        {blossom(214, 110, 1.2, 'c', t.shapeA)}
+        {blossom(158, 36, 1, 'd', t.shapeB)}
+        {blossom(120, 102, 1.25, 'e', t.shapeA)}
+        {blossom(84, 130, 0.9, 'f', t.shapeB)}
+        {loose}
+      </G>
+    );
+  },
+
+  // Laleler
+  tulips: (t) => {
+    const tulip = (x: number, base: number, h: number, s: number, c: string, k: string) => (
+      <G key={k}>
+        <Path d={`M${x} ${base} C ${x - 4} ${base - h * 0.4} ${x + 4} ${base - h * 0.7} ${x} ${base - h}`} stroke={t.shapeB} strokeWidth={2.6} fill="none" />
+        <Path d={`M${x} ${base - h * 0.35} C ${x - 22 * s} ${base - h * 0.45} ${x - 26 * s} ${base - h * 0.75} ${x - 20 * s} ${base - h * 0.85} C ${x - 12 * s} ${base - h * 0.62} ${x - 6 * s} ${base - h * 0.5} ${x} ${base - h * 0.35} Z`} fill={t.shapeB} />
+        <Path
+          d={`M${x} ${base - h + 2} C ${x - 18 * s} ${base - h - 2} ${x - 20 * s} ${base - h - 26 * s} ${x - 14 * s} ${base - h - 40 * s} C ${x - 8 * s} ${base - h - 30 * s} ${x - 4 * s} ${base - h - 30 * s} ${x} ${base - h - 42 * s} C ${x + 4 * s} ${base - h - 30 * s} ${x + 8 * s} ${base - h - 30 * s} ${x + 14 * s} ${base - h - 40 * s} C ${x + 20 * s} ${base - h - 26 * s} ${x + 18 * s} ${base - h - 2} ${x} ${base - h + 2} Z`}
+          fill={c}
+        />
+      </G>
+    );
+    return (
+      <G>
+        <Circle cx={300} cy={70} r={100} fill={t.shapeC} />
+        <Path d={star8(300, 70, 30)} fill="none" stroke={t.palette[1]} strokeWidth={1.4} opacity={0.8} />
+        {tulip(250, 250, 110, 1.15, t.shapeA, 'a')}
+        {tulip(296, 250, 140, 1.3, t.palette[1], 'b')}
+        {tulip(340, 250, 96, 1, t.shapeA, 'c')}
+        {tulip(40, 250, 80, 0.9, t.shapeA, 'd')}
+      </G>
+    );
+  },
+
+  // Şehzade: taç, yıldızlar ve kemer
+  crown: (t) => {
+    const r = rng(23);
+    const dots: ReactElement[] = [];
+    for (let i = 0; i < 16; i++) dots.push(<Path key={i} d={sparkle(20 + r() * 320, 14 + r() * 120, 3 + r() * 5)} fill={t.shapeB} opacity={0.85} />);
+    return (
+      <G>
+        <Rect x={0} y={0} width={360} height={240} fill={t.shapeC} />
+        <Path d="M60 240 V140 C 60 70 120 30 180 30 C 240 30 300 70 300 140 V240 Z" fill={t.bg} />
+        <Path d="M74 240 V142 C 74 80 128 44 180 44 C 232 44 286 80 286 142 V240" stroke={t.shapeB} strokeWidth={2} fill="none" />
+        {dots}
+        {/* taç */}
+        <Path d="M128 162 L 136 112 L 158 136 L 180 98 L 202 136 L 224 112 L 232 162 Z" fill={t.shapeB} />
+        <Rect x={126} y={160} width={108} height={14} rx={4} fill={t.shapeA} />
+        <Circle cx={136} cy={110} r={6} fill={t.shapeA} />
+        <Circle cx={180} cy={95} r={7} fill={t.shapeA} />
+        <Circle cx={224} cy={110} r={6} fill={t.shapeA} />
+        <Circle cx={180} cy={146} r={6} fill={t.shapeC} />
+        <Path d={star8(180, 210, 16)} fill={t.shapeA} opacity={0.9} />
+      </G>
+    );
+  },
+
+  // Geometrik desen (sekiz köşeli yıldız örgüsü) ve hilal
+  geometric: (t) => {
+    const tiles: ReactElement[] = [];
+    for (let row = 0; row < 6; row++) {
+      for (let col = 0; col < 9; col++) {
+        const cx = 20 + col * 42;
+        const cy = 20 + row * 42;
+        tiles.push(<Path key={`${row}-${col}`} d={star8(cx, cy, 15)} fill="none" stroke={t.shapeA} strokeWidth={1} opacity={0.35} />);
+        tiles.push(<Rect key={`r${row}-${col}`} x={cx + 15} y={cy + 15} width={12} height={12} fill="none" stroke={t.shapeB} strokeWidth={0.8} opacity={0.45} transform={`rotate(45 ${cx + 21} ${cy + 21})`} />);
+      }
+    }
+    return (
+      <G>
+        {tiles}
+        <Circle cx={180} cy={112} r={70} fill={t.bg} />
+        <Circle cx={180} cy={112} r={70} fill="none" stroke={t.shapeB} strokeWidth={2} />
+        <Circle cx={180} cy={112} r={62} fill="none" stroke={t.shapeA} strokeWidth={1} />
+        <Path d="M196 72 A 42 42 0 1 0 196 152 A 34 34 0 1 1 196 72 Z" fill={t.shapeA} />
+        <Path d={sparkle(214, 100, 10)} fill={t.shapeB} />
+      </G>
+    );
+  },
+
+  // Bulutlar, yıldızlar ve ay (bebek)
+  clouds: (t) => {
+    const cloud = (x: number, y: number, s: number, c: string, k: string) => (
+      <G key={k}>
+        <Ellipse cx={x} cy={y} rx={46 * s} ry={22 * s} fill={c} />
+        <Circle cx={x - 22 * s} cy={y - 10 * s} r={20 * s} fill={c} />
+        <Circle cx={x + 8 * s} cy={y - 20 * s} r={26 * s} fill={c} />
+        <Circle cx={x + 30 * s} cy={y - 6 * s} r={16 * s} fill={c} />
+      </G>
+    );
+    const r = rng(29);
+    const stars: ReactElement[] = [];
+    for (let i = 0; i < 10; i++) stars.push(<Path key={i} d={sparkle(20 + r() * 320, 16 + r() * 110, 3 + r() * 4)} fill={t.shapeB} />);
+    return (
+      <G>
+        <Rect x={0} y={0} width={360} height={240} fill={t.shapeA} />
+        {stars}
+        <Path d="M300 40 A 26 26 0 1 0 312 88 A 20 20 0 1 1 300 40 Z" fill={t.shapeB} />
+        {cloud(80, 200, 1.4, t.shapeC, 'a')}
+        {cloud(250, 214, 1.7, t.shapeC, 'b')}
+        {cloud(170, 120, 0.8, t.bg, 'c')}
+        {/* çıngırak */}
+        <Circle cx={176} cy={176} r={16} fill={t.palette[2] ?? t.shapeB} />
+        <Rect x={173} y={190} width={6} height={30} rx={3} fill={t.palette[2] ?? t.shapeB} />
+        <Circle cx={176} cy={176} r={6} fill={t.shapeC} />
+      </G>
+    );
+  },
+
+  // Mezuniyet kepleri ve konfeti
+  caps: (t) => {
+    const cap = (x: number, y: number, s: number, rot: number, k: string) => (
+      <G key={k} transform={`rotate(${rot} ${x} ${y})`}>
+        <Path d={`M${x - 40 * s} ${y} L ${x} ${y - 18 * s} L ${x + 40 * s} ${y} L ${x} ${y + 18 * s} Z`} fill={t.shapeA} />
+        <Path d={`M${x - 22 * s} ${y + 9 * s} V ${y + 26 * s} C ${x - 10 * s} ${y + 34 * s} ${x + 10 * s} ${y + 34 * s} ${x + 22 * s} ${y + 26 * s} V ${y + 9 * s}`} fill={t.shapeA} />
+        <Path d={`M${x} ${y} L ${x + 30 * s} ${y + 10 * s} V ${y + 32 * s}`} stroke={t.shapeB} strokeWidth={2} fill="none" />
+        <Rect x={x + 26 * s} y={y + 30 * s} width={8 * s} height={12 * s} rx={2} fill={t.shapeB} />
+      </G>
+    );
+    const r = rng(31);
+    const bits: ReactElement[] = [];
+    for (let i = 0; i < 26; i++) {
+      const x = r() * 360;
+      const y = r() * 240;
+      bits.push(<Rect key={i} x={x} y={y} width={6} height={10} rx={1.5} fill={t.palette[i % t.palette.length]} opacity={0.85} transform={`rotate(${r() * 180} ${x} ${y})`} />);
+    }
+    return (
+      <G>
+        <Circle cx={180} cy={120} r={92} fill={t.shapeC} />
+        {bits}
+        {cap(150, 110, 1.3, -14, 'a')}
+        {cap(250, 70, 0.8, 18, 'b')}
+        {cap(80, 60, 0.7, -24, 'c')}
+      </G>
+    );
+  },
+
+  // Disko topu ve şampanya (bekârlığa veda)
+  disco: (t) => {
+    const tiles: ReactElement[] = [];
+    for (let i = -4; i <= 4; i++) {
+      for (let j = -4; j <= 4; j++) {
+        if (i * i + j * j > 18) continue;
+        tiles.push(<Rect key={`${i}${j}`} x={250 + i * 10 - 4.5} y={80 + j * 10 - 4.5} width={9} height={9} fill={(i + j) % 3 === 0 ? t.shapeB : (i + j) % 2 ? t.shapeA : '#E9DFF7'} opacity={0.95} />);
+      }
+    }
+    const r = rng(37);
+    const glints: ReactElement[] = [];
+    for (let i = 0; i < 18; i++) glints.push(<Path key={i} d={sparkle(r() * 360, r() * 240, 2 + r() * 6)} fill={i % 2 ? t.shapeB : t.palette[2]} opacity={0.9} />);
+    return (
+      <G>
+        <Line x1={250} y1={0} x2={250} y2={38} stroke={t.soft} strokeWidth={1.5} />
+        <Circle cx={250} cy={80} r={44} fill={t.shapeC} />
+        {tiles}
+        {glints}
+        {/* kadehler */}
+        <Path d="M70 120 L 100 120 L 92 160 C 90 168 80 168 78 160 Z" fill="none" stroke={t.shapeB} strokeWidth={2.4} />
+        <Line x1={85} y1={166} x2={85} y2={206} stroke={t.shapeB} strokeWidth={2.4} />
+        <Line x1={70} y1={206} x2={100} y2={206} stroke={t.shapeB} strokeWidth={2.4} />
+        <Path d="M112 112 L 142 116 L 129 154 C 126 162 116 160 116 152 Z" fill="none" stroke={t.shapeA} strokeWidth={2.4} />
+        <Line x1={122} y1={160} x2={118} y2={200} stroke={t.shapeA} strokeWidth={2.4} />
+        <Line x1={104} y1={198} x2={132} y2={202} stroke={t.shapeA} strokeWidth={2.4} />
+        <Circle cx={88} cy={104} r={3} fill={t.shapeB} />
+        <Circle cx={98} cy={92} r={2} fill={t.shapeB} />
+        <Circle cx={124} cy={96} r={2.5} fill={t.shapeA} />
+      </G>
+    );
+  },
+
   // Balonlar
   balloons: (t) => {
     const b = (cx: number, cy: number, c: string, k: string, s = 1) => (

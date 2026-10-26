@@ -1,9 +1,9 @@
 // Web: fotoğraf, ses ve video seçtirir; fotoğrafları tuvalde küçültür.
 import * as DocumentPicker from 'expo-document-picker';
 
-import { type PickedFile, type PickedPhoto, MAX_AUDIO_BYTES, MAX_PHOTO_EDGE, MAX_VIDEO_BYTES, AUDIO_TYPES, VIDEO_TYPES } from './media-types';
+import { type AlbumUpload, type PickedFile, type PickedPhoto, ALBUM_VIDEO_TYPES, MAX_AUDIO_BYTES, MAX_PHOTO_EDGE, MAX_VIDEO_BYTES, AUDIO_TYPES, VIDEO_TYPES } from './media-types';
 
-export type { PickedFile, PickedPhoto } from './media-types';
+export type { AlbumUpload, PickedFile, PickedPhoto } from './media-types';
 
 async function loadImage(blob: Blob): Promise<HTMLImageElement> {
   const url = URL.createObjectURL(blob);
@@ -104,4 +104,36 @@ export async function pickVideo(): Promise<(PickedFile & { width: number; height
     v.src = url;
   });
   return { data: f, mime: ext === 'mov' ? 'video/quicktime' : 'video/mp4', ext, name: a.name ?? '', size: f.size, ...dims };
+}
+
+/** Albüm için fotoğraf ve video (en fazla `max`); fotoğraflar küçültülür, 50 MB'ı aşan videolar atlanır. */
+export async function pickAlbumMedia(max: number): Promise<{ items: AlbumUpload[]; skipped: number }> {
+  const res = await DocumentPicker.getDocumentAsync({ type: ['image/*', ...ALBUM_VIDEO_TYPES], multiple: max > 1 });
+  if (res.canceled || !res.assets?.length) return { items: [], skipped: 0 };
+  const items: AlbumUpload[] = [];
+  let skipped = 0;
+  for (const a of res.assets.slice(0, max)) {
+    const f = await fileOf(a);
+    if (!f) continue;
+    const mime = (a.mimeType || f.type || '').toLowerCase();
+    if (mime.startsWith('video/')) {
+      if (f.size > MAX_VIDEO_BYTES || !ALBUM_VIDEO_TYPES.includes(mime)) {
+        skipped++;
+        continue;
+      }
+      items.push({ data: f, mime, kind: 'video' });
+      continue;
+    }
+    if (f.size > 40 * 1024 * 1024) {
+      skipped++;
+      continue;
+    }
+    try {
+      const r = await toJpeg(f, MAX_PHOTO_EDGE);
+      items.push({ data: r.blob, mime: 'image/jpeg', kind: 'photo' });
+    } catch {
+      skipped++;
+    }
+  }
+  return { items, skipped };
 }

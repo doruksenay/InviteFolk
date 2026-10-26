@@ -10,7 +10,7 @@ export type EventTypeCopy = {
 
 const RSVP = { yes: 'Katılacağım', no: 'Katılamayacağım', askParty: 'Ne güzel! Kaç kişi geleceksiniz?' };
 
-export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'dogum' | 'yemek' | 'kurumsal' | 'saha' | 'basket' | 'voleybol' | 'diger', EventTypeCopy> = {
+export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'sunnet' | 'bebek' | 'mevlut' | 'mezuniyet' | 'veda' | 'dogum' | 'yemek' | 'kurumsal' | 'saha' | 'basket' | 'voleybol' | 'diger', EventTypeCopy> = {
   dugun: {
     name: 'Düğün',
     description: 'Davetiye, katılım ve masa planı tek yerde.',
@@ -46,6 +46,66 @@ export const eventTypes: Record<'dugun' | 'nisan' | 'kina' | 'dogum' | 'yemek' |
       { title: 'Otomatik hatırlatma', detail: 'Cevap vermeyenlere kendiliğinden hatırlatır.' },
     ],
     sample: { greet: 'Sayın Ahmet Yılmaz ve ailesi', kicker: 'Kına gecesi', title: "Ayşe'nin\nkınası", line: 'Kınamızı yakarken sevdiklerimiz yanımızda olsun istiyoruz.', when: '11 Haziran 2027, Cuma · 20.00', where: '[Mekân adı], Üsküdar', deadline: '25 Mayıs', host: 'A', wa: 'Ayşe sizi kına gecesine davet ediyor.' },
+  },
+  sunnet: {
+    name: 'Sünnet düğünü',
+    description: 'Şehzademizin günü: davetiye, katılım ve masa planı.',
+    rsvp: RSVP,
+    menu: ['Et', 'Tavuk', 'Vejetaryen', 'Çocuk menüsü'],
+    features: [
+      { title: 'Oturma planı', detail: 'Masaları kur, aileleri tek dokunuşla yerleştir.' },
+      { title: 'Mevlüt ve düğün tek davetiyede', detail: 'Programa mevlüt, kına ve düğünü ayrı saatlerle ekle.' },
+      { title: 'Menü ve çocuk sayısı', detail: 'Kaç çocuk geleceği ve menü tercihleri hazır gelir.' },
+    ],
+    sample: { greet: 'Sayın Ahmet Yılmaz ve ailesi', kicker: 'Sünnet düğünümüze davetlisiniz', title: 'Şehzade\nEmir', line: 'Oğlumuz Emir’in en mutlu gününde sizleri de aramızda görmekten onur duyarız.', when: '5 Temmuz 2027, Pazar · 18.00', where: '[Salon adı], Bağcılar', deadline: '20 Haziran', host: 'Y', wa: 'Yılmaz ailesi sizi Emir’in sünnet düğününe davet ediyor.' },
+  },
+  bebek: {
+    name: 'Baby shower ve cinsiyet partisi',
+    description: 'Bebeğe hoş geldin, kız mı erkek mi?',
+    rsvp: RSVP,
+    menu: null,
+    features: [
+      { title: 'Getir listesi', detail: 'Bez, body, emzik… kim ne getiriyor, aynısı iki kez gelmesin.' },
+      { title: 'Fotoğraf albümü', detail: 'Herkes çektiğini masadaki karekoddan yüklesin.' },
+      { title: 'Anı defteri', detail: 'Bebeğe ilk mesajlar tek yerde birikir.' },
+    ],
+    sample: { greet: 'Sevgili [Davetli adı],', kicker: 'Bebeğimiz geliyor', title: 'Kız mı\nerkek mi?', line: 'Bu tatlı sürprizi sizinle birlikte öğrenmek istiyoruz.', when: '14 Mart 2027, Pazar · 15.00', where: '[Mekân adı], Ataşehir', deadline: '7 Mart', host: 'Z', wa: 'Zeynep ve Can sizi baby shower’a davet ediyor.' },
+  },
+  mevlut: {
+    name: 'Mevlüt',
+    description: 'Mevlid-i Şerif ve ikram için davet.',
+    rsvp: RSVP,
+    menu: null,
+    features: [
+      { title: 'Kişi sayısı', detail: 'İkram için kaç kişi geleceğini önceden bil.' },
+      { title: 'Yol tarifi', detail: 'Cami ya da ev, adres tek dokunuşla haritada açılır.' },
+      { title: 'Hatırlatma', detail: 'Cevap vermeyenlere kendiliğinden hatırlatır.' },
+    ],
+    sample: { greet: 'Sayın [Davetli adı]', kicker: 'Mevlid-i Şerif', title: 'Mevlüt\ndavetimiz', line: 'Merhum babamız Hasan Yılmaz’ın ruhuna okunacak mevlüdümüze teşriflerinizi rica ederiz.', when: '10 Nisan 2027, Cumartesi · ikindi namazından sonra', where: '[Cami adı], Üsküdar', deadline: '8 Nisan', host: 'Y', wa: 'Yılmaz ailesi sizi mevlüde davet ediyor.' },
+  },
+  mezuniyet: {
+    name: 'Mezuniyet',
+    description: 'Tören, gala yemeği ya da mezuniyet partisi.',
+    rsvp: RSVP,
+    menu: ['Et', 'Balık', 'Vejetaryen'],
+    features: [
+      { title: 'Program', detail: 'Tören ve gala yemeğini ayrı saatlerle göster.' },
+      { title: 'Oturma planı', detail: 'Gala masalarını sürükle-bırak kur.' },
+      { title: 'Fotoğraf albümü', detail: 'Kep atma anı herkesin telefonundan tek albümde.' },
+    ],
+    sample: { greet: 'Sevgili [Davetli adı],', kicker: 'Mezun oluyorum', title: 'Elif\n2027', line: 'Dört yılın sonunda bu anı sizinle kutlamak istiyorum.', when: '25 Haziran 2027, Cuma · 18.00', where: '[Üniversite / mekân], Beşiktaş', deadline: '15 Haziran', host: 'E', wa: 'Elif seni mezuniyet kutlamasına çağırıyor.' },
+  },
+  veda: {
+    name: 'Bekârlığa veda',
+    description: 'Gelin ya da damat için son özgür gece.',
+    rsvp: { yes: 'Varım!', no: 'Bu sefer olmuyor', askParty: 'Harika!' },
+    menu: null,
+    features: [
+      { title: 'Tarih anketi', detail: 'Herkese uyan geceyi oylamayla bul.' },
+      { title: 'Getir listesi', detail: 'Taç, kuşak, pasta… kim ne getiriyor.' },
+      { title: 'Ortak albüm', detail: 'Gecenin fotoğrafları tek yerde, gelin görmeden önce gizli kalabilir.' },
+    ],
+    sample: { greet: 'Kızlar,', kicker: 'Bekârlığa veda', title: 'Ayşe’nin\nson gecesi', line: 'Ayşe evlenmeden önce son bir kez çılgınca eğleniyoruz!', when: '29 Mayıs 2027, Cumartesi · 21.00', where: '[Mekân adı], Bebek', deadline: '20 Mayıs', host: 'S', wa: 'Selin seni Ayşe’nin bekârlığa veda partisine çağırıyor.' },
   },
   dogum: {
     name: 'Doğum günü',

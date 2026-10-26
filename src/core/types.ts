@@ -178,7 +178,8 @@ export type PublicMatch = {
 };
 
 /** Davetliye açılan ayarlar (get_invitation süzer; dosya yolları yok). */
-export type GuestSettings = Omit<EventSettings, 'design' | 'music' | 'video' | 'gallery' | 'gift' | 'album'> & {
+export type GuestSettings = Omit<EventSettings, 'design' | 'music' | 'video' | 'gallery' | 'gift' | 'album' | 'guestbook'> & {
+  guestbook?: { enabled: boolean; public: boolean };
   has_design?: boolean;
   design?: Omit<EventDesign, 'path'>;
   music?: { title?: string };
@@ -201,6 +202,9 @@ export type PublicEvent = {
   collector: boolean;
   album: boolean;
   album_public: boolean;
+  album_moderate?: boolean;
+  guestbook?: boolean;
+  guestbook_public?: boolean;
 };
 
 export type AdminStats = {
@@ -269,8 +273,12 @@ export type EventSettings = {
   /** Araçlar */
   checkin?: boolean;
   collector?: boolean;
-  album?: { enabled?: boolean; public?: boolean };
+  album?: { enabled?: boolean; public?: boolean; moderate?: boolean };
   sms_fallback?: boolean;
+  /** Davetiye görselindeki hareket; yoksa temanın varsayılanı. */
+  effect?: import('./themes').ThemeEffect;
+  /** Anı defteri: davetliler mesaj bırakır; public ise davetliler de okur, moderate ise organizatör onaylar. */
+  guestbook?: { enabled?: boolean; public?: boolean; moderate?: boolean };
   poll?: { options: PollOption[]; closed?: boolean; chosen?: string | null };
   signup?: SignupItem[];
 };
@@ -296,7 +304,14 @@ export type PlanLimits = {
 
 export type TeamMember = { id: string | null; user_id: string | null; full_name: string | null; email: string; role: 'owner' | 'cohost'; accepted: boolean; created_at: string };
 export type GuestRequest = { id: string; event_id: string; name: string; phone: string | null; email: string | null; party: number; note: string | null; status: 'pending' | 'approved' | 'rejected'; created_at: string };
-export type AlbumPhoto = { id: string; event_id: string; path: string; content_type: string; uploader: string | null; confirmed: boolean; hidden: boolean; created_at: string };
+export type AlbumKind = 'photo' | 'video' | 'audio';
+export type AlbumPhoto = { id: string; event_id: string; path: string; content_type: string; uploader: string | null; confirmed: boolean; hidden: boolean; approved: boolean; kind: AlbumKind; created_at: string };
+/** Anı defteri mesajı (organizatör görünümü). */
+export type GuestbookEntry = { id: string; event_id: string; invitation_id: string | null; name: string; message: string; approved: boolean; hidden: boolean; created_at: string };
+/** Davetlilere açık anı defteri mesajı. */
+export type PublicGuestbookEntry = { name: string; message: string; at: string };
+/** Albüm sayfası için ek ayarlar. */
+export type PublicEventExtra = { guestbook: boolean; guestbook_public: boolean; album_moderate: boolean; theme: string };
 export type Announcement = { id: string; event_id: string; body: string; created_at: string };
 export type MatchRow = {
   id: string;

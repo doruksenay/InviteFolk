@@ -2,9 +2,14 @@
 
 > Events feel better together. — Plan. Invite. Celebrate.
 
-Invitefolk; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, halı saha, basketbol ve voleybol maçı ve benzeri her tür etkinlik için davetiye ve katılım (LCV) uygulamasıdır. iOS, Android ve web tek kod tabanından çalışır; arayüz Türkçe ve İngilizce'dir.
+Invitefolk; düğün, nişan, kına, sünnet, bebek partisi ve cinsiyet partisi, mevlit, mezuniyet, bekârlığa veda, doğum günü, yemek, kurumsal etkinlik, halı saha, basketbol ve voleybol maçı ve benzeri her tür etkinlik için davetiye ve katılım (LCV) uygulamasıdır. iOS, Android ve web tek kod tabanından çalışır; arayüz Türkçe ve İngilizce'dir.
 
 ## Neler var
+
+**Tanıtım sayfası ve örnekler** (web)
+- Giriş yapmamış ziyaretçiye ana sayfada tanıtım: etkinlik türleri, şablon vitrini, özellikler, fiyatlar (veritabanındaki güncel fiyat), sık sorulanlar; TR · EN. Giriş yapan kullanıcı doğrudan `/etkinlikler`'e gider; uygulamada ana sayfa giriş ekranıdır.
+- `/demo/<tür>` (ör. `/demo/dugun`, `/demo/bebek?lang=en`): davetlinin göreceği sayfanın aynısı, cihazda üretilen sahte verilerle; cevap, anket, getir listesi ve anı defteri denenir, hiçbir şey sunucuya gitmez.
+- Arama motorları için `robots.txt`, `sitemap.xml`, açıklama ve Open Graph etiketleri (derlemede yazılır).
 
 **Organizatör (kullanıcı paneli)**
 - 4 adımlı sihirbaz: tür ve tema → bilgiler ve davetiye dili → davetliler → gönderim.
@@ -14,13 +19,15 @@ Invitefolk; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, ha
 - Kendi davetiye tasarımı: görsel ya da PDF yükle (PDF web panelinde), isim alanını sürükle, yazı tipini/boyutunu/rengini seç; her davetli kendi adını tasarımın üstünde görür.
 - Oturma planı: masa ekle (4–14 kişi), sürükle-bırak, sahne/dans pisti/bar/DJ/pasta/foto köşesi/giriş, hızlı kurulum ("300 kişi, 10'luk masa"), otomatik yerleştirme, önizleme, masaları WhatsApp/e-posta ile bildirme, masa kartı ve isimlik çıktısı.
 - Etkinlik düzenleme: tüm bilgiler, menü seçenekleri, en fazla 3 özel soru, hediye notu, otomatik hatırlatma, arşivleme, silme.
-- Davetiye sayfası düzenleyici: 26 şablon (düğün, nişan, kına, doğum günü, yemek, kurumsal, halı saha, basketbol, voleybol…), mühürlü zarf açılışı, geri sayım, birden fazla tören (kına + nikâh + düğün) programı, takı/IBAN kartı (kopyalanır, masaya karekodlu kart basılır), fon müziği, fotoğraf galerisi, video davetiye, yapay zekâ ile davet metni.
+- Davetiye sayfası düzenleyici: 34 şablon (düğün, nişan, kına, sünnet, bebek partisi, mevlit, mezuniyet, bekârlığa veda, doğum günü, yemek, kurumsal, halı saha, basketbol, voleybol…), hareketli şablonlar (süzülen yaprak, konfeti, parıltı, yıldız, baloncuk, kalp; şablonun varsayılanı ya da elle seçilir, "hareketi azalt" ayarına uyar), "Katılacağım" deyince konfeti, mühürlü zarf açılışı, geri sayım, birden fazla tören (kına + nikâh + düğün) programı, takı/IBAN kartı (kopyalanır, masaya karekodlu kart basılır), fon müziği, fotoğraf galerisi, video davetiye, yapay zekâ ile davet metni.
 - Davetliye sorulanlar: kişi sayısının içinde kaç çocuk, yanındakilerin adları; tarih anketi (tarih belli değilse); "kim ne getiriyor" listesi (doğum günü, yemek).
 - Ortak yöneticiler: eş, aile ya da arkadaş e-postayla davet edilir ve birlikte yönetir; silme yalnızca sahibe açık.
 - Duyuru: saat/yer değişikliği davetiye sayfasının üstünde görünür; istenirse WhatsApp, e-posta ya da SMS ile de gider.
 - Liste: davetiyeyi açtı/açmadı takibi, "açmayanlar" filtresi, Excel (.xlsx), CSV ve yazdırılabilir PDF.
 - Kapıda giriş: katılan her davetliye kişisel giriş karekodu; organizatör telefon kamerasıyla okutur ya da listeden işaretler, gelen sayısı canlı.
-- Fotoğraf albümü: masadaki karekodla davetliler uygulama indirmeden fotoğraf yükler; organizatör gizler, siler, indirir.
+- Canlı albüm: masadaki karekodla davetliler uygulama indirmeden fotoğraf, video (50 MB'a kadar) ve sesli mesaj (tarayıcıdan en fazla 60 sn) yükler; organizatör isterse her yüklemeyi önce onaylar, gizler, siler, indirir.
+- Salon ekranı (`/etkinlik/<id>/ekran`): projeksiyon ya da TV için tam ekran slayt gösterisi; fotoğraflar ve videolar döner, anı defteri mesajları araya girer, yeni gelenler öne alınır, köşede albüm karekodu, ekran kararmaz.
+- Anı defteri: davetliler davetiyeden ya da masadaki karekoddan dilek ve tebrik bırakır; organizatör onaylar, gizler, siler; isterse davetliler de okur.
 - Bilgi toplama linki: aile gruplarına atılan tek link; davetli adını, telefonunu, kişi sayısını kendisi yazar, organizatör onaylayınca listeye girer.
 - SMS yedeği: WhatsApp'a ulaşılamayan davet ve hatırlatmalar SMS ile gider (Netgsm).
 - Basılı davetiyeden doldurma: davetiyenin fotoğrafından başlık, tarih, saat ve yer yapay zekâ ile okunur.
@@ -35,8 +42,8 @@ Invitefolk; düğün, nişan, kına, doğum günü, yemek, kurumsal etkinlik, ha
 - Kişiye özel link (`/r/<token>`): tema ya da organizatörün tasarımı üstünde kendi adı.
 - Katılım, kişi sayısı, menü, özel sorular, not; takım sporlarında kadro/yedek durumu ve ücret.
 - Takvime ekle, haritada aç, masası belli ise "Masanız", TR · EN seçici, KVKK bağlantısı.
-- Zarf açılışı ve müzik, geri sayım, program, galeri, video, takı/IBAN kopyalama, duyurular, hava durumu, tarih anketi, getir listesi, giriş karekodu, albüme yükleme; takım sporlarında takımım, "ödedim", maçın oyuncusu oyu.
-- Herkese açık kısa sayfalar (giriş gerekmez, dizinlenmez): `/a/<kod>` albüme yükleme, `/h/<kod>` hediye bilgisi, `/k/<kod>` bilgi toplama formu, `/katil/<anahtar>` ortak yönetici daveti (giriş ister).
+- Zarf açılışı ve müzik, geri sayım, program, galeri, video, takı/IBAN kopyalama, duyurular, hava durumu, tarih anketi, getir listesi, giriş karekodu, albüme yükleme (fotoğraf, video, sesli mesaj), anı defteri, hareketli şablon ve "Katılacağım" konfetisi; takım sporlarında takımım, "ödedim", maçın oyuncusu oyu.
+- Herkese açık kısa sayfalar (giriş gerekmez, dizinlenmez): `/a/<kod>` canlı albüm ve anı defteri, `/h/<kod>` hediye bilgisi, `/k/<kod>` bilgi toplama formu, `/katil/<anahtar>` ortak yönetici daveti (giriş ister).
 
 **Yönetim paneli** (`/admin`, iki adımlı doğrulama zorunlu)
 - Platform özeti (yalnızca sayılar) ve kullanıcı yönetimi: arama, paket atama, askıya alma. Davetli kişisel verilerine erişim yoktur; her işlem denetim kaydına yazılır.
@@ -195,7 +202,7 @@ public/zxing/                  Karekod okuyucu WASM (yalnızca web, yerleşik ok
 
 ## Güvenlik
 
-İlke: uygulama ya da web sitesi tamamen ele geçirilse bile saldırganın elinde yalnızca herkese açık anahtar ve en fazla kendi oturumu olur; asıl koruma veritabanındadır. 293 saldırı ve işlev senaryosu gerçek Postgres üzerinde test edildi. İki ayrı bağımsız güvenlik incelemesi yapıldı: ilki 5, ortak yönetim ve yeni araçlar için yapılan ikincisi 11 bulgu çıkardı; hepsi kapatılıp tekrar test edildi. Son cevap günü bilerek yalnızca bilgi amaçlıdır: geç cevaplar da kabul edilir.
+İlke: uygulama ya da web sitesi tamamen ele geçirilse bile saldırganın elinde yalnızca herkese açık anahtar ve en fazla kendi oturumu olur; asıl koruma veritabanındadır. 332 saldırı ve işlev senaryosu gerçek Postgres üzerinde test edildi. İki ayrı bağımsız güvenlik incelemesi yapıldı: ilki 5, ortak yönetim ve yeni araçlar için yapılan ikincisi 11 bulgu çıkardı; hepsi kapatılıp tekrar test edildi. Son cevap günü bilerek yalnızca bilgi amaçlıdır: geç cevaplar da kabul edilir.
 
 **Veritabanı**
 - Satır düzeyi güvenlik: herkes yalnızca kendi etkinlik, kişi, masa, davet, tasarım dosyası ve bildirim anahtarını görür.
@@ -206,7 +213,8 @@ public/zxing/                  Karekod okuyucu WASM (yalnızca web, yerleşik ok
 - Askıya alınan hesap yazamaz; kotalar, hız sınırları ve girdi sınırları kötüye kullanımı keser. Günlük WhatsApp/e-posta/SMS hakkı her mesajın kaydı açılırken veritabanında atomik düşülür: paralel isteklerle aşılamaz. SMS yalnızca Türkiye cep numaralarına gider. Duyuru metni sunucuda kayıttan okunur ve her duyuru her kanaldan bir kez gönderilir; sayıp-ekleyen tüm sınırlar etkinlik satırını kilitler.
 - Tüm fonksiyonlar varsayılan kapalı; gerekenler tek tek açıldı. Denetim kaydı API'den erişilemez.
 - Tasarım dosyaları özel kovada; davetli yalnızca davet anahtarı doğrulandıktan sonra 15 dakikalık imzalı linkle görür.
-- Müzik, video, galeri (`media`) ve albüm (`album`) kovaları da özel; yollar her zaman etkinlik sahibinin klasöründe, yazma yalnızca etkinliği düzenleyebilenlere. Davetli albüme yalnızca sunucunun verdiği tek kullanımlık imzalı linkle, boyut ve tür sınırıyla yükler; albüm kotası ve saatlik hız sınırı veritabanında.
+- Müzik, video, galeri (`media`) ve albüm (`album`) kovaları da özel; yollar her zaman etkinlik sahibinin klasöründe, yazma yalnızca etkinliği düzenleyebilenlere. Davetli albüme yalnızca sunucunun verdiği tek kullanımlık imzalı linkle, boyut ve tür sınırıyla yükler; albüm kotası ve saatlik hız sınırı veritabanında. Video ve ses yalnızca izin verilen türlerle (MP4/MOV/WebM, WebM/M4A/MP3/OGG/AAC) ve dosya başına 50 MB; onay açıksa yükleme organizatör onaylayana kadar albümde ve salon ekranında görünmez.
+- Anı defterine yalnızca tanımlı fonksiyonlarla yazılır: kişisel linkle yazanın adı organizatörün listesinden gelir (değiştirilemez), mesaj 500 karakter; etkinlik başına saatte 120 ve toplam 3.000 mesaj, kişisel linkle günde 5 mesaj. Davetliler mesajları yalnızca organizatör herkese açtıysa ve yalnızca onaylı, gizlenmemiş olanları görür; düzenleme ve silme yalnızca etkinliği yönetenlere.
 - Ortak yönetici yalnızca davet edilen e-postayla giriş yapıp linki bir kez kabul edebilir; davet anahtarı kullanılınca değişir. Ortak yönetici etkinliği silemez ya da arşivleyemez, başkalarını davet edemez, takı/IBAN bilgisini değiştiremez (IBAN değişiklikleri denetim kaydına yazılır), başkasının rehberindeki kişileri düzeltemez ve etkinliğe yalnızca kendi kişilerini bağlar. Davet e-postaları kullanıcı başına günde 20 ve aynı adrese 10 dakikada bir ile sınırlı.
 - Herkese açık kısa sayfalar (`/a`, `/h`, `/k`) 12+ karakterlik rastgele kodla çalışır, kod tek tıkla yenilenir; yalnızca gereken alanları döndürür (ör. hediye sayfası yalnızca organizatörün herkese açık işaretlediği IBAN'ı). Bilgi toplama formunda hız ve bekleyen başvuru sınırı vardır, telefonla tekrar engellenir.
 - IBAN sunucuda mod-97 ile doğrulanır; uygulama para toplamaz, yalnızca bilgiyi gösterir. "Ödedim" yalnızca oyuncunun beyanıdır; ödemeyi organizatör işaretler.
@@ -220,7 +228,7 @@ public/zxing/                  Karekod okuyucu WASM (yalnızca web, yerleşik ok
 
 **Uygulama ve web**
 - Telefonda oturum anahtarları Keychain/Keystore'da şifreli; Android yedeği kapalı; çıkışta cihazın bildirim kaydı silinir.
-- Web'de sıkı CSP (yalnızca kendi betiklerimiz, yalnızca kendi Supabase projemize istek), HSTS, çerçeveleme yasağı, `no-referrer`, davet linkleri dizinlenmez. Kamera yalnızca kendi sayfalarımızda (kapıda giriş), mikrofon ve konum kapalı. `wasm-unsafe-eval` yalnızca kendi alan adımızdan gelen karekod WASM'ı için; JavaScript `eval` kapalı.
+- Web'de sıkı CSP (yalnızca kendi betiklerimiz, yalnızca kendi Supabase projemize istek), HSTS, çerçeveleme yasağı, `no-referrer`, davet linkleri dizinlenmez. Örnek davetiyeler (`/demo`) sunucuya hiç istek atmaz. Kamera ve mikrofon yalnızca kendi sayfalarımızda (kapıda giriş, albüme sesli mesaj), konum kapalı; mobil uygulama mikrofon izni hiç istemez. `wasm-unsafe-eval` yalnızca kendi alan adımızdan gelen karekod WASM'ı için; JavaScript `eval` kapalı.
 - Dışa aktarılan Excel/CSV'de formül enjeksiyonuna karşı `=`, `+`, `-`, `@` ile başlayan hücreler metin olarak yazılır.
 
 **Canlıya çıkmadan Supabase panelinde**

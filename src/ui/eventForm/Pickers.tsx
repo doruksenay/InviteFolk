@@ -10,7 +10,7 @@ import { color, font, shadow } from '@/ui/tokens';
 
 type PressState = PressableStateCallbackType & { hovered?: boolean };
 
-const GROUPS = ['wedding', 'celebration', 'everyday'] as const;
+const GROUPS = ['wedding', 'tradition', 'celebration', 'everyday'] as const;
 
 /** Davetiye teması küçük resimleri; düğün, kutlama ve gündelik olarak gruplu. Önerilen tema grubun başında. */
 export function ThemePicker({ value, onChange, suggested }: { value: ThemeKey; onChange: (k: ThemeKey) => void; suggested?: ThemeKey }) {

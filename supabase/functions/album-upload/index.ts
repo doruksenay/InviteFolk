@@ -1,18 +1,23 @@
 // Davetlilerin fotoğraf albümü (masadaki karekod → /a/<bağlantı>). Girişsiz; yetki herkese açık etkinlik bağlantısıdır.
 //   POST { action: 'reserve', slug, type, uploader? }  → { id, path, token }   (tek seferlik imzalı yükleme)
-//   POST { action: 'confirm', slug, id }                → { ok: true }         (dosya gerçekten yüklendiyse)
-//   POST { action: 'list', slug }                       → { photos: [{ url }] } (organizatör albümü herkese açtıysa)
+//   POST { action: 'confirm', slug, id }                → { ok: true, pending } (dosya gerçekten yüklendiyse)
+//   POST { action: 'list', slug }                       → { photos: [{ url, kind }] } (organizatör albümü herkese açtıysa)
 //
 // Güvenlik:
 // - Albüm açık mı, paket kotası ve hız sınırı veritabanında (album_reserve) denetlenir.
 // - Yükleme yolu sunucuda üretilir (etkinlik klasörü + rastgele ad); istemci yol seçemez.
-// - Yalnızca jpeg/png/webp, en fazla 15 MB (kova sınırı da zorlar).
+// - Fotoğraf (jpeg/png/webp), video (mp4/mov/webm) ve sesli mesaj; dosya başına en fazla 50 MB (kova zorlar).
+// - Organizatör "önce onaylayayım" dediyse yüklenen öğe onaylanana kadar herkese açık albümde görünmez.
 // - Organizatör fotoğrafları görür, gizler, siler; davetliler yalnızca albüm herkese açıksa görür.
 
 import { adminClient, corsHeaders, json, readBody, UUID } from '../_shared/supabase.ts';
 
 const SLUG = /^[0-9a-f]{32}$/;
-const TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const TYPES = new Set([
+  'image/jpeg', 'image/png', 'image/webp',
+  'video/mp4', 'video/quicktime', 'video/webm',
+  'audio/webm', 'audio/mp4', 'audio/mpeg', 'audio/ogg', 'audio/aac', 'audio/x-m4a',
+]);
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) });
@@ -57,12 +62,13 @@ Deno.serve(async (req) => {
     const { data: row } = await db.from('album_photos').select('id, path, confirmed, events!inner(public_slug)').eq('id', id).maybeSingle();
     // deno-lint-ignore no-explicit-any
     if (!row || (row as any).events?.public_slug !== slug) return json(req, { error: 'not_found' }, 404);
+    let pending = false;
     if (!row.confirmed) {
       const folder = row.path.slice(0, row.path.lastIndexOf('/'));
       const name = row.path.slice(row.path.lastIndexOf('/') + 1);
       const { data: files } = await db.storage.from('album').list(folder, { search: name, limit: 1 });
       if (!files?.some((f) => f.name === name)) return json(req, { error: 'not_found' }, 404);
-      const { error: cErr } = await db.rpc('album_confirm', { p_id: id });
+      const { data: cData, error: cErr } = await db.rpc('album_confirm', { p_id: id });
       if (cErr) {
         // Paralel yüklemelerle kota dolduysa dosya silinir, kayıt temizlikte gider.
         await db.storage.from('album').remove([row.path]).catch(() => {});
@@ -70,20 +76,26 @@ Deno.serve(async (req) => {
         console.error('album_confirm', cErr);
         return json(req, { error: 'server_error' }, 500);
       }
+      pending = !!(cData as { pending?: boolean } | null)?.pending;
     }
-    return json(req, { ok: true });
+    return json(req, { ok: true, pending });
   }
 
   if (body.action === 'list') {
-    const { data: paths, error } = await db.rpc('album_public_paths', { p_slug: slug });
+    const { data: items, error } = await db.rpc('album_public_items', { p_slug: slug });
     if (error) {
       console.error('album list', error);
       return json(req, { error: 'server_error' }, 500);
     }
-    const list = (paths ?? []) as string[];
+    const list = (items ?? []) as { path: string; kind: string }[];
     if (!list.length) return json(req, { photos: [] });
-    const signed = await db.storage.from('album').createSignedUrls(list, 3600);
-    return json(req, { photos: (signed.data ?? []).filter((s) => s.signedUrl).map((s) => ({ url: s.signedUrl })) });
+    const kinds = new Map(list.map((x) => [x.path, x.kind]));
+    const signed = await db.storage.from('album').createSignedUrls(list.map((x) => x.path), 3600);
+    return json(req, {
+      photos: (signed.data ?? [])
+        .filter((s) => s.signedUrl && s.path)
+        .map((s) => ({ url: s.signedUrl, kind: kinds.get(s.path as string) ?? 'photo' })),
+    });
   }
 
   return json(req, { error: 'invalid_input' }, 400);

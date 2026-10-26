@@ -40,9 +40,19 @@ export const guest: typeof TR = {
     code: 'Code: {code}',
   },
   album: {
-    kicker: 'PHOTO ALBUM',
-    body: 'Add the photos you take at the event to the shared album.',
+    kicker: 'LIVE ALBUM',
+    body: 'Add the photos and videos you take at the event to the shared album, or leave a voice message.',
     open: 'Upload to the album',
+  },
+  guestbook: {
+    kicker: 'GUESTBOOK',
+    body: 'Leave a kind wish, a memory or a congratulation; the host keeps them all.',
+    name: 'Your name',
+    placeholder: 'Your message…',
+    send: 'Sign',
+    thanks: 'Your message is in the guestbook. Thank you!',
+    pending: 'Message received; it will appear once the host approves it.',
+    another: 'Write another message',
   },
   calendar: { subscribe: 'Add every week to my calendar' },
   children: {

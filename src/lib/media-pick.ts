@@ -5,9 +5,9 @@ import { File } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 
-import { type PickedFile, type PickedPhoto, MAX_AUDIO_BYTES, MAX_PHOTO_EDGE, MAX_VIDEO_BYTES, AUDIO_TYPES, VIDEO_TYPES } from './media-types';
+import { type AlbumUpload, type PickedFile, type PickedPhoto, ALBUM_VIDEO_TYPES, MAX_AUDIO_BYTES, MAX_PHOTO_EDGE, MAX_VIDEO_BYTES, AUDIO_TYPES, VIDEO_TYPES } from './media-types';
 
-export type { PickedFile, PickedPhoto } from './media-types';
+export type { AlbumUpload, PickedFile, PickedPhoto } from './media-types';
 
 async function shrink(uri: string, width: number, height: number, edge: number, base64 = false) {
   const scale = Math.min(1, edge / Math.max(width, height));
@@ -64,4 +64,27 @@ export async function pickVideo(): Promise<(PickedFile & { width: number; height
   const ext = mime.includes('quicktime') || a.uri.toLowerCase().endsWith('.mov') ? 'mov' : 'mp4';
   if (mime && !VIDEO_TYPES.includes(mime)) throw new Error('unsupported-type');
   return { data: await file.arrayBuffer(), mime: ext === 'mov' ? 'video/quicktime' : 'video/mp4', ext, name: a.fileName ?? '', size: file.size, width: a.width || 1080, height: a.height || 1920 };
+}
+
+/** Albüm için fotoğraf ve video (en fazla `max`); 50 MB'ı aşan videolar atlanır ve `skipped` olarak sayılır. */
+export async function pickAlbumMedia(max: number): Promise<{ items: AlbumUpload[]; skipped: number }> {
+  const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images', 'videos'], allowsMultipleSelection: max > 1, selectionLimit: max, quality: 1, exif: false, videoMaxDuration: 180 });
+  if (res.canceled || !res.assets?.length) return { items: [], skipped: 0 };
+  const items: AlbumUpload[] = [];
+  let skipped = 0;
+  for (const a of res.assets.slice(0, max)) {
+    if (a.type === 'video') {
+      const file = new File(a.uri);
+      const mime = (a.mimeType ?? '').toLowerCase() || (a.uri.toLowerCase().endsWith('.mov') ? 'video/quicktime' : 'video/mp4');
+      if (file.size > MAX_VIDEO_BYTES || !ALBUM_VIDEO_TYPES.includes(mime)) {
+        skipped++;
+        continue;
+      }
+      items.push({ data: await file.arrayBuffer(), mime, kind: 'video' });
+    } else {
+      const r = await shrink(a.uri, a.width || MAX_PHOTO_EDGE, a.height || MAX_PHOTO_EDGE, MAX_PHOTO_EDGE);
+      items.push({ data: await new File(r.uri).arrayBuffer(), mime: 'image/jpeg', kind: 'photo' });
+    }
+  }
+  return { items, skipped };
 }

@@ -64,7 +64,7 @@ export default function EventDetail() {
     return (
       <Screen maxWidth={640}>
         <Notice tone="error" text={t('event.loadError')} />
-        <Button label={t('event.backToEvents')} variant="secondary" onPress={() => router.replace('/')} />
+        <Button label={t('event.backToEvents')} variant="secondary" onPress={() => router.replace('/etkinlikler')} />
       </Screen>
     );
   }
@@ -109,7 +109,7 @@ export default function EventDetail() {
     ...(saha
       ? []
       : [
-          { key: 'album', icon: 'camera' as const, title: t('tools.card.album.title'), body: t('tools.card.album.body'), locked: L && L.album_photos <= 0 ? plan('otomatik') : null, badge: lim.data?.album_used ? String(lim.data.album_used) : null, tint: color.coralTint, ink: color.coralInk, onPress: () => go('/etkinlik/[id]/album') },
+          { key: 'album', icon: 'camera' as const, title: t('tools.card.album.title'), body: t('tools.card.album.body'), locked: L && L.album_photos <= 0 && !settings.guestbook?.enabled ? plan('otomatik') : null, badge: lim.data?.album_used ? String(lim.data.album_used) : null, tint: color.coralTint, ink: color.coralInk, onPress: () => go('/etkinlik/[id]/album') },
           { key: 'collector', icon: 'qr' as const, title: t('tools.card.collector.title'), body: t('tools.card.collector.body'), locked: L && !L.collector ? plan('temel') : null, tint: color.goldTint, ink: color.goldInk, onPress: () => go('/etkinlik/[id]/basvurular') },
         ]),
   ];
@@ -174,7 +174,7 @@ export default function EventDetail() {
     <Screen>
       {/* Başlık */}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 14 }}>
-        <IconButton icon="arrowLeft" label={t('event.backToEvents')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+        <IconButton icon="arrowLeft" label={t('event.backToEvents')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/etkinlikler'))} />
         <View style={{ flex: 1, minWidth: 240, gap: 6 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <Pill label={typeName} bg={cfg.iconBg} fg={color.ink} />
