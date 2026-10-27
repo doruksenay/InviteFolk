@@ -63,6 +63,8 @@ jobs:
         # Yalnızca dolu olanlar yazılır; boş bırakılan özellik (SMS, otomatik WhatsApp…) kapalı kalır.
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          EMAIL_REPLY_TO: ${{ vars.EMAIL_REPLY_TO }}
           EMAIL_FROM: ${{ vars.EMAIL_FROM }}
           WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
           WHATSAPP_PHONE_NUMBER_ID: ${{ vars.WHATSAPP_PHONE_NUMBER_ID }}
@@ -81,7 +83,7 @@ jobs:
           put() { if [ -n "$2" ]; then printf '%s=%s\n' "$1" "$2" >> "$f"; fi; }
           put APP_WEB_URL "$WEB_URL"
           put ALLOWED_ORIGINS "$WEB_URL"
-          for k in RESEND_API_KEY EMAIL_FROM WHATSAPP_TOKEN WHATSAPP_PHONE_NUMBER_ID WHATSAPP_APP_SECRET \
+          for k in RESEND_API_KEY BREVO_API_KEY EMAIL_REPLY_TO EMAIL_FROM WHATSAPP_TOKEN WHATSAPP_PHONE_NUMBER_ID WHATSAPP_APP_SECRET \
                    WHATSAPP_VERIFY_TOKEN NETGSM_USERCODE NETGSM_PASSWORD NETGSM_HEADER \
                    IYZICO_API_KEY IYZICO_SECRET_KEY IYZICO_BASE_URL; do
             put "$k" "${!k}"

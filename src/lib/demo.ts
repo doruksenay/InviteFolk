@@ -15,36 +15,149 @@ type Copy = { title: string; hosts: string | null; venue: string; address: strin
 /** Her tür için örnek içerik. Mekân ve kişi adları uydurmadır. */
 const COPY: Record<EventTypeKey, Record<Lang, Copy>> = {
   dugun: {
-    tr: { title: 'Ayşe & Mehmet', hosts: 'Yılmaz ve Demir aileleri', venue: 'Bahçe Davet Salonu', address: 'Kadıköy, İstanbul', message: 'Hayatımızın en güzel gününde sizi de aramızda görmek istiyoruz.', program: [['Karşılama', -60], ['Nikâh', 0], ['Yemek ve dans', 60]], guest: 'Selin ve ailesi' },
-    en: { title: 'Emma & James', hosts: 'The Taylor and Wright families', venue: 'The Garden Hall', address: 'Kadıköy, Istanbul', message: 'We would love you to be with us on the happiest day of our lives.', program: [['Welcome drinks', -60], ['Ceremony', 0], ['Dinner and dancing', 60]], guest: 'Sophie and family' },
+    tr: {
+      title: 'Ayşe & Mehmet',
+      hosts: 'Yılmaz ve Demir aileleri',
+      venue: 'Bahçe Davet Salonu',
+      address: 'Kadıköy, İstanbul',
+      message: 'Hayatımızın en güzel gününde sizi de aramızda görmek istiyoruz.',
+      program: [
+        ['Karşılama', -60],
+        ['Nikâh', 0],
+        ['Yemek ve dans', 60],
+      ],
+      guest: 'Selin ve ailesi',
+    },
+    en: {
+      title: 'Emma & James',
+      hosts: 'The Taylor and Wright families',
+      venue: 'The Garden Hall',
+      address: 'Kadıköy, Istanbul',
+      message: 'We would love you to be with us on the happiest day of our lives.',
+      program: [
+        ['Welcome drinks', -60],
+        ['Ceremony', 0],
+        ['Dinner and dancing', 60],
+      ],
+      guest: 'Sophie and family',
+    },
   },
   nisan: {
     tr: { title: 'Zeynep & Can', hosts: 'Kaya ve Arslan aileleri', venue: 'Çamlık Bahçe', address: 'Üsküdar, İstanbul', message: 'Ailelerimizle birlikte bu mutlu anı paylaşmak istiyoruz.', guest: 'Elif ve ailesi' },
     en: { title: 'Olivia & Daniel', hosts: 'The Clarke and Evans families', venue: 'Pine Garden', address: 'Üsküdar, Istanbul', message: 'Join our families as we celebrate our engagement.', guest: 'Grace and family' },
   },
   kina: {
-    tr: { title: 'Merve’nin Kına Gecesi', hosts: 'Merve ve annesi', venue: 'Konak Bahçesi', address: 'Bağcılar, İstanbul', message: 'Kınamızı yakarken türkülerimizi birlikte söyleyelim.', program: [['Gelin alma', 0], ['Kına yakma', 90]], guest: 'Derya Hanım' },
-    en: { title: 'Mia’s Henna Night', hosts: 'Mia and her mother', venue: 'The Mansion Garden', address: 'Bağcılar, Istanbul', message: 'Sing and celebrate with us as the henna is lit.', program: [['Arrival of the bride', 0], ['Henna ceremony', 90]], guest: 'Mrs Hannah' },
+    tr: {
+      title: 'Merve’nin Kına Gecesi',
+      hosts: 'Merve ve annesi',
+      venue: 'Konak Bahçesi',
+      address: 'Bağcılar, İstanbul',
+      message: 'Kınamızı yakarken türkülerimizi birlikte söyleyelim.',
+      program: [
+        ['Gelin alma', 0],
+        ['Kına yakma', 90],
+      ],
+      guest: 'Derya Hanım',
+    },
+    en: {
+      title: 'Mia’s Henna Night',
+      hosts: 'Mia and her mother',
+      venue: 'The Mansion Garden',
+      address: 'Bağcılar, Istanbul',
+      message: 'Sing and celebrate with us as the henna is lit.',
+      program: [
+        ['Arrival of the bride', 0],
+        ['Henna ceremony', 90],
+      ],
+      guest: 'Mrs Hannah',
+    },
   },
   sunnet: {
-    tr: { title: 'Ali’nin Sünnet Düğünü', hosts: 'Ahmet ve Fatma Yıldız', venue: 'Şehzade Davet Salonu', address: 'Ataşehir, İstanbul', message: 'Oğlumuz Ali’nin bu güzel gününde sizleri de aramızda görmekten mutluluk duyarız.', program: [['Mevlit', -120], ['Yemek', 0], ['Eğlence', 60]], guest: 'Kemal Bey ve ailesi' },
-    en: { title: 'Ali’s Circumcision Celebration', hosts: 'Ahmet and Fatma Yıldız', venue: 'The Prince Hall', address: 'Ataşehir, Istanbul', message: 'We would be delighted to have you with us on our son Ali’s special day.', program: [['Mevlit', -120], ['Dinner', 0], ['Party', 60]], guest: 'Mr Kemal and family' },
+    tr: {
+      title: 'Ali’nin Sünnet Düğünü',
+      hosts: 'Ahmet ve Fatma Yıldız',
+      venue: 'Şehzade Davet Salonu',
+      address: 'Ataşehir, İstanbul',
+      message: 'Oğlumuz Ali’nin bu güzel gününde sizleri de aramızda görmekten mutluluk duyarız.',
+      program: [
+        ['Mevlit', -120],
+        ['Yemek', 0],
+        ['Eğlence', 60],
+      ],
+      guest: 'Kemal Bey ve ailesi',
+    },
+    en: {
+      title: 'Ali’s Circumcision Celebration',
+      hosts: 'Ahmet and Fatma Yıldız',
+      venue: 'The Prince Hall',
+      address: 'Ataşehir, Istanbul',
+      message: 'We would be delighted to have you with us on our son Ali’s special day.',
+      program: [
+        ['Mevlit', -120],
+        ['Dinner', 0],
+        ['Party', 60],
+      ],
+      guest: 'Mr Kemal and family',
+    },
   },
   bebek: {
-    tr: { title: 'Bebek Partisi', hosts: 'Deniz ve Burak', venue: 'Bulut Kafe', address: 'Moda, İstanbul', message: 'Minik misafirimizi beklerken bir araya gelelim. Kız mı, erkek mi? Hep birlikte öğreneceğiz!', guest: 'Ece' },
+    tr: {
+      title: 'Bebek Partisi',
+      hosts: 'Deniz ve Burak',
+      venue: 'Bulut Kafe',
+      address: 'Moda, İstanbul',
+      message: 'Minik misafirimizi beklerken bir araya gelelim. Kız mı, erkek mi? Hep birlikte öğreneceğiz!',
+      guest: 'Ece',
+    },
     en: { title: 'Baby Shower', hosts: 'Lucy and Ben', venue: 'Cloud Café', address: 'Moda, Istanbul', message: 'Let’s get together before our little one arrives. Boy or girl? We’ll find out together!', guest: 'Chloe' },
   },
   mevlut: {
     tr: { title: 'Mevlit', hosts: 'Aydın ailesi', venue: 'Mahalle Camii', address: 'Üsküdar, İstanbul', message: 'Rahmetli babamız Hasan Aydın’ın ruhuna okutulacak mevlide davetlisiniz.', guest: 'Nuri Bey' },
-    en: { title: 'Mevlit', hosts: 'The Aydın family', venue: 'Neighbourhood Mosque', address: 'Üsküdar, Istanbul', message: 'You are invited to the mevlit recited in memory of our late father Hasan Aydın.', guest: 'Mr Nuri' },
+    en: {
+      title: 'Mevlit',
+      hosts: 'The Aydın family',
+      venue: 'Neighbourhood Mosque',
+      address: 'Üsküdar, Istanbul',
+      message: 'You are invited to the mevlit recited in memory of our late father Hasan Aydın.',
+      guest: 'Mr Nuri',
+    },
   },
   mezuniyet: {
-    tr: { title: 'Mezuniyet Kutlaması', hosts: 'Ege Tan', venue: 'Kampüs Terası', address: 'Beşiktaş, İstanbul', message: 'Dört yılın sonunda keplerimizi atıyoruz! Bu anı sizinle kutlamak istiyorum.', program: [['Tören', 0], ['Yemek', 120]], guest: 'Naz' },
-    en: { title: 'Graduation Party', hosts: 'Ethan Tan', venue: 'Campus Terrace', address: 'Beşiktaş, Istanbul', message: 'Four years later, the caps are flying! I’d love to celebrate with you.', program: [['Ceremony', 0], ['Dinner', 120]], guest: 'Zoe' },
+    tr: {
+      title: 'Mezuniyet Kutlaması',
+      hosts: 'Ege Tan',
+      venue: 'Kampüs Terası',
+      address: 'Beşiktaş, İstanbul',
+      message: 'Dört yılın sonunda keplerimizi atıyoruz! Bu anı sizinle kutlamak istiyorum.',
+      program: [
+        ['Tören', 0],
+        ['Yemek', 120],
+      ],
+      guest: 'Naz',
+    },
+    en: {
+      title: 'Graduation Party',
+      hosts: 'Ethan Tan',
+      venue: 'Campus Terrace',
+      address: 'Beşiktaş, Istanbul',
+      message: 'Four years later, the caps are flying! I’d love to celebrate with you.',
+      program: [
+        ['Ceremony', 0],
+        ['Dinner', 120],
+      ],
+      guest: 'Zoe',
+    },
   },
   veda: {
     tr: { title: 'Bekârlığa Veda', hosts: 'Gelinin kızları', venue: 'Işıltı Bar', address: 'Bebek, İstanbul', message: 'Damattan önceki son büyük gece! Parıltılı bir şey giy, gerisini bize bırak.', guest: 'Melis' },
-    en: { title: 'Hen Night', hosts: 'The bridesmaids', venue: 'Glitter Bar', address: 'Bebek, Istanbul', message: 'One last big night before the wedding! Wear something sparkly and leave the rest to us.', guest: 'Amy' },
+    en: {
+      title: 'Hen Night',
+      hosts: 'The bridesmaids',
+      venue: 'Glitter Bar',
+      address: 'Bebek, Istanbul',
+      message: 'One last big night before the wedding! Wear something sparkly and leave the rest to us.',
+      guest: 'Amy',
+    },
   },
   dogum: {
     tr: { title: 'Defne 30 yaşında!', hosts: 'Defne', venue: 'Teras Kafe', address: 'Moda, İstanbul', message: 'Otuzuncu yaşımı en sevdiklerimle kutlamak istiyorum.', guest: 'Kerem' },
@@ -55,11 +168,42 @@ const COPY: Record<EventTypeKey, Record<Lang, Copy>> = {
     en: { title: 'Friday Dinner', hosts: 'Sarah and Tom', venue: 'Our place', address: 'Cihangir, Istanbul', message: 'It’s been too long. Pick the evening that suits you and we’ll set the table.', guest: 'Harry' },
   },
   kurumsal: {
-    tr: { title: 'Yıl Sonu Buluşması', hosts: 'Örnek Teknoloji', venue: 'Şehir Oteli Balo Salonu', address: 'Şişli, İstanbul', message: 'Birlikte geçen bir yılı kutluyor, yeni hedeflerimizi paylaşıyoruz.', program: [['Kayıt', -30], ['Açılış konuşması', 0], ['Akşam yemeği', 90]], guest: 'Can Öztürk' },
-    en: { title: 'Year-End Gathering', hosts: 'Sample Technologies', venue: 'City Hotel Ballroom', address: 'Şişli, Istanbul', message: 'Celebrating a year together and sharing our goals for the next one.', program: [['Registration', -30], ['Opening talk', 0], ['Dinner', 90]], guest: 'Chris Morgan' },
+    tr: {
+      title: 'Yıl Sonu Buluşması',
+      hosts: 'Örnek Teknoloji',
+      venue: 'Şehir Oteli Balo Salonu',
+      address: 'Şişli, İstanbul',
+      message: 'Birlikte geçen bir yılı kutluyor, yeni hedeflerimizi paylaşıyoruz.',
+      program: [
+        ['Kayıt', -30],
+        ['Açılış konuşması', 0],
+        ['Akşam yemeği', 90],
+      ],
+      guest: 'Can Öztürk',
+    },
+    en: {
+      title: 'Year-End Gathering',
+      hosts: 'Sample Technologies',
+      venue: 'City Hotel Ballroom',
+      address: 'Şişli, Istanbul',
+      message: 'Celebrating a year together and sharing our goals for the next one.',
+      program: [
+        ['Registration', -30],
+        ['Opening talk', 0],
+        ['Dinner', 90],
+      ],
+      guest: 'Chris Morgan',
+    },
   },
   saha: {
-    tr: { title: 'Perşembe Maçı', hosts: 'Kaptan Emre', venue: 'Yeşil Halı Saha', address: 'Ataşehir, İstanbul', message: 'Saat 21.00’de sahadayız. Gelemeyecekler erken haber versin, yedekler bekliyor!', guest: 'Burak' },
+    tr: {
+      title: 'Perşembe Maçı',
+      hosts: 'Kaptan Emre',
+      venue: 'Yeşil Halı Saha',
+      address: 'Ataşehir, İstanbul',
+      message: 'Saat 21.00’de sahadayız. Gelemeyecekler erken haber versin, yedekler bekliyor!',
+      guest: 'Burak',
+    },
     en: { title: 'Thursday Football', hosts: 'Captain Leo', venue: 'Green Pitch', address: 'Ataşehir, Istanbul', message: 'Kick-off at 9pm. Let us know early if you can’t make it, the bench is waiting!', guest: 'Sam' },
   },
   basket: {
@@ -79,27 +223,63 @@ const COPY: Record<EventTypeKey, Record<Lang, Copy>> = {
 type Book = 'wedding' | 'mevlut' | 'other';
 const GUESTBOOK: Record<Book, Record<Lang, [string, string][]>> = {
   wedding: {
-    tr: [['Zeynep', 'Bir ömür boyu mutluluklar dileriz! Bu güzel günde yanınızda olmak çok güzel.'], ['Halil Amca', 'Allah bir yastıkta kocatsın evlatlarım.']],
-    en: [['Zoe', 'Wishing you a lifetime of happiness! So glad to be here with you.'], ['Uncle Bob', 'Here’s to many happy years together.']],
+    tr: [
+      ['Zeynep', 'Bir ömür boyu mutluluklar dileriz! Bu güzel günde yanınızda olmak çok güzel.'],
+      ['Halil Amca', 'Allah bir yastıkta kocatsın evlatlarım.'],
+    ],
+    en: [
+      ['Zoe', 'Wishing you a lifetime of happiness! So glad to be here with you.'],
+      ['Uncle Bob', 'Here’s to many happy years together.'],
+    ],
   },
   mevlut: {
-    tr: [['Nuri Bey', 'Allah rahmet eylesin, mekânı cennet olsun.'], ['Ayten Hanım', 'Başınız sağ olsun, dualarımız sizinle.']],
-    en: [['Mr Nuri', 'May he rest in peace.'], ['Mrs Ayten', 'Our prayers are with your family.']],
+    tr: [
+      ['Nuri Bey', 'Allah rahmet eylesin, mekânı cennet olsun.'],
+      ['Ayten Hanım', 'Başınız sağ olsun, dualarımız sizinle.'],
+    ],
+    en: [
+      ['Mr Nuri', 'May he rest in peace.'],
+      ['Mrs Ayten', 'Our prayers are with your family.'],
+    ],
   },
   other: {
-    tr: [['Naz', 'Harika olacak, sabırsızlıkla bekliyorum!'], ['Kerem', 'Ellerinize sağlık, orada olacağız.']],
-    en: [['Zoe', 'This is going to be great, can’t wait!'], ['Jack', 'Thanks for organising, we’ll be there.']],
+    tr: [
+      ['Naz', 'Harika olacak, sabırsızlıkla bekliyorum!'],
+      ['Kerem', 'Ellerinize sağlık, orada olacağız.'],
+    ],
+    en: [
+      ['Zoe', 'This is going to be great, can’t wait!'],
+      ['Jack', 'Thanks for organising, we’ll be there.'],
+    ],
   },
 };
 
 const SIGNUP: Record<Lang, [string, number][]> = {
-  tr: [['Pasta', 1], ['Meyve tabağı', 2], ['Balon ve süs', 1], ['İçecek', 3]],
-  en: [['Cake', 1], ['Fruit platter', 2], ['Balloons and decorations', 1], ['Drinks', 3]],
+  tr: [
+    ['Pasta', 1],
+    ['Meyve tabağı', 2],
+    ['Balon ve süs', 1],
+    ['İçecek', 3],
+  ],
+  en: [
+    ['Cake', 1],
+    ['Fruit platter', 2],
+    ['Balloons and decorations', 1],
+    ['Drinks', 3],
+  ],
 };
 
 const LEADERS: Record<Lang, { name: string; goals: number; mvps: number }[]> = {
-  tr: [{ name: 'Emre', goals: 14, mvps: 3 }, { name: 'Burak', goals: 9, mvps: 2 }, { name: 'Onur', goals: 7, mvps: 1 }],
-  en: [{ name: 'Leo', goals: 14, mvps: 3 }, { name: 'Sam', goals: 9, mvps: 2 }, { name: 'Noah', goals: 7, mvps: 1 }],
+  tr: [
+    { name: 'Emre', goals: 14, mvps: 3 },
+    { name: 'Burak', goals: 9, mvps: 2 },
+    { name: 'Onur', goals: 7, mvps: 1 },
+  ],
+  en: [
+    { name: 'Leo', goals: 14, mvps: 3 },
+    { name: 'Sam', goals: 9, mvps: 2 },
+    { name: 'Noah', goals: 7, mvps: 1 },
+  ],
 };
 
 /** İstanbul saatiyle `days` gün sonra saat `hour`:`minute` (ISO). */
@@ -138,6 +318,7 @@ function build(token: string): PublicInvitation | null {
     countdown: !sport,
     envelope: wedding ? { enabled: true, seal: type === 'dugun' ? (lang === 'en' ? 'E&J' : 'A&M') : undefined } : undefined,
     program: c.program?.map(([title, mins], i) => ({ id: `p${i}`, title, at: new Date(new Date(starts).getTime() + mins * 60000).toISOString() })),
+    program_rsvp: type === 'kina' || type === 'sunnet' ? true : undefined,
     guestbook: sport ? undefined : { enabled: true, public: true },
     checkin: type === 'dugun' || type === 'kurumsal' || type === 'mezuniyet',
     layout: LOOK[type]?.layout,
@@ -163,7 +344,11 @@ function build(token: string): PublicInvitation | null {
     poll:
       type === 'yemek'
         ? {
-            options: [{ id: 'o1', at: at(8, 20) }, { id: 'o2', at: at(9, 20) }, { id: 'o3', at: at(15, 20) }],
+            options: [
+              { id: 'o1', at: at(8, 20) },
+              { id: 'o2', at: at(9, 20) },
+              { id: 'o3', at: at(15, 20) },
+            ],
             closed: false,
             chosen: null,
             mine: {},
@@ -201,7 +386,7 @@ const LOOK: Partial<Record<EventTypeKey, { layout?: ThemeLayout; theme?: ThemeKe
 
 const store = new Map<string, PublicInvitation>();
 const books = new Map<string, PublicGuestbookEntry[]>();
-const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
+const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
 
 function get(token: string): PublicInvitation {
   let inv = store.get(token);
@@ -225,7 +410,15 @@ export async function demoInvitation(token: string): Promise<PublicInvitation | 
   }
 }
 
-export async function demoRespond(token: string, status: 'yes' | 'no' | 'maybe', partySize?: number, menu?: string | null, note?: string | null, answers?: Record<string, string> | null, extra?: { children?: number | null; companions?: string[] | null }) {
+export async function demoRespond(
+  token: string,
+  status: 'yes' | 'no' | 'maybe',
+  partySize?: number,
+  menu?: string | null,
+  note?: string | null,
+  answers?: Record<string, string> | null,
+  extra?: { children?: number | null; companions?: string[] | null },
+) {
   await wait();
   const inv = get(token);
   const was = inv.status;
@@ -256,6 +449,13 @@ export async function demoVotePoll(token: string, votes: Record<string, PollVote
   return clone(inv);
 }
 
+export async function demoRespondProgram(token: string, votes: Record<string, 'yes' | 'no'>) {
+  await wait();
+  const inv = get(token);
+  inv.program_rsvp = { ...votes };
+  return clone(inv);
+}
+
 export async function demoClaimSignup(token: string, item: string, qty: number) {
   await wait();
   const inv = get(token);
@@ -282,7 +482,10 @@ export async function demoGuestbook(token: string): Promise<PublicGuestbookEntry
     const now = Date.now();
     const t = p?.type;
     const kind: Book = t === 'dugun' || t === 'nisan' || t === 'kina' ? 'wedding' : t === 'mevlut' ? 'mevlut' : 'other';
-    books.set(token, GUESTBOOK[kind][p?.lang ?? 'tr'].map(([name, message], i) => ({ name, message, at: new Date(now - (i + 1) * 3600_000 * 5).toISOString() })));
+    books.set(
+      token,
+      GUESTBOOK[kind][p?.lang ?? 'tr'].map(([name, message], i) => ({ name, message, at: new Date(now - (i + 1) * 3600_000 * 5).toISOString() })),
+    );
   }
   return clone(books.get(token)!);
 }
@@ -297,5 +500,14 @@ export async function demoSignGuestbook(token: string, message: string): Promise
 /** Tanıtım sayfasındaki canlı önizleme için örnek içerik (sunucuya gitmez). */
 export function demoPreview(type: EventTypeKey, lang: Lang) {
   const c = COPY[type][lang];
-  return { title: c.title, hosts: c.hosts, venue: c.venue, address: c.address, message: c.message, guest: c.guest, theme: LOOK[type]?.theme ?? EVENT_TYPES[type].suggestedTheme, layout: LOOK[type]?.layout ?? ('classic' as ThemeLayout) };
+  return {
+    title: c.title,
+    hosts: c.hosts,
+    venue: c.venue,
+    address: c.address,
+    message: c.message,
+    guest: c.guest,
+    theme: LOOK[type]?.theme ?? EVENT_TYPES[type].suggestedTheme,
+    layout: LOOK[type]?.layout ?? ('classic' as ThemeLayout),
+  };
 }

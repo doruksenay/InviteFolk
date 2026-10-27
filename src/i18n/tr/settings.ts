@@ -24,6 +24,8 @@ export const settings = {
   notificationsTitle: 'Bildirimler',
   notifyRsvp: 'Davetli cevap verince bildir',
   notifyRsvpHint: 'Telefonuna anlık bildirim gelir. Bildirim izni telefon ayarlarından da yönetilir.',
+  notifyDigest: 'Günlük özet e-postası',
+  notifyDigestHint: 'Son 24 saatte yeni cevap, not ya da albüm paylaşımı olduysa her sabah tek bir e-posta.',
   notifyFailed: 'Tercih kaydedilemedi.',
   helpTitle: 'Yardım',
   helpBody: 'Bir sorun mu var ya da bir şey mi soracaksın? Bize yaz, en kısa sürede dönelim.',

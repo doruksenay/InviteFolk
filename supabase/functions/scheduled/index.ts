@@ -6,6 +6,7 @@
 //   b) Otomatik hatırlatması açık etkinliklerde cevap vermeyenlere hatırlatma yollar.
 //   c) Organizatör bildirim kuyruğunu telefonlara (Expo Push) iletir.
 //   d) Fotoğraf albümünde yarıda kalmış (yüklenmemiş) ayırmaları ve dosyalarını temizler.
+//   e) Sabah 09.00'dan sonra (İstanbul) organizatörlere günlük özet e-postası (hareket varsa, günde bir kez).
 // Her adım kotaya uyar, ~50 saniyede durur; yarım kalan iş bir sonraki çalıştırmada devam eder.
 //
 // Ortam: CRON_SECRET, (WhatsApp/e-posta/push için send-invitations, send-email ve EXPO_ACCESS_TOKEN ile aynı değişkenler)
@@ -13,7 +14,7 @@
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
 
 import { canEmail, canWhatsApp, deliverEmail, type DeliveryEvent, type DeliveryTarget, deliverWhatsApp } from '../_shared/delivery.ts';
-import { appWebUrl } from '../_shared/email.ts';
+import { appWebUrl, type DigestEvent, renderDigest, sendEmail } from '../_shared/email.ts';
 import { type Lang, langOf } from '../_shared/messages.ts';
 import { type PushMessage, pushText, type QueueRow, sendPush } from '../_shared/push.ts';
 import { adminClient } from '../_shared/supabase.ts';
@@ -214,7 +215,36 @@ Deno.serve(async (req) => {
     console.error('album cleanup failed', e instanceof Error ? e.message : e);
   }
 
-  return new Response(JSON.stringify({ ok: true, ms: Date.now() - started, ...summary }), {
+  // e) Günlük özet (e-posta servisi tanımlıysa)
+  const digest = { sent: 0, failed: 0 };
+  try {
+    const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Istanbul', hour: '2-digit', hourCycle: 'h23' }).format(new Date()));
+    const web = appWebUrl();
+    const configured = !!Deno.env.get('EMAIL_FROM') && (!!Deno.env.get('RESEND_API_KEY') || !!Deno.env.get('BREVO_API_KEY'));
+    if (hour >= 9 && hour < 22 && web && configured && timeLeft() > 8_000) {
+      const { data: due, error } = await db.rpc('digest_due', { p_limit: 100 });
+      if (error) throw error;
+      const done: string[] = [];
+      for (const row of (due ?? []) as { user_id: string; email: string; lang: string; events: DigestEvent[] }[]) {
+        if (timeLeft() < 4_000) {
+          summary.stopped_early = true;
+          break;
+        }
+        const mail = renderDigest({ lang: row.lang === 'en' ? 'en' : 'tr', events: row.events, webUrl: web });
+        const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul' }).format(new Date());
+        const r = await sendEmail({ to: row.email, ...mail, idempotencyKey: `digest-${row.user_id}-${day}` });
+        if (r.ok) digest.sent++;
+        else digest.failed++;
+        // Gönderilemese de işaretlenir: aynı gün tekrar tekrar denenip kotayı tüketmesin.
+        done.push(row.user_id);
+      }
+      if (done.length) await db.rpc('digest_mark', { p_users: done });
+    }
+  } catch (e) {
+    console.error('digest failed', e instanceof Error ? e.message : e);
+  }
+
+  return new Response(JSON.stringify({ ok: true, ms: Date.now() - started, ...summary, digest }), {
     status: 200,
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   });

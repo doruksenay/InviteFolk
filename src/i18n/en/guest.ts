@@ -65,6 +65,12 @@ export const guest: typeof TR = {
     hint: 'For the place cards; you can leave this blank.',
     placeholder: "Guest {n}'s name",
   },
+  programRsvp: {
+    kicker: 'WHICH PARTS WILL YOU JOIN?',
+    body: "Mark any part you can't make, so the hosts can plan.",
+    yes: 'Coming',
+    no: "Can't make it",
+  },
   poll: {
     kicker: 'WHICH DATE WORKS FOR YOU?',
     body: "Mark the days you can make it; we'll pick the one that suits most people.",

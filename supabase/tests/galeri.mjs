@@ -141,5 +141,24 @@ ok(gi3.event.settings.layout === 'cover' && gi3.event.settings.has_cover === tru
 ok(!(await tryq(OWN, `update public.events set settings = settings || '{"layout":"weird"}'::jsonb where id='${ev.id}'`)).ok, 'bilinmeyen düzen reddedilir');
 ok(!(await tryq(OWN, `update public.events set settings = settings || jsonb_build_object('cover', jsonb_build_object('path', '${EVIL}/${ev.id}/abcdef0123456789.jpg', 'width', 1, 'height', 1)) where id='${ev.id}'`)).ok, 'başkasının klasöründeki kapak yolu reddedilir');
 
+// Tören bazında katılım
+await as(OWN, `update public.events set settings = settings || '{"program":[{"id":"k1","title":"Kına"},{"id":"d1","title":"Düğün"}],"program_rsvp":true}'::jsonb where id='${ev.id}'`);
+let pr = (await one(null, `select public.respond_program('${tok}', '{"k1":"no","d1":"yes","zz":"yes","x":"maybe"}') j`)).j;
+ok(pr.program_rsvp?.k1 === 'no' && pr.program_rsvp?.d1 === 'yes' && !('zz' in pr.program_rsvp) && pr.event.settings.program_rsvp === true, 'davetli törenleri ayrı ayrı işaretler; bilinmeyen bölüm ve değer atılır');
+ok((await one(OWN, `select program_rsvp from public.invitations where token='${tok}'`)).program_rsvp.k1 === 'no', 'organizatör tören cevaplarını görür');
+ok(!(await tryq(OWN, `update public.invitations set program_rsvp='{}'::jsonb where token='${tok}' returning id`)).ok, 'tören cevabını organizatör elle yazamaz');
+await as(OWN, `update public.events set settings = settings - 'program_rsvp' where id='${ev.id}'`);
+ok((await errOf(null, `select public.respond_program('${tok}', '{"k1":"yes"}')`)).includes('invalid_input'), 'kapalıyken tören cevabı verilemez');
+ok(!('program_rsvp' in (await one(null, `select public.get_invitation('${tok}') j`)).j) || (await one(null, `select public.get_invitation('${tok}') j`)).j.program_rsvp === null, 'kapalıyken davetliye tören cevabı dönmez');
+
+// Günlük özet
+const due = (await svc(`select * from public.digest_due(50)`)).rows;
+const mine = due.find((r) => r.user_id === OWN);
+ok(mine && mine.email === 'gelin@x.com' && mine.events.some((e) => e.notes_new > 0), 'özet hareketi olan organizatörü ve etkinliği listeler');
+await svc(`select public.digest_mark(array['${OWN}']::uuid[])`);
+ok(!(await svc(`select * from public.digest_due(50)`)).rows.some((r) => r.user_id === OWN), 'aynı gün ikinci özet gitmez');
+ok(!(await tryq(OWN, `select * from public.digest_due(50)`)).ok, 'özet listesi kullanıcıya kapalı');
+ok((await tryq(OWN, `update public.profiles set notify_digest = false where id='${OWN}' returning id`)).r?.rows?.length === 1, 'kullanıcı özeti kapatabilir');
+
 console.log(`\nSONUÇ: ${pass} geçti, ${fail} kaldı`);
 process.exit(fail ? 1 : 0);

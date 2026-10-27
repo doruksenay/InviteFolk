@@ -33,6 +33,11 @@ export async function setNotifyRsvp(userId: string, value: boolean) {
   must(await supabase.from('profiles').update({ notify_rsvp: value }).eq('id', userId).select('id'));
 }
 
+/** Günlük özet e-postası (yeni cevaplar, notlar, albüm). */
+export async function setNotifyDigest(userId: string, value: boolean) {
+  must(await supabase.from('profiles').update({ notify_digest: value }).eq('id', userId).select('id'));
+}
+
 // ---------------------------------------------------------------------------
 // Admin (MFA'lı oturum; veritabanı ayrıca doğrular)
 // ---------------------------------------------------------------------------

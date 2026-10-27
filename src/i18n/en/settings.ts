@@ -26,6 +26,8 @@ export const settings: typeof TR = {
   notificationsTitle: 'Notifications',
   notifyRsvp: 'Notify me when a guest replies',
   notifyRsvpHint: 'You get an instant notification on your phone. Notification permission is also managed in your phone settings.',
+  notifyDigest: 'Daily summary email',
+  notifyDigestHint: 'One email each morning if there were new replies, notes or album uploads in the last 24 hours.',
   notifyFailed: 'Could not save your preference.',
   helpTitle: 'Help',
   helpBody: 'Something wrong, or a question? Write to us and we will get back to you soon.',

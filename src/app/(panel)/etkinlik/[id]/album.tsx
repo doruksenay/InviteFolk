@@ -13,6 +13,7 @@ import { type AlbumItem, albumDownloadUrl, deleteAlbumPhoto, deleteGuestbookEntr
 import { Icon } from '@/ui/Icon';
 import { ToolError, ToolHeader, ToolLoading } from '@/ui/event/ToolScreen';
 import { Button, Caption, EmptyState, Notice, Surface } from '@/ui/primitives';
+import { downloadAlbumZip, type ZipProgress } from '@/ui/album/zip';
 import { buildQrCardsHtml } from '@/ui/print/qrCards';
 import { QrCode } from '@/ui/QrCode';
 import { Screen } from '@/ui/Screen';
@@ -32,7 +33,16 @@ function Tabs({ value, onChange, items }: { value: Tab; onChange: (t: Tab) => vo
             accessibilityRole="tab"
             accessibilityState={{ selected: on }}
             onPress={() => onChange(it.k)}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 40, paddingHorizontal: 16, borderRadius: 999, backgroundColor: on ? color.ink : 'transparent', boxShadow: on ? 'none' : `inset 0 0 0 1px ${color.hairline}` }}>
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              height: 40,
+              paddingHorizontal: 16,
+              borderRadius: 999,
+              backgroundColor: on ? color.ink : 'transparent',
+              boxShadow: on ? 'none' : `inset 0 0 0 1px ${color.hairline}`,
+            }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 14, color: on ? '#FFFFFF' : color.ink }}>{it.label}</Text>
             {it.badge ? (
               <View style={{ minWidth: 22, height: 22, paddingHorizontal: 6, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? '#FFFFFF' : color.lavenderTint }}>
@@ -57,6 +67,7 @@ export default function AlbumScreen() {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const gb = useQuery(() => listGuestbook(id).catch(() => [] as GuestbookEntry[]), [id]);
   const [tab, setTab] = useState<Tab | null>(null);
+  const [zip, setZip] = useState<ZipProgress | null>(null);
 
   if (ev.loading && !ev.data) return <ToolLoading />;
   if (ev.error || !ev.data) return <ToolError />;
@@ -171,9 +182,7 @@ export default function AlbumScreen() {
           <QrCode value={url} size={132} />
         </View>
         <View style={{ flex: 1, gap: 8 }}>
-          <Text style={{ fontFamily: font.display, fontSize: 26, color: color.ink }}>
-            {albumOn ? t('tools.album.count', { count: items.length }) : t('tools.album.gbCount', { count: entries.length })}
-          </Text>
+          <Text style={{ fontFamily: font.display, fontSize: 26, color: color.ink }}>{albumOn ? t('tools.album.count', { count: items.length }) : t('tools.album.gbCount', { count: entries.length })}</Text>
           {albumOn && lim.data && <Caption>{t('tools.album.limit', { count: lim.data.limits.album_photos })}</Caption>}
           <Text selectable style={{ fontFamily: font.semibold, fontSize: 13, color: color.lavenderInk }}>
             {url}
@@ -181,6 +190,32 @@ export default function AlbumScreen() {
           <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
             <Button label={t('tools.album.poster')} icon="print" onPress={poster} />
             <Button label={t('tools.album.screen')} icon="monitor" variant="secondary" onPress={() => router.push({ pathname: '/etkinlik/[id]/ekran', params: { id: event.id } })} />
+            {albumOn && items.length > 0 && (
+              <Button
+                label={zip ? t('tools.album.zipProgress', { done: zip.done, total: zip.total }) : t('tools.album.zip')}
+                icon="download"
+                variant="secondary"
+                loading={!!zip}
+                disabled={!!zip}
+                onPress={async () => {
+                  setMsg(null);
+                  setZip({ done: 0, total: items.length, part: 1 });
+                  try {
+                    const fresh = await listAlbum(event.id);
+                    const r = await downloadAlbumZip(
+                      fresh.filter((p) => p.approved !== false),
+                      `album-${event.public_slug}`,
+                      setZip,
+                    );
+                    setMsg(r.failed ? { tone: 'error', text: t('tools.album.zipPartial', { saved: r.saved, failed: r.failed }) } : { tone: 'success', text: t('tools.album.zipDone', { count: r.saved }) });
+                  } catch (e) {
+                    setMsg({ tone: 'error', text: e instanceof Error ? e.message : String(e) });
+                  } finally {
+                    setZip(null);
+                  }
+                }}
+              />
+            )}
             <Button
               label={t('tools.album.copyLink')}
               icon="copy"
@@ -219,7 +254,18 @@ export default function AlbumScreen() {
         ) : (
           <View style={{ gap: 12 }}>
             <View style={{ flexDirection: 'row' }}>
-              <Button label={t('tools.album.approveAll', { count: pending.length })} icon="check" onPress={() => act(() => setAlbumApproved(pending.map((p) => p.id), true))} />
+              <Button
+                label={t('tools.album.approveAll', { count: pending.length })}
+                icon="check"
+                onPress={() =>
+                  act(() =>
+                    setAlbumApproved(
+                      pending.map((p) => p.id),
+                      true,
+                    ),
+                  )
+                }
+              />
             </View>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>{pending.map((p) => tile(p, 'pending'))}</View>
           </View>
@@ -232,7 +278,18 @@ export default function AlbumScreen() {
           <View style={{ gap: 10 }}>
             {gbPending > 0 && (
               <View style={{ flexDirection: 'row' }}>
-                <Button label={t('tools.album.approveAll', { count: gbPending })} icon="check" onPress={() => act(() => setGuestbookFlags(entries.filter((e) => !e.approved).map((e) => e.id), { approved: true }))} />
+                <Button
+                  label={t('tools.album.approveAll', { count: gbPending })}
+                  icon="check"
+                  onPress={() =>
+                    act(() =>
+                      setGuestbookFlags(
+                        entries.filter((e) => !e.approved).map((e) => e.id),
+                        { approved: true },
+                      ),
+                    )
+                  }
+                />
               </View>
             )}
             {entries.map((e) => (
@@ -240,8 +297,16 @@ export default function AlbumScreen() {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   <Text style={{ fontFamily: font.bold, fontSize: 15, color: color.ink }}>{e.name}</Text>
                   <Caption>{fmt(e.created_at)}</Caption>
-                  {!e.approved && <Text style={{ fontFamily: font.bold, fontSize: 11, color: color.lavenderInk, backgroundColor: color.lavenderTint, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, overflow: 'hidden' }}>{t('tools.album.awaiting')}</Text>}
-                  {e.hidden && <Text style={{ fontFamily: font.bold, fontSize: 11, color: '#FFFFFF', backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, overflow: 'hidden' }}>{t('tools.album.hidden')}</Text>}
+                  {!e.approved && (
+                    <Text style={{ fontFamily: font.bold, fontSize: 11, color: color.lavenderInk, backgroundColor: color.lavenderTint, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, overflow: 'hidden' }}>
+                      {t('tools.album.awaiting')}
+                    </Text>
+                  )}
+                  {e.hidden && (
+                    <Text style={{ fontFamily: font.bold, fontSize: 11, color: '#FFFFFF', backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, overflow: 'hidden' }}>
+                      {t('tools.album.hidden')}
+                    </Text>
+                  )}
                 </View>
                 <Text selectable style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: color.ink }}>
                   {e.message}

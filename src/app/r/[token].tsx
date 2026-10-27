@@ -15,7 +15,7 @@ import { getGuestMedia, type GuestMedia, guestNeedsMedia } from '@/lib/api-page'
 import { addToCalendar, type CalEvent, googleCalendarUrl, mapsUrl } from '@/ui/design/calendar';
 import { GuestDesignCard } from '@/ui/design/GuestDesignCard';
 import { Envelope, sealFrom } from '@/ui/guest/Envelope';
-import { PollCard, SahaCards, SignupCard } from '@/ui/guest/Interactive';
+import { PollCard, ProgramRsvpCard, SahaCards, SignupCard } from '@/ui/guest/Interactive';
 import { Gallery, MusicButton, useInvitationMusic, VideoInvite } from '@/ui/guest/Media';
 import { GuestbookCard } from '@/ui/guest/Guestbook';
 import { AlbumCard, AnnouncementCard, InfoCard, CheckinPass, Countdown, GiftCard, ProgramList, WeatherCard } from '@/ui/guest/Sections';
@@ -76,7 +76,10 @@ export default function GuestRsvp() {
     if (!loaded || !token) return;
     markOpened(token);
     const days = startsAt ? (new Date(startsAt).getTime() - Date.now()) / 86400_000 : NaN;
-    if (days > -0.5 && days <= 14) getWeather(token).then(setWeather).catch(() => {});
+    if (days > -0.5 && days <= 14)
+      getWeather(token)
+        .then(setWeather)
+        .catch(() => {});
   }, [loaded, token, startsAt]);
 
   const player = useInvitationMusic(media?.music?.url ?? null);
@@ -142,8 +145,17 @@ export default function GuestRsvp() {
     setBusy(true);
     setErr(null);
     try {
-      const filled = Object.fromEntries(Object.entries(answerValues).filter(([, v]) => typeof v === 'string' && v.trim()).map(([k, v]) => [k, v.trim().slice(0, 200)]));
-      const companions = askNames ? nameValues.slice(0, Math.max(0, partyValue - 1)).map((n) => n.trim()).filter(Boolean) : null;
+      const filled = Object.fromEntries(
+        Object.entries(answerValues)
+          .filter(([, v]) => typeof v === 'string' && v.trim())
+          .map(([k, v]) => [k, v.trim().slice(0, 200)]),
+      );
+      const companions = askNames
+        ? nameValues
+            .slice(0, Math.max(0, partyValue - 1))
+            .map((n) => n.trim())
+            .filter(Boolean)
+        : null;
       const updated = await respondInvitation(token, status, status === 'yes' ? partyValue : 0, menu, note.trim() || null, questions.length ? filled : null, {
         children: askChildren && status === 'yes' ? childValue : null,
         companions: askNames && status === 'yes' ? companions : null,
@@ -199,6 +211,9 @@ export default function GuestRsvp() {
       {settings.program?.length ? <ProgramList theme={theme} items={settings.program} t={t} locale={locale} /> : null}
       {settings.info ? <InfoCard theme={theme} info={settings.info} t={t} /> : null}
       {media?.gallery?.length ? <Gallery theme={theme} photos={media.gallery} t={t} /> : null}
+      {inv.status === 'yes' && settings.program_rsvp && (settings.program?.length ?? 0) > 1 ? (
+        <ProgramRsvpCard theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} />
+      ) : null}
       {inv.poll ? <PollCard theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
       {inv.signup?.length ? <SignupCard theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
       {sportOf(inv.event.type) ? <SahaCards theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
@@ -249,7 +264,9 @@ export default function GuestRsvp() {
                   {actions}
                 </View>
               ) : designPending ? (
-                <View accessibilityLabel={t('rsvp.designLoading')} style={{ height: 520, borderRadius: 28, backgroundColor: theme.dark ? 'rgba(255,255,255,0.05)' : '#EFE8DD', alignItems: 'center', justifyContent: 'center' }}>
+                <View
+                  accessibilityLabel={t('rsvp.designLoading')}
+                  style={{ height: 520, borderRadius: 28, backgroundColor: theme.dark ? 'rgba(255,255,255,0.05)' : '#EFE8DD', alignItems: 'center', justifyContent: 'center' }}>
                   <ActivityIndicator color={theme.ink} />
                 </View>
               ) : designReady && design ? (
@@ -260,9 +277,7 @@ export default function GuestRsvp() {
                   </View>
                   {actions}
                   {inv.event.rsvp_deadline ? (
-                    <Text style={[styles.small, { color: theme.soft, textAlign: 'center', fontSize: 12 }]}>
-                      {t('wizard.card.deadline', { date: formatDayMonth(inv.event.rsvp_deadline, locale) ?? '' })}
-                    </Text>
+                    <Text style={[styles.small, { color: theme.soft, textAlign: 'center', fontSize: 12 }]}>{t('wizard.card.deadline', { date: formatDayMonth(inv.event.rsvp_deadline, locale) ?? '' })}</Text>
                   ) : null}
                 </GuestDesignCard>
               ) : (
@@ -357,12 +372,7 @@ export default function GuestRsvp() {
                     <View key={q.id} style={{ gap: 10 }}>
                       <Text style={[styles.label, { color: theme.ink }]}>{q.label}</Text>
                       {q.type === 'choice' && Array.isArray(q.options) && q.options.length ? (
-                        <ChoiceChips
-                          theme={theme}
-                          options={q.options.slice(0, 8)}
-                          value={answerValues[q.id] ?? null}
-                          onChange={(v) => setAnswers({ ...answerValues, [q.id]: v })}
-                        />
+                        <ChoiceChips theme={theme} options={q.options.slice(0, 8)} value={answerValues[q.id] ?? null} onChange={(v) => setAnswers({ ...answerValues, [q.id]: v })} />
                       ) : (
                         <TextInput
                           accessibilityLabel={q.label}
@@ -398,15 +408,9 @@ export default function GuestRsvp() {
                 <ThemeArt theme={theme} width="100%" height={150} />
               </View>
               <Text style={[styles.small, { color: theme.soft, letterSpacing: 1.2 }]}>{t('rsvp.doneKicker')}</Text>
-              <Text style={[themeTitle(theme, 54), { color: theme.ink }]}>
-                {inv.status === 'waitlist' ? t('rsvp.doneWaitlistTitle') : inv.status === 'yes' ? t('rsvp.doneYesTitle') : t('rsvp.doneNoTitle')}
-              </Text>
+              <Text style={[themeTitle(theme, 54), { color: theme.ink }]}>{inv.status === 'waitlist' ? t('rsvp.doneWaitlistTitle') : inv.status === 'yes' ? t('rsvp.doneYesTitle') : t('rsvp.doneNoTitle')}</Text>
               <Text style={[themeProse(theme, 22), { color: theme.soft }]}>
-                {inv.status === 'waitlist'
-                  ? t('rsvp.doneWaitlistBody', { position: waitPos ?? 1 })
-                  : inv.status === 'yes'
-                    ? t('rsvp.doneYesBody', { count: inv.party_size ?? 1 })
-                    : t('rsvp.doneNoBody')}
+                {inv.status === 'waitlist' ? t('rsvp.doneWaitlistBody', { position: waitPos ?? 1 }) : inv.status === 'yes' ? t('rsvp.doneYesBody', { count: inv.party_size ?? 1 }) : t('rsvp.doneNoBody')}
               </Text>
               {inv.table_label && <TableTicket theme={theme} label={inv.table_label} t={t} />}
               {(inv.status === 'yes' || inv.status === 'waitlist') && (
@@ -598,21 +602,7 @@ function TableTicket({ theme, label, t }: { theme: InvitationTheme; label: strin
   );
 }
 
-function Sheet({
-  theme,
-  title,
-  subtitle,
-  backLabel,
-  onBack,
-  children,
-}: {
-  theme: InvitationTheme;
-  title: string;
-  subtitle: string;
-  backLabel: string;
-  onBack: () => void;
-  children: ReactNode;
-}) {
+function Sheet({ theme, title, subtitle, backLabel, onBack, children }: { theme: InvitationTheme; title: string; subtitle: string; backLabel: string; onBack: () => void; children: ReactNode }) {
   return (
     <View style={{ gap: 20, paddingTop: 8 }}>
       <Pressable accessibilityRole="button" accessibilityLabel={backLabel} onPress={onBack} style={[styles.back, { boxShadow: `inset 0 0 0 1px ${theme.dark ? 'rgba(255,255,255,0.2)' : 'rgba(120,100,80,0.25)'}` }]}>
@@ -646,9 +636,7 @@ function LangToggle({ theme, lang, onChange, t }: { theme: InvitationTheme; lang
               }}
               hitSlop={8}
               style={{ paddingHorizontal: 6, paddingVertical: 4 }}>
-              <Text style={{ fontFamily: on ? font.bold : font.medium, fontSize: 12, letterSpacing: 1.6, color: on ? theme.ink : theme.soft, opacity: on ? 1 : 0.7 }}>
-                {l.toUpperCase()}
-              </Text>
+              <Text style={{ fontFamily: on ? font.bold : font.medium, fontSize: 12, letterSpacing: 1.6, color: on ? theme.ink : theme.soft, opacity: on ? 1 : 0.7 }}>{l.toUpperCase()}</Text>
             </Pressable>
           </View>
         );
@@ -662,11 +650,7 @@ function PillButton({ theme, label, onPress, filled }: { theme: InvitationTheme;
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.pill,
-        filled ? { backgroundColor: theme.ink } : { boxShadow: `inset 0 0 0 1.5px ${theme.ink}` },
-        pressed && { transform: [{ scale: 0.98 }] },
-      ]}>
+      style={({ pressed }) => [styles.pill, filled ? { backgroundColor: theme.ink } : { boxShadow: `inset 0 0 0 1.5px ${theme.ink}` }, pressed && { transform: [{ scale: 0.98 }] }]}>
       <Text style={[styles.pillText, { color: filled ? theme.bg : theme.ink }]}>{label}</Text>
     </Pressable>
   );

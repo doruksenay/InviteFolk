@@ -18,6 +18,8 @@ export type Profile = {
   plan_expires_at: string | null;
   suspended_at: string | null;
   notify_rsvp: boolean;
+  /** Organizatöre günlük özet e-postası. */
+  notify_digest?: boolean;
   created_at: string;
 };
 
@@ -107,6 +109,8 @@ export type Invitation = {
   paid_claimed_at: string | null;
   /** Tarih anketi oyları: seçenek kimliği → yes/maybe/no. */
   poll: Record<string, PollVote>;
+  /** Tören bazında cevap (program kimliği → yes/no); işaretlenmemiş tören "katılıyor" sayılır. */
+  program_rsvp?: Record<string, 'yes' | 'no'>;
   created_at: string;
 };
 
@@ -159,6 +163,7 @@ export type PublicInvitation = {
   last_match?: PublicMatch | null;
   leaders?: { name: string; goals: number; mvps: number }[] | null;
   announcement?: { body: string; at: string } | null;
+  program_rsvp?: Record<string, 'yes' | 'no'> | null;
   event: Pick<EventRow, 'type' | 'theme' | 'title' | 'host_names' | 'starts_at' | 'venue_name' | 'venue_address' | 'rsvp_deadline'> & { settings: GuestSettings };
 };
 
@@ -265,6 +270,8 @@ export type EventSettings = {
   envelope?: { enabled?: boolean; seal?: string };
   countdown?: boolean;
   program?: ProgramItem[];
+  /** Davetliler her tören için ayrı cevap verir (en az iki tören olmalı). */
+  program_rsvp?: boolean;
   gift?: GiftInfo;
   music?: { path: string; title?: string };
   video?: EventVideo;

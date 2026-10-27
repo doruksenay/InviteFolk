@@ -5,7 +5,7 @@ import { SPORTS, sportOf } from '@/core/event-types';
 import type { InvitationTheme } from '@/core/themes';
 import type { PollVote, PublicInvitation } from '@/core/types';
 import type { TFn } from '@/i18n';
-import { claimPaid, claimSignup, votePoll, voteMvp } from '@/lib/api-guest';
+import { claimPaid, claimSignup, respondProgram, votePoll, voteMvp } from '@/lib/api-guest';
 import { Icon } from '@/ui/Icon';
 import { tapFeedback } from '@/ui/primitives';
 import { themeTitle } from '@/ui/theme/typography';
@@ -45,8 +45,7 @@ function Seg({ theme, options, value, onChange }: { theme: InvitationTheme; opti
 export function PollCard({ theme, inv, token, t, locale, onUpdate, onError }: Props) {
   const poll = inv.poll!;
   const [busy, setBusy] = useState(false);
-  const fmt = (iso: string) =>
-    new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' }).format(new Date(iso));
+  const fmt = (iso: string) => new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' }).format(new Date(iso));
   const chosen = poll.chosen ? poll.options.find((o) => o.id === poll.chosen) : null;
 
   const vote = async (id: string, v: PollVote) => {
@@ -86,6 +85,47 @@ export function PollCard({ theme, inv, token, t, locale, onUpdate, onError }: Pr
             />
             <Text style={{ fontFamily: font.medium, fontSize: 12, color: theme.soft }}>{t('guest.poll.count', { count: poll.counts?.[o.id] ?? 0 })}</Text>
           </View>
+        </View>
+      ))}
+      {busy && <ActivityIndicator color={theme.ink} />}
+    </SectionCard>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Tören bazında katılım (kına, nikâh, düğün…)
+// ---------------------------------------------------------------------------
+export function ProgramRsvpCard({ theme, inv, token, t, onUpdate, onError }: Props) {
+  const items = [...(inv.event.settings.program ?? [])].sort((a, b) => (a.at ?? '9').localeCompare(b.at ?? '9'));
+  const votes = inv.program_rsvp ?? {};
+  const [busy, setBusy] = useState(false);
+  const set = async (id: string, v: 'yes' | 'no') => {
+    setBusy(true);
+    try {
+      onUpdate(await respondProgram(token, { ...votes, [id]: v }));
+    } catch (e) {
+      onError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <SectionCard theme={theme} kicker={t('guest.programRsvp.kicker')} icon="check">
+      <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: theme.soft }}>{t('guest.programRsvp.body')}</Text>
+      {items.map((p, i) => (
+        <View
+          key={p.id}
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, paddingTop: i ? 12 : 0, borderTopWidth: i ? 1 : 0, borderTopColor: hairline(theme.dark) }}>
+          <Text style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 15, color: theme.ink }}>{p.title}</Text>
+          <Seg
+            theme={theme}
+            value={votes[p.id] ?? 'yes'}
+            onChange={(k) => set(p.id, k as 'yes' | 'no')}
+            options={[
+              { k: 'yes', label: t('guest.programRsvp.yes') },
+              { k: 'no', label: t('guest.programRsvp.no') },
+            ]}
+          />
         </View>
       ))}
       {busy && <ActivityIndicator color={theme.ink} />}
@@ -159,7 +199,16 @@ function Step({ theme, label, onPress, disabled, filled }: { theme: InvitationTh
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={{ width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', opacity: disabled ? 0.35 : 1, backgroundColor: filled ? theme.ink : 'transparent', boxShadow: filled ? 'none' : `inset 0 0 0 1px ${hairline(theme.dark)}` }}>
+      style={{
+        width: 34,
+        height: 34,
+        borderRadius: 17,
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: disabled ? 0.35 : 1,
+        backgroundColor: filled ? theme.ink : 'transparent',
+        boxShadow: filled ? 'none' : `inset 0 0 0 1px ${hairline(theme.dark)}`,
+      }}>
       <Text style={{ fontFamily: font.semibold, fontSize: 18, color: filled ? theme.bg : theme.ink }}>{label}</Text>
     </Pressable>
   );
@@ -215,9 +264,7 @@ export function SahaCards({ theme, inv, token, t, onUpdate, onError }: Props) {
 
       {match ? (
         <SectionCard theme={theme} kicker={t('guest.saha.mvpKicker')} icon="trophy">
-          {match.score_a !== null && match.score_b !== null ? (
-            <Text style={[themeTitle(theme, 30), { color: theme.ink }]}>{t('guest.saha.score', { a: match.score_a, b: match.score_b })}</Text>
-          ) : null}
+          {match.score_a !== null && match.score_b !== null ? <Text style={[themeTitle(theme, 30), { color: theme.ink }]}>{t('guest.saha.score', { a: match.score_a, b: match.score_b })}</Text> : null}
           {match.voting_open ? (
             <>
               <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: theme.soft }}>{t('guest.saha.mvpBody')}</Text>
@@ -232,14 +279,28 @@ export function SahaCards({ theme, inv, token, t, onUpdate, onError }: Props) {
                       accessibilityState={{ checked: mine, disabled: busy }}
                       disabled={busy}
                       onPress={() => run(() => voteMvp(token, match.id, p.id))}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, height: 36, borderRadius: 999, backgroundColor: mine ? theme.ink : 'transparent', boxShadow: mine ? 'none' : `inset 0 0 0 1px ${hairline(theme.dark)}` }}>
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 6,
+                        paddingHorizontal: 12,
+                        height: 36,
+                        borderRadius: 999,
+                        backgroundColor: mine ? theme.ink : 'transparent',
+                        boxShadow: mine ? 'none' : `inset 0 0 0 1px ${hairline(theme.dark)}`,
+                      }}>
                       <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: teamColor(p.team) }} />
                       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: mine ? theme.bg : theme.ink }}>{p.name}</Text>
                     </Pressable>
                   );
                 })}
               </View>
-              {match.my_vote ? <Text style={{ fontFamily: font.medium, fontSize: 12, color: theme.soft }}>{t('guest.saha.mvpVoted')}{match.mvp ? ` · ${t('guest.saha.mvpLeader', { name: match.mvp })}` : ''}</Text> : null}
+              {match.my_vote ? (
+                <Text style={{ fontFamily: font.medium, fontSize: 12, color: theme.soft }}>
+                  {t('guest.saha.mvpVoted')}
+                  {match.mvp ? ` · ${t('guest.saha.mvpLeader', { name: match.mvp })}` : ''}
+                </Text>
+              ) : null}
             </>
           ) : match.mvp ? (
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: theme.ink }}>{t('guest.saha.mvpWinner', { name: match.mvp })}</Text>

@@ -4,7 +4,7 @@ import { Pressable, Text, TextInput, useWindowDimensions, View, Linking } from '
 
 import { LANG_NAMES, LANGS, type Lang, useI18n } from '@/i18n';
 import { deleteMyAccount, setProfileLocale } from '@/lib/api';
-import { setNotifyRsvp } from '@/lib/api-billing';
+import { setNotifyDigest, setNotifyRsvp } from '@/lib/api-billing';
 import { useSession } from '@/lib/session';
 import { Icon } from '@/ui/Icon';
 import { Body, Button, Caption, Display, DisplayAccent, IconButton, Label, Notice, Pill, Surface, Title, ToggleRow } from '@/ui/primitives';
@@ -26,6 +26,20 @@ export default function SettingsScreen() {
   const [notify, setNotify] = useState<boolean | null>(null);
   const notifyValue = notify ?? profile?.notify_rsvp ?? true;
   const [notifyErr, setNotifyErr] = useState(false);
+  const [digest, setDigest] = useState<boolean | null>(null);
+  const digestValue = digest ?? profile?.notify_digest ?? true;
+
+  const changeDigest = (v: boolean) => {
+    if (!profile) return;
+    setDigest(v);
+    setNotifyErr(false);
+    setNotifyDigest(profile.id, v)
+      .then(() => refreshProfile())
+      .catch(() => {
+        setDigest(!v);
+        setNotifyErr(true);
+      });
+  };
 
   const changeNotify = (v: boolean) => {
     if (!profile) return;
@@ -130,6 +144,7 @@ export default function SettingsScreen() {
               <Title>{t('settings.notificationsTitle')}</Title>
             </View>
             <ToggleRow label={t('settings.notifyRsvp')} hint={t('settings.notifyRsvpHint')} value={notifyValue} onChange={changeNotify} disabled={!profile} />
+            <ToggleRow label={t('settings.notifyDigest')} hint={t('settings.notifyDigestHint')} value={digestValue} onChange={changeDigest} disabled={!profile} />
             {notifyErr && <Notice tone="error" text={t('settings.notifyFailed')} />}
           </Surface>
 
@@ -179,7 +194,17 @@ export default function SettingsScreen() {
               accessibilityLabel={t('settings.confirmPrompt', { word })}
               placeholder={word}
               placeholderTextColor={color.faint}
-              style={{ height: 50, borderRadius: radius.md, backgroundColor: '#FFFFFF', paddingHorizontal: 16, fontFamily: font.semibold, fontSize: 16, letterSpacing: 2, color: color.ink, boxShadow: `inset 0 0 0 1px ${color.hairline}` }}
+              style={{
+                height: 50,
+                borderRadius: radius.md,
+                backgroundColor: '#FFFFFF',
+                paddingHorizontal: 16,
+                fontFamily: font.semibold,
+                fontSize: 16,
+                letterSpacing: 2,
+                color: color.ink,
+                boxShadow: `inset 0 0 0 1px ${color.hairline}`,
+              }}
             />
             {err && <Notice tone="error" text={err} />}
             <Button

@@ -2,7 +2,7 @@
 import type { AlbumKind, PollVote, PublicEvent, PublicEventExtra, PublicGuestbookEntry, PublicInvitation } from '@/core/types';
 
 import { friendlyError, must, supabase } from './api';
-import { demoClaimPaid, demoClaimSignup, demoGuestbook, demoSignGuestbook, demoVotePoll, isDemoToken } from './demo';
+import { demoClaimPaid, demoClaimSignup, demoGuestbook, demoRespondProgram, demoSignGuestbook, demoVotePoll, isDemoToken } from './demo';
 
 /** Davetli sayfayı açtı (organizatörün önizlemesi sayılmaz; hata davetliye gösterilmez). */
 export async function markOpened(token: string) {
@@ -26,6 +26,12 @@ export async function claimSignup(token: string, item: string, qty: number) {
 export async function voteMvp(token: string, match: string, target: string) {
   if (isDemoToken(token)) throw new Error('demo');
   return must(await supabase.rpc('vote_mvp', { p_token: token, p_match: match, p_target: target })) as PublicInvitation;
+}
+
+/** Tören bazında katılım (kına, nikâh, düğün…). */
+export async function respondProgram(token: string, votes: Record<string, 'yes' | 'no'>) {
+  if (isDemoToken(token)) return demoRespondProgram(token, votes);
+  return must(await supabase.rpc('respond_program', { p_token: token, p_votes: votes })) as PublicInvitation;
 }
 
 export async function claimPaid(token: string) {

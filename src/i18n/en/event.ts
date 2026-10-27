@@ -37,6 +37,7 @@ export const event: typeof TR = {
   },
   feeLine: 'Collected {collected} of {expected}',
   menuSummary: 'Menu choices',
+  programSummary: 'Coming to each part (people)',
   list: {
     title: 'Guests',
     filters: { all: 'All', yes: 'Attending', pending: 'Pending', no: 'Declined', waitlist: 'Waitlist', failed: 'Not reached' },

@@ -252,12 +252,68 @@ export function renderCohostInvite(args: { lang: Lang; eventTitle: string; invit
   return { subject, html, text };
 }
 
+export type DigestEvent = {
+  id: string;
+  title: string;
+  yes_new: number;
+  no_new: number;
+  pending: number;
+  attending: number;
+  notes_new: number;
+  album_new: number;
+  album_pending: number;
+  requests_new: number;
+};
+
+/** Organizatöre günlük özet: etkinlik başına son 24 saatin hareketleri ve panele link. */
+export function renderDigest(args: { lang: Lang; events: DigestEvent[]; webUrl: string }): { subject: string; html: string; text: string } {
+  const tr = args.lang === 'tr';
+  const n = (v: number) => new Intl.NumberFormat(tr ? 'tr-TR' : 'en-GB').format(v);
+  const total = args.events.reduce((s, e) => s + e.yes_new + e.no_new, 0);
+  const subject = cleanHeader(
+    tr ? (total ? `Invitefolk günlük özet: ${n(total)} yeni cevap` : 'Invitefolk günlük özet') : total ? `Invitefolk daily summary: ${n(total)} new replies` : 'Invitefolk daily summary',
+  );
+  const lines = (e: DigestEvent): string[] =>
+    [
+      e.yes_new ? (tr ? `${n(e.yes_new)} hane katılacağını bildirdi` : `${n(e.yes_new)} households said yes`) : '',
+      e.no_new ? (tr ? `${n(e.no_new)} hane katılamayacağını bildirdi` : `${n(e.no_new)} households can't make it`) : '',
+      e.requests_new ? (tr ? `${n(e.requests_new)} yeni bilgi formu onay bekliyor` : `${n(e.requests_new)} new sign-ups awaiting approval`) : '',
+      e.notes_new ? (tr ? `Anı defterine ${n(e.notes_new)} yeni mesaj` : `${n(e.notes_new)} new guestbook messages`) : '',
+      e.album_new ? (tr ? `Albüme ${n(e.album_new)} yeni yükleme` : `${n(e.album_new)} new album uploads`) : '',
+      e.album_pending ? (tr ? `${n(e.album_pending)} yükleme onayını bekliyor` : `${n(e.album_pending)} uploads awaiting your approval`) : '',
+      tr ? `Toplam: ${n(e.attending)} kişi geliyor, ${n(e.pending)} hane cevap bekliyor` : `So far: ${n(e.attending)} people coming, ${n(e.pending)} households yet to reply`,
+    ].filter(Boolean);
+  const blocks = args.events
+    .map((e) => {
+      const link = `${args.webUrl}/etkinlik/${e.id}`;
+      return `<tr><td style="padding:18px 0;border-top:1px solid #F0EAE2">
+<p style="margin:0 0 8px 0;font:800 18px/24px Helvetica,Arial,sans-serif;color:#1F1B2E">${escapeHtml(e.title)}</p>
+${lines(e).map((l) => `<p style="margin:0 0 4px 0;font:400 15px/22px Helvetica,Arial,sans-serif;color:#3A3548">• ${escapeHtml(l)}</p>`).join('')}
+<p style="margin:10px 0 0 0"><a href="${escapeHtml(link)}" style="font:700 14px/20px Helvetica,Arial,sans-serif;color:#4A3BC2">${tr ? 'Etkinliği aç' : 'Open the event'} →</a></p>
+</td></tr>`;
+    })
+    .join('');
+  const settings = `${args.webUrl}/ayarlar`;
+  const foot = tr ? 'Bu özeti Ayarlar sayfasından kapatabilirsin.' : 'You can turn off this summary in Settings.';
+  const html = `<!doctype html><html lang="${args.lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(subject)}</title></head>
+<body style="margin:0;padding:0;background:#FFF9F4"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFF9F4"><tr><td align="center" style="padding:32px 16px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border-radius:28px"><tr><td style="padding:32px 36px">
+<p style="margin:0 0 6px 0;font:700 12px/16px Helvetica,Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;color:#4A3BC2">Invitefolk</p>
+<h1 style="margin:0 0 6px 0;font:800 24px/30px Helvetica,Arial,sans-serif;color:#1F1B2E">${tr ? 'Son 24 saatte olanlar' : 'The last 24 hours'}</h1>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0">${blocks}</table>
+<p style="margin:18px 0 0 0;font:400 12px/18px Helvetica,Arial,sans-serif;color:#9A968F">${escapeHtml(foot)} <a href="${escapeHtml(settings)}" style="color:#6E6A72">${tr ? 'Ayarlar' : 'Settings'}</a></p>
+</td></tr></table></td></tr></table></body></html>`;
+  const text = args.events.map((e) => `${e.title}\n${lines(e).map((l) => `- ${l}`).join('\n')}\n${args.webUrl}/etkinlik/${e.id}`).join('\n\n') + `\n\n${foot} ${settings}`;
+  return { subject, html, text };
+}
+
 export type EmailResult = { ok: true; id: string } | { ok: false; code: string };
 
 /** Resend üzerinden tek e-posta. Sağlayıcı hata ayrıntısı yalnızca sunucu günlüğüne yazılır. */
 export async function sendEmail(args: { to: string; subject: string; html: string; text: string; idempotencyKey?: string }): Promise<EmailResult> {
-  const key = Deno.env.get('RESEND_API_KEY');
   const from = Deno.env.get('EMAIL_FROM');
+  if (from && Deno.env.get('BREVO_API_KEY') && !Deno.env.get('RESEND_API_KEY')) return sendViaBrevo(from, args);
+  const key = Deno.env.get('RESEND_API_KEY');
   if (!key || !from) return { ok: false, code: 'not_configured' };
   const replyTo = Deno.env.get('EMAIL_REPLY_TO');
   const headers: Record<string, string> = { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' };
@@ -288,3 +344,38 @@ export async function sendEmail(args: { to: string; subject: string; html: strin
 }
 
 export const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+/** "Ad <adres>" ya da "adres" → { name, email } */
+function parseFrom(from: string): { name?: string; email: string } {
+  const m = /^\s*(.*?)\s*<([^>]+)>\s*$/.exec(from);
+  return m ? { name: m[1].replace(/^"|"$/g, '') || undefined, email: m[2].trim() } : { email: from.trim() };
+}
+
+/** Brevo (eski adıyla Sendinblue) işlem e-postası API'si; Resend tanımlı değilse kullanılır. */
+async function sendViaBrevo(from: string, args: { to: string; subject: string; html: string; text: string; idempotencyKey?: string }): Promise<EmailResult> {
+  const replyTo = Deno.env.get('EMAIL_REPLY_TO');
+  try {
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'api-key': Deno.env.get('BREVO_API_KEY')!, 'Content-Type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify({
+        sender: parseFrom(from),
+        to: [{ email: args.to }],
+        subject: args.subject,
+        htmlContent: args.html,
+        textContent: args.text,
+        ...(replyTo ? { replyTo: parseFrom(replyTo) } : {}),
+        ...(args.idempotencyKey ? { headers: { 'X-Idempotency-Key': args.idempotencyKey.slice(0, 256) } } : {}),
+      }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      console.error('brevo error', res.status, body?.code ?? '', body?.message ?? '');
+      return { ok: false, code: String(res.status) };
+    }
+    return { ok: true, id: String(body?.messageId ?? '') };
+  } catch (e) {
+    console.error('brevo fetch failed', e instanceof Error ? e.message : e);
+    return { ok: false, code: 'network' };
+  }
+}

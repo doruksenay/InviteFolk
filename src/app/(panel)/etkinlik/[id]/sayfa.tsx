@@ -100,6 +100,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
   };
   const [program, setProgram] = useState<ProgramDraft[]>(programToDraft(s0.program));
   const [gift, setGift] = useState<GiftDraft>({ holder: s0.gift?.holder ?? '', iban: s0.gift?.iban ? formatIban(s0.gift.iban) : '', bank: s0.gift?.bank ?? '', note: s0.gift?.note ?? '', public: !!s0.gift?.public });
+  const [programRsvp, setProgramRsvp] = useState(!!s0.program_rsvp);
   const [askChildren, setAskChildren] = useState(!!s0.ask_children);
   const [askNames, setAskNames] = useState(!!s0.ask_names);
   const [poll, setPoll] = useState<PollDraft[]>(pollToDraft(s0.poll?.options));
@@ -189,7 +190,13 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
     else drop.push('message');
     if (prog.length) patch.program = prog;
     else drop.push('program');
-    const infoOut = Object.fromEntries(Object.entries(info).map(([k, v]) => [k, v.trim().slice(0, 400)]).filter(([, v]) => v));
+    if (programRsvp && prog.length > 1) patch.program_rsvp = true;
+    else drop.push('program_rsvp');
+    const infoOut = Object.fromEntries(
+      Object.entries(info)
+        .map(([k, v]) => [k, v.trim().slice(0, 400)])
+        .filter(([, v]) => v),
+    );
     if (Object.keys(infoOut).length) patch.info = infoOut;
     else drop.push('info');
     if (giftOut) patch.gift = giftOut;
@@ -245,9 +252,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
           no: copy.rsvp.no,
         }}
       />
-      {invitations[0] && (
-        <Button label={t('tools.page.openGuest')} icon="eye" variant="secondary" onPress={() => router.push({ pathname: '/r/[token]', params: { token: invitations[0].token } })} />
-      )}
+      {invitations[0] && <Button label={t('tools.page.openGuest')} icon="eye" variant="secondary" onPress={() => router.push({ pathname: '/r/[token]', params: { token: invitations[0].token } })} />}
     </View>
   );
 
@@ -309,6 +314,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
         <Surface style={{ gap: 12 }}>
           <SectionHead title={t('tools.page.program.title')} hint={t('tools.page.program.hint')} />
           <ProgramEditor value={program} onChange={setProgram} />
+          {program.length > 1 && <ToggleRow label={t('tools.page.program.rsvp')} hint={t('tools.page.program.rsvpHint')} value={programRsvp} onChange={setProgramRsvp} />}
         </Surface>
       )}
 
@@ -400,15 +406,39 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
       {/* Araçlar */}
       <Surface style={{ gap: 10 }}>
         <Title>{t('tools.page.tools.title')}</Title>
-        <ToggleRow label={t('tools.page.tools.checkin')} hint={L && !L.checkin && !checkin ? locked('Otomatik') : t('tools.page.tools.checkinHint')} value={checkin} onChange={setCheckin} disabled={!!L && !L.checkin && !checkin} />
-        <ToggleRow label={t('tools.page.tools.collector')} hint={L && !L.collector && !collector ? locked('Temel') : t('tools.page.tools.collectorHint')} value={collector} onChange={setCollector} disabled={!!L && !L.collector && !collector} />
-        <ToggleRow label={t('tools.page.tools.album')} hint={L && L.album_photos <= 0 && !albumOn ? locked('Otomatik') : t('tools.page.tools.albumHint')} value={albumOn} onChange={setAlbumOn} disabled={!!L && L.album_photos <= 0 && !albumOn} />
+        <ToggleRow
+          label={t('tools.page.tools.checkin')}
+          hint={L && !L.checkin && !checkin ? locked('Otomatik') : t('tools.page.tools.checkinHint')}
+          value={checkin}
+          onChange={setCheckin}
+          disabled={!!L && !L.checkin && !checkin}
+        />
+        <ToggleRow
+          label={t('tools.page.tools.collector')}
+          hint={L && !L.collector && !collector ? locked('Temel') : t('tools.page.tools.collectorHint')}
+          value={collector}
+          onChange={setCollector}
+          disabled={!!L && !L.collector && !collector}
+        />
+        <ToggleRow
+          label={t('tools.page.tools.album')}
+          hint={L && L.album_photos <= 0 && !albumOn ? locked('Otomatik') : t('tools.page.tools.albumHint')}
+          value={albumOn}
+          onChange={setAlbumOn}
+          disabled={!!L && L.album_photos <= 0 && !albumOn}
+        />
         {albumOn && <ToggleRow label={t('tools.page.tools.albumPublic')} value={albumPublic} onChange={setAlbumPublic} />}
         {albumOn && <ToggleRow label={t('tools.page.tools.albumModerate')} hint={t('tools.page.tools.albumModerateHint')} value={albumModerate} onChange={setAlbumModerate} />}
         <ToggleRow label={t('tools.page.tools.guestbook')} hint={t('tools.page.tools.guestbookHint')} value={gbOn} onChange={setGbOn} />
         {gbOn && <ToggleRow label={t('tools.page.tools.guestbookPublic')} value={gbPublic} onChange={setGbPublic} />}
         {gbOn && <ToggleRow label={t('tools.page.tools.guestbookModerate')} value={gbModerate} onChange={setGbModerate} />}
-        <ToggleRow label={t('tools.page.tools.sms')} hint={L && L.sms_per_day <= 0 && !smsFallback ? locked('Otomatik') : t('tools.page.tools.smsHint')} value={smsFallback} onChange={setSmsFallback} disabled={!!L && L.sms_per_day <= 0 && !smsFallback} />
+        <ToggleRow
+          label={t('tools.page.tools.sms')}
+          hint={L && L.sms_per_day <= 0 && !smsFallback ? locked('Otomatik') : t('tools.page.tools.smsHint')}
+          value={smsFallback}
+          onChange={setSmsFallback}
+          disabled={!!L && L.sms_per_day <= 0 && !smsFallback}
+        />
       </Surface>
     </View>
   );
@@ -449,12 +479,7 @@ function LayoutTile({ kind, on, label, onPress }: { kind: ThemeLayout; on: boole
   const bar = (w: number | `${number}%`, h = 4) => <View style={{ width: w, height: h, borderRadius: 2, backgroundColor: ink, opacity: 0.55 }} />;
   const art = (h: number, round = 6) => <View style={{ alignSelf: 'stretch', height: h, borderRadius: round, backgroundColor: on ? color.lavender : color.ring, opacity: on ? 0.55 : 0.6 }} />;
   return (
-    <Pressable
-      accessibilityRole="radio"
-      accessibilityState={{ checked: on }}
-      accessibilityLabel={label}
-      onPress={onPress}
-      style={{ width: 104, gap: 8, alignItems: 'center' }}>
+    <Pressable accessibilityRole="radio" accessibilityState={{ checked: on }} accessibilityLabel={label} onPress={onPress} style={{ width: 104, gap: 8, alignItems: 'center' }}>
       <View
         style={{
           width: 96,
@@ -465,7 +490,15 @@ function LayoutTile({ kind, on, label, onPress }: { kind: ThemeLayout; on: boole
           overflow: 'hidden',
           boxShadow: on ? `inset 0 0 0 2px ${color.lavender}` : `inset 0 0 0 1px ${color.hairline}`,
         }}>
-        <View style={{ flex: 1, borderRadius: 9, gap: 5, padding: kind === 'cover' || kind === 'classic' ? 0 : 6, alignItems: kind === 'minimal' || kind === 'framed' ? 'center' : 'flex-start', boxShadow: kind === 'framed' ? `inset 0 0 0 1px ${ink}` : 'none' }}>
+        <View
+          style={{
+            flex: 1,
+            borderRadius: 9,
+            gap: 5,
+            padding: kind === 'cover' || kind === 'classic' ? 0 : 6,
+            alignItems: kind === 'minimal' || kind === 'framed' ? 'center' : 'flex-start',
+            boxShadow: kind === 'framed' ? `inset 0 0 0 1px ${ink}` : 'none',
+          }}>
           {kind === 'classic' && (
             <>
               {art(44, 0)}

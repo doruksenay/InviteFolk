@@ -48,6 +48,8 @@ export function ExportSheet({ open, onClose, event, invitations }: { open: boole
     cols.push({ key: 'party', label: c('party'), width: 7, get: (i) => (i.status === 'yes' ? i.party_size || 1 : 0) });
     if (s.ask_children || invitations.some((i) => i.children > 0)) cols.push({ key: 'children', label: c('children'), width: 7, get: (i) => (i.status === 'yes' ? i.children : 0) });
     if (s.ask_names || invitations.some((i) => i.companions?.length)) cols.push({ key: 'companions', label: c('companions'), width: 30, get: (i) => (i.companions ?? []).join(', ') });
+    if (s.program_rsvp && (s.program?.length ?? 0) > 1)
+      for (const p of s.program ?? []) cols.push({ key: `p_${p.id}`, label: p.title, width: 12, get: (i) => (i.status === 'yes' ? (i.program_rsvp?.[p.id] === 'no' ? '—' : i.party_size || 1) : null) });
     if ((s.menu ?? []).length) cols.push({ key: 'menu', label: c('menu'), width: 14, get: (i) => i.menu });
     if (Object.keys(tables).length) cols.push({ key: 'table', label: c('table'), width: 12, get: (i) => (i.table_id ? tables[i.table_id] : null) });
     for (const q of s.questions ?? []) cols.push({ key: `q_${q.id}`, label: q.label, width: 18, get: (i) => i.answers?.[q.id] ?? null });
@@ -77,7 +79,12 @@ export function ExportSheet({ open, onClose, event, invitations }: { open: boole
       const header = cols.map((c) => c.label);
       const data = rows.map((i) => cols.map((c) => c.get(i)));
       if (kind === 'xlsx') {
-        const bytes = await buildXlsx(t('tools.export.sheetName'), header, data, cols.map((c) => c.width));
+        const bytes = await buildXlsx(
+          t('tools.export.sheetName'),
+          header,
+          data,
+          cols.map((c) => c.width),
+        );
         await shareBinaryFile(`${base}.xlsx`, bytes, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'org.openxmlformats.spreadsheetml.sheet');
       } else if (kind === 'csv') {
         await shareTextFile(`${base}.csv`, buildCsv(header, data, locale.startsWith('tr') ? ';' : ','));

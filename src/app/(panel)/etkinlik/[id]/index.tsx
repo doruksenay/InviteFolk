@@ -98,29 +98,88 @@ export default function EventDetail() {
   const L = lim.data?.limits ?? null;
   const isOwner = lim.data?.is_owner ?? true;
   const saha = !!sportOf(event.type);
-  const go = (path: '/etkinlik/[id]/sayfa' | '/etkinlik/[id]/ekip' | '/etkinlik/[id]/giris' | '/etkinlik/[id]/album' | '/etkinlik/[id]/basvurular' | '/etkinlik/[id]/takim') => router.push({ pathname: path, params: { id: event.id } });
+  const go = (path: '/etkinlik/[id]/sayfa' | '/etkinlik/[id]/ekip' | '/etkinlik/[id]/giris' | '/etkinlik/[id]/album' | '/etkinlik/[id]/basvurular' | '/etkinlik/[id]/takim') =>
+    router.push({ pathname: path, params: { id: event.id } });
   const plan = (k: 'temel' | 'otomatik' | 'tam') => t('tools.locked', { plan: t(`status.plan.${k}`) });
   const tiles: ToolTile[] = [
     { key: 'page', icon: 'envelope', title: t('tools.card.page.title'), body: t('tools.card.page.body'), tint: color.coralTint, ink: color.coralInk, onPress: () => go('/etkinlik/[id]/sayfa') },
-    ...(saha ? [{ key: 'teams', icon: 'shirt' as const, title: t('tools.card.teams.title'), body: t('tools.card.teams.body'), badge: counts.claims ? t('tools.teams.paidClaims', { count: counts.claims }) : null, tint: color.sageTint, ink: color.sageInk, onPress: () => go('/etkinlik/[id]/takim') }] : []),
+    ...(saha
+      ? [
+          {
+            key: 'teams',
+            icon: 'shirt' as const,
+            title: t('tools.card.teams.title'),
+            body: t('tools.card.teams.body'),
+            badge: counts.claims ? t('tools.teams.paidClaims', { count: counts.claims }) : null,
+            tint: color.sageTint,
+            ink: color.sageInk,
+            onPress: () => go('/etkinlik/[id]/takim'),
+          },
+        ]
+      : []),
     { key: 'announce', icon: 'megaphone', title: t('tools.card.announce.title'), body: t('tools.card.announce.body'), tint: color.goldTint, ink: color.goldInk, onPress: () => setAnnounceOpen(true) },
     { key: 'export', icon: 'download', title: t('tools.card.export.title'), body: t('tools.card.export.body'), tint: color.sageTint, ink: color.sageInk, onPress: () => setExportOpen(true) },
-    { key: 'team', icon: 'userPlus', title: t('tools.card.team.title'), body: t('tools.card.team.body'), locked: L && L.max_cohosts <= 0 ? plan('temel') : null, badge: lim.data?.cohosts ? String(lim.data.cohosts) : null, tint: color.lavenderTint, ink: color.lavenderInk, onPress: () => go('/etkinlik/[id]/ekip') },
-    { key: 'checkin', icon: 'scan', title: t('tools.card.checkin.title'), body: t('tools.card.checkin.body'), locked: L && !L.checkin ? plan('otomatik') : null, badge: counts.checkedIn ? `${counts.checkedIn}/${counts.yes}` : null, tint: color.lavenderTint, ink: color.lavenderInk, onPress: () => go('/etkinlik/[id]/giris') },
+    {
+      key: 'team',
+      icon: 'userPlus',
+      title: t('tools.card.team.title'),
+      body: t('tools.card.team.body'),
+      locked: L && L.max_cohosts <= 0 ? plan('temel') : null,
+      badge: lim.data?.cohosts ? String(lim.data.cohosts) : null,
+      tint: color.lavenderTint,
+      ink: color.lavenderInk,
+      onPress: () => go('/etkinlik/[id]/ekip'),
+    },
+    {
+      key: 'checkin',
+      icon: 'scan',
+      title: t('tools.card.checkin.title'),
+      body: t('tools.card.checkin.body'),
+      locked: L && !L.checkin ? plan('otomatik') : null,
+      badge: counts.checkedIn ? `${counts.checkedIn}/${counts.yes}` : null,
+      tint: color.lavenderTint,
+      ink: color.lavenderInk,
+      onPress: () => go('/etkinlik/[id]/giris'),
+    },
     ...(saha
       ? []
       : [
-          { key: 'album', icon: 'camera' as const, title: t('tools.card.album.title'), body: t('tools.card.album.body'), locked: L && L.album_photos <= 0 && !settings.guestbook?.enabled ? plan('otomatik') : null, badge: lim.data?.album_used ? String(lim.data.album_used) : null, tint: color.coralTint, ink: color.coralInk, onPress: () => go('/etkinlik/[id]/album') },
-          { key: 'collector', icon: 'qr' as const, title: t('tools.card.collector.title'), body: t('tools.card.collector.body'), locked: L && !L.collector ? plan('temel') : null, tint: color.goldTint, ink: color.goldInk, onPress: () => go('/etkinlik/[id]/basvurular') },
+          {
+            key: 'album',
+            icon: 'camera' as const,
+            title: t('tools.card.album.title'),
+            body: t('tools.card.album.body'),
+            locked: L && L.album_photos <= 0 && !settings.guestbook?.enabled ? plan('otomatik') : null,
+            badge: lim.data?.album_used ? String(lim.data.album_used) : null,
+            tint: color.coralTint,
+            ink: color.coralInk,
+            onPress: () => go('/etkinlik/[id]/album'),
+          },
+          {
+            key: 'collector',
+            icon: 'qr' as const,
+            title: t('tools.card.collector.title'),
+            body: t('tools.card.collector.body'),
+            locked: L && !L.collector ? plan('temel') : null,
+            tint: color.goldTint,
+            ink: color.goldInk,
+            onPress: () => go('/etkinlik/[id]/basvurular'),
+          },
         ]),
   ];
 
   // Menü dağılımı (gelen haneler)
   const menuCounts = (settings.menu ?? []).map((m) => ({ m, n: invitations.filter((i) => i.status === 'yes' && i.menu === m).length })).filter((x) => x.n > 0);
 
+  // Tören bazında gelecek kişi sayısı (işaretlenmemiş tören "geliyor" sayılır)
+  const programCounts =
+    settings.program_rsvp && (settings.program?.length ?? 0) > 1
+      ? (settings.program ?? []).map((p) => ({ m: p.title, n: invitations.filter((i) => i.status === 'yes' && i.program_rsvp?.[p.id] !== 'no').reduce((sum, i) => sum + (i.party_size || 1), 0) }))
+      : [];
+
   const quickStatus = async (inv: InvitationWithContact, s: RsvpStatus) => {
     try {
-      await setStatus(inv.id, s, s === 'yes' ? (inv.party_size || 1) : 0);
+      await setStatus(inv.id, s, s === 'yes' ? inv.party_size || 1 : 0);
       reload();
     } catch (e) {
       setFeedback({ tone: 'error', text: e instanceof Error ? e.message : String(e) });
@@ -210,14 +269,38 @@ export default function EventDetail() {
             { key: 'guests', label: t('event.checklist.guests'), hint: t('event.checklist.guestsHint'), done: counts.all > 0 },
             ...(saha
               ? []
-              : [{ key: 'page', label: t('event.checklist.page'), hint: t('event.checklist.pageHint'), done: !!(settings.message || settings.design || settings.program?.length || settings.envelope?.enabled), onPress: () => go('/etkinlik/[id]/sayfa') }]),
+              : [
+                  {
+                    key: 'page',
+                    label: t('event.checklist.page'),
+                    hint: t('event.checklist.pageHint'),
+                    done: !!(settings.message || settings.design || settings.program?.length || settings.envelope?.enabled),
+                    onPress: () => go('/etkinlik/[id]/sayfa'),
+                  },
+                ]),
             { key: 'send', label: t('event.checklist.send'), hint: t('event.checklist.sendHint'), done: invitations.some((i) => i.delivery !== 'not_sent'), onPress: counts.all ? () => setSendOpen(true) : undefined },
             ...(cfg.tools.seating
-              ? [{ key: 'seating', label: t('event.checklist.seating'), hint: t('event.checklist.seatingHint'), done: invitations.some((i) => i.table_id), onPress: () => router.push({ pathname: '/etkinlik/[id]/oturma', params: { id: event.id } }) }]
+              ? [
+                  {
+                    key: 'seating',
+                    label: t('event.checklist.seating'),
+                    hint: t('event.checklist.seatingHint'),
+                    done: invitations.some((i) => i.table_id),
+                    onPress: () => router.push({ pathname: '/etkinlik/[id]/oturma', params: { id: event.id } }),
+                  },
+                ]
               : []),
             ...(saha
               ? []
-              : [{ key: 'reminders', label: t('event.checklist.reminders'), hint: t('event.checklist.remindersHint'), done: !!settings.reminders?.auto, onPress: () => router.push({ pathname: '/etkinlik/[id]/duzenle', params: { id: event.id } }) }]),
+              : [
+                  {
+                    key: 'reminders',
+                    label: t('event.checklist.reminders'),
+                    hint: t('event.checklist.remindersHint'),
+                    done: !!settings.reminders?.auto,
+                    onPress: () => router.push({ pathname: '/etkinlik/[id]/duzenle', params: { id: event.id } }),
+                  },
+                ]),
           ]}
         />
       )}
@@ -243,19 +326,8 @@ export default function EventDetail() {
         )}
       </View>
 
-      {menuCounts.length > 0 && (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
-          <Caption style={{ marginRight: 4 }}>{t('event.menuSummary')}</Caption>
-          {menuCounts.map(({ m, n }) => (
-            <View key={m} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 14, paddingRight: 6, height: 34, borderRadius: 999, backgroundColor: color.surface, boxShadow: shadow.card }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: color.ink }}>{m}</Text>
-              <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, backgroundColor: color.sageTint }}>
-                <Text style={{ fontFamily: font.bold, fontSize: 12, color: color.sageInk }}>{n}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-      )}
+      {menuCounts.length > 0 && <CountChips label={t('event.menuSummary')} items={menuCounts} />}
+      {programCounts.length > 0 && <CountChips label={t('event.programSummary')} items={programCounts} />}
 
       <View style={{ flexDirection: wide ? 'row' : 'column', gap: 16 }}>
         {cfg.tools.seating && (
@@ -306,7 +378,17 @@ export default function EventDetail() {
                     accessibilityRole="button"
                     accessibilityState={{ selected: on }}
                     onPress={() => setFilter(k)}
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 38, paddingLeft: 14, paddingRight: 8, borderRadius: 999, backgroundColor: on ? color.ink : color.surface, boxShadow: on ? 'none' : `inset 0 0 0 1px ${color.hairline}` }}>
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 8,
+                      height: 38,
+                      paddingLeft: 14,
+                      paddingRight: 8,
+                      borderRadius: 999,
+                      backgroundColor: on ? color.ink : color.surface,
+                      boxShadow: on ? 'none' : `inset 0 0 0 1px ${color.hairline}`,
+                    }}>
                     <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? '#FFFFFF' : color.inkSoft }}>{label}</Text>
                     <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, backgroundColor: on ? 'rgba(255,255,255,0.18)' : color.surfaceSoft }}>
                       <Text style={{ fontFamily: font.bold, fontSize: 12, color: on ? '#FFFFFF' : color.inkSoft }}>{n}</Text>
@@ -386,7 +468,11 @@ export default function EventDetail() {
                   )}
                   <View style={{ flexDirection: 'row', gap: 6 }}>
                     {inv.contacts.phone && (
-                      <SmallAction icon="whatsapp" label={t('event.actions.whatsapp')} onPress={() => Linking.openURL(waMeLink(inv.contacts.phone, guestMessage(event, inv, inv.status === 'pending' && inv.delivery !== 'not_sent' ? 'reminder' : 'invite')))} />
+                      <SmallAction
+                        icon="whatsapp"
+                        label={t('event.actions.whatsapp')}
+                        onPress={() => Linking.openURL(waMeLink(inv.contacts.phone, guestMessage(event, inv, inv.status === 'pending' && inv.delivery !== 'not_sent' ? 'reminder' : 'invite')))}
+                      />
                     )}
                     <SmallAction
                       icon="copy"
@@ -412,9 +498,7 @@ export default function EventDetail() {
           <Title color={theme.ink}>{t('event.guestPage.title')}</Title>
           <Body color={theme.soft}>{t('event.guestPage.body')}</Body>
         </View>
-        {invitations[0] && (
-          <Button label={t('event.guestPage.open')} variant="secondary" iconRight="arrowRight" onPress={() => router.push({ pathname: '/r/[token]', params: { token: invitations[0].token } })} />
-        )}
+        {invitations[0] && <Button label={t('event.guestPage.open')} variant="secondary" iconRight="arrowRight" onPress={() => router.push({ pathname: '/r/[token]', params: { token: invitations[0].token } })} />}
       </Surface>
 
       <Sheet open={sendOpen} onClose={() => setSendOpen(false)} title={t('send.title')} italic={t('send.titleAccent')} subtitle={t('send.subtitle')} maxWidth={640}>
@@ -424,14 +508,7 @@ export default function EventDetail() {
       <AnnounceSheet open={announceOpen} onClose={() => setAnnounceOpen(false)} eventId={event.id} limits={L} onDone={reload} />
       <ExportSheet open={exportOpen} onClose={() => setExportOpen(false)} event={event} invitations={invitations} />
 
-      <GuestEditSheet
-        open={!!editing}
-        onClose={() => setEditing(null)}
-        onChanged={reload}
-        contactId={editing?.contact_id ?? null}
-        invitation={editing}
-        event={{ type: event.type, settings }}
-      />
+      <GuestEditSheet open={!!editing} onClose={() => setEditing(null)} onChanged={reload} contactId={editing?.contact_id ?? null} invitation={editing} event={{ type: event.type, settings }} />
     </Screen>
   );
 }
@@ -453,7 +530,10 @@ function SmallAction({ icon, label, onPress, tone }: { icon: IconName; label: st
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      style={({ pressed }) => [{ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: tone === 'danger' ? color.coralTint : color.surfaceSoft }, pressed && { transform: [{ scale: 0.94 }] }]}>
+      style={({ pressed }) => [
+        { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: tone === 'danger' ? color.coralTint : color.surfaceSoft },
+        pressed && { transform: [{ scale: 0.94 }] },
+      ]}>
       <Icon name={icon} size={16} color={tone === 'danger' ? color.coralInk : color.ink} strokeWidth={2} />
     </Pressable>
   );
@@ -489,5 +569,21 @@ function FeatureCard({ icon, tint, ink, title, body, cta, onPress }: { icon: Ico
         <Icon name="arrowRight" size={16} color="#FFFFFF" strokeWidth={2} />
       </View>
     </Pressable>
+  );
+}
+
+function CountChips({ label, items }: { label: string; items: { m: string; n: number }[] }) {
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+      <Caption style={{ marginRight: 4 }}>{label}</Caption>
+      {items.map(({ m, n }) => (
+        <View key={m} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 14, paddingRight: 6, height: 34, borderRadius: 999, backgroundColor: color.surface, boxShadow: shadow.card }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: color.ink }}>{m}</Text>
+          <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, backgroundColor: color.sageTint }}>
+            <Text style={{ fontFamily: font.bold, fontSize: 12, color: color.sageInk }}>{n}</Text>
+          </View>
+        </View>
+      ))}
+    </View>
   );
 }

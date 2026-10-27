@@ -35,6 +35,7 @@ export const event = {
   },
   feeLine: 'Toplanan {collected} / {expected}',
   menuSummary: 'Menü seçimleri',
+  programSummary: 'Törenlere gelecek kişi',
   list: {
     title: 'Davetliler',
     filters: { all: 'Tümü', yes: 'Geliyor', pending: 'Bekliyor', no: 'Gelmiyor', waitlist: 'Yedek', failed: 'Ulaşılamadı' },

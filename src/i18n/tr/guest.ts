@@ -65,6 +65,12 @@ export const guest = {
     hint: 'Masa kartları için; isterseniz boş bırakın.',
     placeholder: '{n}. kişinin adı',
   },
+  programRsvp: {
+    kicker: 'HANGİ TÖRENLERE GELİYORSUNUZ?',
+    body: 'Gelemeyeceğiniz törenleri işaretleyin; ev sahibi ona göre hazırlansın.',
+    yes: 'Geliyorum',
+    no: 'Gelemiyorum',
+  },
   poll: {
     kicker: 'HANGİ TARİH SİZE UYGUN?',
     body: 'Uygun olduğunuz günleri işaretleyin; en çok kişinin geldiği gün seçilecek.',
