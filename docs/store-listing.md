@@ -28,7 +28,7 @@ Karakter sınırları App Store'a göre verilmiştir (Google Play kısa açıkla
 Invitefolk; düğün, nişan, kına, sünnet, bebek ve cinsiyet partisi, mevlit, mezuniyet, bekârlığa veda, doğum günü, yemek daveti, kurumsal etkinlik ve halı saha maçı gibi her tür buluşma için davetiye ve katılım (LCV) uygulamasıdır.
 
 **Davetiyeni hazırla**
-- 37 şablon ve 4 düzen, çiftin fotoğrafıyla fotoğraflı davetiye; süzülen yapraklar, konfeti, kalpler, yıldızlar; ya da kendi tasarımını yükle
+- 50 şablon ve 4 düzen, çiftin fotoğrafıyla fotoğraflı davetiye; süzülen yapraklar, konfeti, kalpler, yıldızlar; ya da kendi tasarımını yükle
 - Her davetliye adıyla hitap eden kişisel davetiye
 - Türkçe ve İngilizce davetiye
 
@@ -78,7 +78,7 @@ Davetlilerinin bilgileri yalnızca sana görünür. Şifre yok: e-postana gelen 
 Invitefolk is an invitation and RSVP app for every kind of gathering: weddings, engagements, henna nights, circumcision celebrations, baby showers and gender reveals, mevlit, graduations, hen and stag nights, birthdays, dinner parties, corporate events and weekly football.
 
 **Design your invitation**
-- 37 templates and 4 layouts, photo invitations with the couple’s picture; drifting petals, confetti, hearts and stars, or upload your own design
+- 50 templates and 4 layouts, photo invitations with the couple’s picture; drifting petals, confetti, hearts and stars, or upload your own design
 - A personal invitation that greets every guest by name
 - Invitations in Turkish or English
 

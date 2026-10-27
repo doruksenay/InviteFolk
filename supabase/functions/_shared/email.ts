@@ -61,6 +61,19 @@ const THEME: Record<string, { bg: string; ink: string; soft: string; accent: str
   osmanli: { bg: '#FAF3E6', ink: '#33140F', soft: '#674A40', accent: '#7A1F2B', button: '#7A1F2B', buttonInk: '#FFFFFF', shape: '#C9A044' },
   cini: { bg: '#F5F8FC', ink: '#132744', soft: '#4A5C78', accent: '#1F4E8C', button: '#1F4E8C', buttonInk: '#FFFFFF', shape: '#2BA3A6' },
   isilti: { bg: '#1D1430', ink: '#F8F1FF', soft: '#CDBEDF', accent: '#F5C86A', button: '#F5C86A', buttonInk: '#1D1430', shape: '#B57BE8' },
+  suluboya: { bg: '#FFF6F2', ink: '#3A2422', soft: '#6E514D', accent: '#A44E4A', button: '#3A2422', buttonInk: '#FFFFFF', shape: '#F4B7B0' },
+  mavi_suluboya: { bg: '#F2F6F8', ink: '#1D2D3A', soft: '#4C5D6A', accent: '#3E6584', button: '#1D2D3A', buttonInk: '#FFFFFF', shape: '#A9C3D6' },
+  boho: { bg: '#F8F0E6', ink: '#35231A', soft: '#6A5242', accent: '#9C4A2B', button: '#9C4A2B', buttonInk: '#FFFFFF', shape: '#C8734F' },
+  kil: { bg: '#F4E0D2', ink: '#3A1E14', soft: '#674236', accent: '#8E3B24', button: '#8E3B24', buttonInk: '#FFFFFF', shape: '#A9472C' },
+  mermer: { bg: '#FAFAF8', ink: '#232323', soft: '#5E5E5E', accent: '#7F6328', button: '#232323', buttonInk: '#FFFFFF', shape: '#C6A35A' },
+  akdeniz: { bg: '#F5F8FC', ink: '#132A44', soft: '#46597A', accent: '#235C95', button: '#235C95', buttonInk: '#FFFFFF', shape: '#2F6FA8' },
+  retro: { bg: '#FBF1DE', ink: '#2E1C10', soft: '#634A36', accent: '#A3461A', button: '#A3461A', buttonInk: '#FFFFFF', shape: '#E0A030' },
+  neon: { bg: '#120E24', ink: '#F7F2FF', soft: '#C9C0E0', accent: '#2CE6F2', button: '#2CE6F2', buttonInk: '#120E24', shape: '#FF3EA5' },
+  tropik: { bg: '#F1F7F0', ink: '#15301F', soft: '#46604F', accent: '#2B6A44', button: '#2B6A44', buttonInk: '#FFFFFF', shape: '#2F7A4F' },
+  kis: { bg: '#F2F7FB', ink: '#152638', soft: '#475B6E', accent: '#2F5D82', button: '#2F5D82', buttonInk: '#FFFFFF', shape: '#3F6E5A' },
+  ask: { bg: '#FFF2F3', ink: '#3A1820', soft: '#6E4851', accent: '#B02741', button: '#B02741', buttonInk: '#FFFFFF', shape: '#E2425C' },
+  simli: { bg: '#FCF8F0', ink: '#2C2416', soft: '#655843', accent: '#83631F', button: '#2C2416', buttonInk: '#FFFFFF', shape: '#C8A048' },
+  cizgi: { bg: '#FAF8F3', ink: '#222120', soft: '#5F5C57', accent: '#4A4744', button: '#222120', buttonInk: '#FFFFFF', shape: '#C9B79C' },
 };
 
 const COPY = {

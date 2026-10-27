@@ -82,6 +82,54 @@ function sparkle(cx: number, cy: number, r: number) {
   return `M${cx} ${cy - r} Q ${cx + k} ${cy - k} ${cx + r} ${cy} Q ${cx + k} ${cy + k} ${cx} ${cy + r} Q ${cx - k} ${cy + k} ${cx - r} ${cy} Q ${cx - k} ${cy - k} ${cx} ${cy - r} Z`;
 }
 
+type Pt = [number, number];
+
+/** İkinci dereceden eğride t noktası ve oradaki yön (derece). */
+function qAt(p0: Pt, p1: Pt, p2: Pt, t: number): [number, number, number] {
+  const u = 1 - t;
+  const dx = 2 * u * (p1[0] - p0[0]) + 2 * t * (p2[0] - p1[0]);
+  const dy = 2 * u * (p1[1] - p0[1]) + 2 * t * (p2[1] - p1[1]);
+  return [u * u * p0[0] + 2 * u * t * p1[0] + t * t * p2[0], u * u * p0[1] + 2 * u * t * p1[1] + t * t * p2[1], (Math.atan2(dy, dx) * 180) / Math.PI];
+}
+
+/** Yumuşak kenarlı, düzensiz leke (suluboya, mermer bulutu). */
+function blob(cx: number, cy: number, r: number, seed: number, n = 9) {
+  const rr = rng(seed);
+  const pts: Pt[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = (Math.PI * 2 * i) / n;
+    const k = 0.74 + rr() * 0.45;
+    pts.push([cx + r * k * Math.cos(a), cy + r * k * 0.86 * Math.sin(a)]);
+  }
+  const mid = (a: Pt, b: Pt) => `${((a[0] + b[0]) / 2).toFixed(1)} ${((a[1] + b[1]) / 2).toFixed(1)}`;
+  let d = `M${mid(pts[n - 1], pts[0])}`;
+  for (let i = 0; i < n; i++) d += ` Q ${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)} ${mid(pts[i], pts[(i + 1) % n])}`;
+  return `${d} Z`;
+}
+
+/** Kalp (merkez ve ölçek). */
+function heart(cx: number, cy: number, s: number) {
+  return `M${cx} ${cy + 9 * s} C ${cx - 14 * s} ${cy - 1 * s} ${cx - 11 * s} ${cy - 12 * s} ${cx - 5.5 * s} ${cy - 12 * s} C ${cx - 2 * s} ${cy - 12 * s} ${cx} ${cy - 9 * s} ${cx} ${cy - 7 * s} C ${cx} ${cy - 9 * s} ${cx + 2 * s} ${cy - 12 * s} ${cx + 5.5 * s} ${cy - 12 * s} C ${cx + 11 * s} ${cy - 12 * s} ${cx + 14 * s} ${cy - 1 * s} ${cx} ${cy + 9 * s} Z`;
+}
+
+/** Kar tanesi: altı kol ve uçlarda çatallar, tek yol. */
+function snowflake(cx: number, cy: number, r: number) {
+  let d = '';
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i - Math.PI / 2;
+    const c = Math.cos(a);
+    const s = Math.sin(a);
+    d += `M${cx} ${cy} L${(cx + r * c).toFixed(1)} ${(cy + r * s).toFixed(1)} `;
+    const bx = cx + r * 0.58 * c;
+    const by = cy + r * 0.58 * s;
+    for (const side of [-1, 1]) {
+      const b = a + side * 0.7;
+      d += `M${bx.toFixed(1)} ${by.toFixed(1)} L${(bx + r * 0.32 * Math.cos(b)).toFixed(1)} ${(by + r * 0.32 * Math.sin(b)).toFixed(1)} `;
+    }
+  }
+  return d;
+}
+
 const MOTIFS: Record<InvitationTheme['motif'], Draw> = {
   // Büyük daire + kemer + küçük daire (ilk temaların görünümü)
   arch: (t) => (
@@ -657,6 +705,337 @@ const MOTIFS: Record<InvitationTheme['motif'], Draw> = {
         {b(304, 104, t.palette[1], 'b', 0.95)}
         {b(206, 116, t.palette[3] ?? t.shapeC, 'c', 0.85)}
         {b(60, 150, t.palette[2] ?? t.shapeB, 'd', 0.7)}
+      </G>
+    );
+  },
+
+  // Suluboya: üst üste binen saydam lekeler
+  watercolor: (t) => {
+    const spots: [number, number, number, number][] = [[300, 46, 92, 0], [214, 96, 58, 1], [336, 168, 66, 2], [52, 34, 66, 1], [148, 22, 38, 3], [258, 214, 40, 0]];
+    const items: ReactElement[] = [];
+    spots.forEach(([cx, cy, r, c], i) => {
+      const col = t.palette[c % t.palette.length];
+      // dış leke ve koyulaşan kenarı, içte giderek küçülen katmanlar (boya birikmesi)
+      items.push(<Path key={`a${i}`} d={blob(cx, cy, r, 11 + i, 11)} fill={col} opacity={0.3} stroke={col} strokeWidth={1.6} strokeOpacity={0.9} />);
+      items.push(<Path key={`b${i}`} d={blob(cx + 6, cy - 5, r * 0.8, 41 + i, 10)} fill={t.palette[(c + 1) % t.palette.length]} opacity={0.3} />);
+      items.push(<Path key={`c${i}`} d={blob(cx - 4, cy + 3, r * 0.6, 71 + i)} fill={col} opacity={0.32} />);
+      items.push(<Path key={`e${i}`} d={blob(cx + 3, cy + 6, r * 0.36, 91 + i, 7)} fill={t.palette[(c + 2) % t.palette.length]} opacity={0.35} />);
+    });
+    const r = rng(43);
+    for (let i = 0; i < 16; i++) {
+      const x = 120 + r() * 240;
+      const y = r() * 200;
+      items.push(<Circle key={`d${i}`} cx={x} cy={y} r={1 + r() * 3} fill={t.palette[i % 2]} opacity={0.55} />);
+    }
+    return (
+      <G>
+        {items}
+        <G opacity={0.55}>{branch('w', [250, 150], [236, 110], [262, 70], 5, 15, [t.soft, t.key_], t.soft)}</G>
+      </G>
+    );
+  },
+
+  // Boho: gökkuşağı yayları, pampas otları ve kuru yapraklar
+  boho: (t) => {
+    const plume = (k: string, p0: Pt, p1: Pt, p2: Pt, len: number, c: string) => {
+      // tüylü salkım: gövdeden kıvrılarak çıkan, boyu ve açısı değişen ince teller
+      const r = rng(k.length * 97 + len);
+      let d = '';
+      for (let i = 0; i < 56; i++) {
+        const tt = 0.34 + (0.66 * i) / 56;
+        const [x, y, a] = qAt(p0, p1, p2, tt);
+        const l = len * (0.55 + 0.6 * r()) * Math.pow(Math.sin(tt * Math.PI * 0.98), 0.6);
+        const side = i % 2 ? 1 : -1;
+        const b = ((a + side * (14 + r() * 26)) * Math.PI) / 180;
+        const bend = ((a + side * 4) * Math.PI) / 180;
+        d += `M${x.toFixed(1)} ${y.toFixed(1)} q${(l * 0.5 * Math.cos(b)).toFixed(1)} ${(l * 0.5 * Math.sin(b)).toFixed(1)} ${(l * Math.cos((b + bend) / 2)).toFixed(1)} ${(l * Math.sin((b + bend) / 2)).toFixed(1)} `;
+      }
+      return (
+        <G key={k}>
+          <Path d={`M${p0[0]} ${p0[1]} Q ${p1[0]} ${p1[1]} ${p2[0]} ${p2[1]}`} stroke={t.palette[3]} strokeWidth={1.4} fill="none" />
+          <Path d={d} stroke={c} strokeWidth={1.4} strokeLinecap="round" fill="none" opacity={0.85} />
+        </G>
+      );
+    };
+    const arcs = [104, 80, 56].map((R, i) => (
+      <Path key={R} d={`M${262 - R} 250 A${R} ${R} 0 0 1 ${262 + R} 250`} stroke={t.palette[i]} strokeWidth={20} fill="none" />
+    ));
+    return (
+      <G>
+        <Circle cx={60} cy={30} r={86} fill={t.shapeC} />
+        {arcs}
+        <Circle cx={262} cy={250} r={34} fill={t.palette[3]} />
+        {plume('p1', [210, 250], [196, 150], [150, 58], 28, t.palette[2])}
+        {plume('p2', [222, 250], [236, 140], [226, 40], 30, t.palette[1])}
+        {plume('p3', [234, 250], [290, 160], [326, 70], 26, t.palette[2])}
+        {branch('l', [-6, 120], [40, 60], [118, 30], 6, 18, [t.palette[0], t.palette[3]], t.palette[3])}
+        <Circle cx={150} cy={130} r={4} fill={t.palette[0]} />
+        <Circle cx={330} cy={30} r={6} fill={t.palette[0]} />
+      </G>
+    );
+  },
+
+  // Mermer: gri damarlar, bulutlar ve ince altın çizgiler
+  marble: (t) => {
+    const vein = (k: string, x0: number, y0: number, x1: number, y1: number, seed: number, w: number, c: string, o: number) => {
+      const r = rng(seed);
+      const n = 7;
+      let d = `M${x0} ${y0}`;
+      for (let i = 1; i <= n; i++) {
+        const x = x0 + ((x1 - x0) * i) / n;
+        const y = y0 + ((y1 - y0) * i) / n;
+        d += ` Q ${(x - (x1 - x0) / n / 2 + (r() - 0.5) * 30).toFixed(1)} ${(y - (y1 - y0) / n / 2 + (r() - 0.5) * 34).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`;
+      }
+      return <Path key={k} d={d} stroke={c} strokeWidth={w} fill="none" opacity={o} strokeLinecap="round" />;
+    };
+    return (
+      <G>
+        <Path d={blob(290, 60, 110, 5)} fill={t.shapeC} opacity={0.9} />
+        <Path d={blob(80, 150, 90, 9)} fill={t.shapeC} opacity={0.6} />
+        {vein('g1', -10, 40, 370, 210, 3, 4, t.shapeA, 0.25)}
+        {vein('g2', -10, 46, 370, 214, 3, 1.6, t.palette[1], 0.8)}
+        {vein('g3', 120, -10, 380, 120, 8, 2.6, t.shapeA, 0.3)}
+        {vein('g4', 120, -10, 380, 120, 8, 1, t.palette[1], 0.9)}
+        {vein('g5', 200, 250, 360, 150, 12, 1.2, t.shapeA, 0.6)}
+        {vein('g7', 60, -10, 250, 120, 31, 0.7, t.shapeA, 0.8)}
+        {vein('g8', 260, -10, 300, 250, 33, 0.6, t.shapeA, 0.7)}
+        {vein('g6', -10, 120, 160, -10, 14, 1, t.shapeA, 0.7)}
+        {vein('a1', 140, -10, 370, 90, 21, 1.2, t.shapeB, 0.95)}
+        {vein('a2', 230, 250, 370, 170, 25, 0.9, t.shapeB, 0.9)}
+        <Circle cx={262} cy={110} r={56} fill="none" stroke={t.shapeB} strokeWidth={1.3} />
+        <Circle cx={262} cy={110} r={50} fill="none" stroke={t.shapeB} strokeWidth={0.5} />
+        <Path d={sparkle(304, 64, 7)} fill={t.shapeB} />
+        <Circle cx={318} cy={78} r={1.8} fill={t.shapeB} />
+      </G>
+    );
+  },
+
+  // Akdeniz: limon dalı, limon dilimi ve mavi karo bordür
+  citrus: (t) => {
+    const lemon = (x: number, y: number, rot: number, s: number, k: string) => (
+      <G key={k} transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`}>
+        <Ellipse cx={0} cy={0} rx={24} ry={17} fill={t.shapeA} />
+        <Ellipse cx={24} cy={0} rx={5} ry={3.6} fill={t.shapeA} />
+        <Ellipse cx={-24} cy={0} rx={3} ry={2.6} fill={t.shapeA} />
+        <Ellipse cx={-7} cy={-7} rx={9} ry={3.5} fill="#FFFFFF" opacity={0.45} />
+      </G>
+    );
+    const segs: ReactElement[] = [];
+    for (let i = 0; i < 8; i++) segs.push(<Line key={i} x1={74} y1={74} x2={74 + 22 * Math.cos((i * Math.PI) / 4)} y2={74 + 22 * Math.sin((i * Math.PI) / 4)} stroke="#FFFFFF" strokeWidth={2} />);
+    const tiles: ReactElement[] = [];
+    for (let x = 0; x < 360; x += 24) tiles.push(<Path key={x} d={`M${x} 0 h24 v8 a12 12 0 0 1 -24 0 Z`} fill={t.shapeB} opacity={x % 48 ? 0.75 : 1} />);
+    const leaf = [t.palette[1], '#7FAE5C'];
+    return (
+      <G>
+        <Circle cx={290} cy={130} r={104} fill={t.shapeC} />
+        {tiles}
+        {branch('a', [370, 30], [290, 50], [196, 132], 8, 26, leaf, t.palette[1])}
+        {branch('b', [300, 60], [300, 130], [338, 200], 5, 22, leaf, t.palette[1])}
+        {lemon(250, 104, 30, 1.2, 'l1')}
+        {lemon(304, 126, -60, 1.05, 'l2')}
+        {lemon(214, 150, 70, 0.9, 'l3')}
+        {lemon(330, 196, 10, 0.95, 'l4')}
+        <Circle cx={74} cy={74} r={30} fill={t.shapeA} />
+        <Circle cx={74} cy={74} r={25} fill="#FFF6C9" />
+        <Circle cx={74} cy={74} r={22} fill={t.shapeA} opacity={0.7} />
+        {segs}
+      </G>
+    );
+  },
+
+  // Retro: 70'ler yayları ve çizgili gün batımı
+  retro: (t) => {
+    const cols = [t.shapeC, t.shapeB, t.shapeA, t.palette[3]];
+    const arcs = [214, 186, 158, 130, 102, 74].map((R, i) => (
+      <Path key={R} d={`M${318 - R} 250 A${R} ${R} 0 0 1 ${318 + R} 250`} stroke={cols[i % 4]} strokeWidth={26} fill="none" />
+    ));
+    const cuts = [0, 1, 2, 3].map((i) => <Rect key={i} x={30} y={70 + i * 9} width={100} height={2.5 + i * 1.2} fill={t.bg} />);
+    return (
+      <G>
+        {arcs}
+        <Circle cx={80} cy={70} r={44} fill={t.shapeB} />
+        <Circle cx={80} cy={70} r={44} fill={t.shapeA} opacity={0.5} />
+        {cuts}
+        <Path d="M20 138 q 15 -12 30 0 t 30 0 t 30 0" stroke={t.shapeC} strokeWidth={4} fill="none" strokeLinecap="round" />
+        <Path d={sparkle(186, 46, 10)} fill={t.shapeC} />
+        <Path d={sparkle(212, 76, 6)} fill={t.shapeB} />
+      </G>
+    );
+  },
+
+  // Neon: koyu zeminde parlayan çizgiler
+  neon: (t) => {
+    const glow = (k: string, d: string, c: string) => [
+      <Path key={`${k}1`} d={d} stroke={c} strokeWidth={12} opacity={0.12} fill="none" strokeLinecap="round" strokeLinejoin="round" />,
+      <Path key={`${k}2`} d={d} stroke={c} strokeWidth={6} opacity={0.3} fill="none" strokeLinecap="round" strokeLinejoin="round" />,
+      <Path key={`${k}3`} d={d} stroke={c} strokeWidth={2.6} fill="none" strokeLinecap="round" strokeLinejoin="round" />,
+      <Path key={`${k}4`} d={d} stroke="#FFFFFF" strokeWidth={0.9} opacity={0.7} fill="none" strokeLinecap="round" strokeLinejoin="round" />,
+    ];
+    const r = rng(53);
+    const dots: ReactElement[] = [];
+    for (let i = 0; i < 18; i++) dots.push(<Circle key={i} cx={140 + r() * 220} cy={r() * 150} r={0.8 + r() * 1.4} fill={t.palette[i % 4]} opacity={0.8} />);
+    return (
+      <G>
+        <Circle cx={262} cy={96} r={90} fill={t.shapeC} />
+        {dots}
+        {glow('ring', 'M262 46 A50 50 0 1 1 261.9 46', t.shapeB)}
+        {glow('h', heart(262, 98, 2.2), t.shapeA)}
+        {glow('z', 'M30 40 L54 22 L78 40 L102 22 L126 40 L150 22', t.shapeA)}
+        {glow('w', 'M300 196 q 12 -14 24 0 t 24 0', t.shapeB)}
+        {glow('tri', 'M60 92 L82 128 L38 128 Z', t.palette[2])}
+        {glow('p', 'M176 170 v14 M169 177 h14', t.palette[3])}
+        {glow('s', 'M150 82 v10 M145 87 h10', t.shapeB)}
+      </G>
+    );
+  },
+
+  // Tropik: palmiye yaprakları, deve tabanı ve mercan çiçeği
+  tropical: (t) => {
+    const LEAFLET = 'M0 0 C 12 -5 34 -5 48 0 C 34 4 12 4 0 0 Z';
+    const frond = (k: string, p0: Pt, p1: Pt, p2: Pt, size: number, c: string) => {
+      const items: ReactElement[] = [<Path key={`${k}s`} d={`M${p0[0]} ${p0[1]} Q ${p1[0]} ${p1[1]} ${p2[0]} ${p2[1]}`} stroke={c} strokeWidth={2.2} fill="none" />];
+      for (let i = 2; i <= 12; i++) {
+        const [x, y, a] = qAt(p0, p1, p2, i / 13);
+        const s = (size * (0.5 + 0.5 * Math.sin((i / 13) * Math.PI))) / 48;
+        for (const side of [-55, 55]) items.push(<Path key={`${k}${i}${side}`} d={LEAFLET} fill={c} transform={`translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(a + side).toFixed(0)}) scale(${s.toFixed(2)})`} />);
+      }
+      return items;
+    };
+    const cuts: Pt[] = [[-62, -14], [-58, 18], [-40, 44], [56, -20], [52, 14], [34, 42]];
+    return (
+      <G>
+        <Circle cx={250} cy={120} r={96} fill={t.shapeC} />
+        <Circle cx={196} cy={60} r={26} fill={t.shapeB} opacity={0.85} />
+        {frond('f1', [370, -10], [300, 40], [190, 126], 54, t.palette[1])}
+        {frond('f2', [370, 60], [320, 120], [250, 200], 46, t.shapeA)}
+        {frond('f3', [370, 140], [340, 190], [330, 250], 40, t.palette[2])}
+        <G transform="translate(52 36) rotate(-35)">
+          <Path d="M0 62 C -54 44 -76 -10 -44 -52 C -22 -74 -2 -66 0 -54 C 4 -70 40 -74 62 -40 C 80 -6 54 46 0 62 Z" fill={t.shapeA} />
+          {cuts.map(([x, y], i) => <Line key={i} x1={x * 1.2} y1={y * 1.2} x2={x * 0.35} y2={y * 0.35 + 6} stroke={t.bg} strokeWidth={5} strokeLinecap="round" />)}
+          <Path d="M0 62 Q 4 10 0 -50" stroke={t.palette[2]} strokeWidth={2} fill="none" />
+        </G>
+        <Path d={blob(228, 176, 12, 3, 6)} fill={t.shapeB} />
+        <Circle cx={228} cy={176} r={4} fill="#FFFFFF" opacity={0.8} />
+      </G>
+    );
+  },
+
+  // Kış: çam dalları, kar taneleri, buzlu mavi
+  winter: (t) => {
+    const pine = (k: string, p0: Pt, p1: Pt, p2: Pt, len: number) => {
+      let d = `M${p0[0]} ${p0[1]} Q ${p1[0]} ${p1[1]} ${p2[0]} ${p2[1]} `;
+      for (let i = 1; i <= 22; i++) {
+        const [x, y, a] = qAt(p0, p1, p2, i / 23);
+        const l = len * (1 - (i / 23) * 0.45);
+        for (const side of [-50, 50, -30, 30]) {
+          const b = ((a + side) * Math.PI) / 180;
+          d += `M${x.toFixed(1)} ${y.toFixed(1)} l${(l * Math.cos(b)).toFixed(1)} ${(l * Math.sin(b)).toFixed(1)} `;
+        }
+      }
+      return <Path key={k} d={d} stroke={t.shapeB} strokeWidth={1.4} strokeLinecap="round" fill="none" />;
+    };
+    const r = rng(61);
+    const snow: ReactElement[] = [];
+    for (let i = 0; i < 26; i++) snow.push(<Circle key={i} cx={r() * 360} cy={r() * 160} r={1 + r() * 2.2} fill={i % 3 ? '#FFFFFF' : t.shapeA} opacity={0.95} />);
+    return (
+      <G>
+        <Rect x={0} y={0} width={360} height={240} fill={t.shapeC} opacity={0.7} />
+        <Path d="M0 200 C 80 176 160 214 240 190 S 330 176 360 186 V240 H0 Z" fill="#FFFFFF" opacity={0.85} />
+        {snow}
+        {pine('a', [370, -6], [300, 20], [214, 22], 13)}
+        {pine('b', [340, -6], [326, 56], [280, 92], 11)}
+        {pine('c', [-10, -6], [40, 20], [110, 16], 11)}
+        <Circle cx={292} cy={22} r={5} fill={t.shapeA} />
+        <Circle cx={302} cy={30} r={4} fill="#FFFFFF" stroke={t.shapeA} strokeWidth={1} />
+        <Circle cx={56} cy={16} r={4} fill={t.shapeA} />
+        <Path d={snowflake(240, 128, 26)} stroke="#FFFFFF" strokeWidth={4} strokeLinecap="round" fill="none" />
+        <Path d={snowflake(240, 128, 26)} stroke={t.key_} strokeWidth={1.6} strokeLinecap="round" fill="none" opacity={0.85} />
+        <Path d={snowflake(320, 160, 14)} stroke={t.key_} strokeWidth={1.3} strokeLinecap="round" fill="none" opacity={0.7} />
+        <Path d={snowflake(150, 70, 12)} stroke={t.key_} strokeWidth={1.2} strokeLinecap="round" fill="none" opacity={0.65} />
+        <Path d={snowflake(60, 104, 10)} stroke={t.key_} strokeWidth={1.1} strokeLinecap="round" fill="none" opacity={0.6} />
+      </G>
+    );
+  },
+
+  // Aşk: kalp deseni ve büyük kalpler
+  hearts: (t) => {
+    const items: ReactElement[] = [];
+    const r = rng(67);
+    for (let row = 0; row < 6; row++) {
+      for (let col = 0; col < 9; col++) {
+        const x = 20 + col * 42 + (row % 2) * 21;
+        const y = 16 + row * 42;
+        if (x < 170 && y > 140) continue;
+        items.push(<Path key={`${row}-${col}`} d={heart(x, y, 0.55 + r() * 0.35)} fill={(row + col) % 3 ? t.shapeB : t.shapeA} opacity={(row + col) % 3 ? 0.45 : 0.3} transform={`rotate(${(r() - 0.5) * 40} ${x} ${y})`} />);
+      }
+    }
+    return (
+      <G>
+        {items}
+        <Circle cx={262} cy={110} r={84} fill={t.shapeC} />
+        <Path d={heart(236, 110, 4.6)} fill={t.shapeB} transform="rotate(-14 236 110)" />
+        <Path d={heart(284, 118, 5.4)} fill={t.shapeA} transform="rotate(10 284 118)" />
+        <Path d={heart(284, 118, 6.4)} fill="none" stroke={t.palette[2]} strokeWidth={1.2} transform="rotate(10 284 118)" />
+        <Ellipse cx={262} cy={92} rx={8} ry={4} fill="#FFFFFF" opacity={0.4} transform="rotate(-30 262 92)" />
+        <Path d={sparkle(206, 62, 8)} fill={t.shapeA} />
+        <Path d={sparkle(334, 54, 5)} fill={t.shapeA} />
+      </G>
+    );
+  },
+
+  // Simli: köşeden dökülen altın sim ve ince altın halkalar
+  foil: (t) => {
+    const r = rng(71);
+    const dots: ReactElement[] = [];
+    let n = 0;
+    while (dots.length < 110 && n < 2000) {
+      n++;
+      const x = r() * 380 - 10;
+      const y = r() * 250 - 10;
+      const d = Math.hypot(360 - x, y) / 300;
+      if (r() > Math.exp(-d * d * 3.2)) continue;
+      dots.push(<Circle key={n} cx={x} cy={y} r={0.6 + r() * (2.8 - d * 1.6)} fill={t.palette[n % 3]} opacity={0.65 + r() * 0.35} />);
+    }
+    return (
+      <G>
+        <Rect x={0} y={0} width={360} height={240} fill={t.shapeC} opacity={0.5} />
+        <Circle cx={240} cy={112} r={70} fill={t.bg} />
+        <Circle cx={240} cy={112} r={70} fill="none" stroke={t.shapeB} strokeWidth={1.4} />
+        <Circle cx={240} cy={112} r={63} fill="none" stroke={t.shapeB} strokeWidth={0.5} />
+        <Line x1={20} y1={30} x2={130} y2={30} stroke={t.shapeB} strokeWidth={0.8} />
+        <Path d="M136 30 l4 -4 l4 4 l-4 4 Z" fill={t.shapeB} />
+        {dots}
+        <Path d={sparkle(204, 66, 9)} fill={t.shapeB} />
+        <Path d={sparkle(286, 170, 6)} fill={t.palette[1]} />
+        <Path d={sparkle(80, 60, 5)} fill={t.shapeB} />
+      </G>
+    );
+  },
+
+  // Çizgi: tek çizgi botanik dal, kâğıt üzerinde mürekkep
+  lineart: (t) => {
+    const p0: Pt = [196, 236];
+    const p1: Pt = [214, 120];
+    const p2: Pt = [312, 26];
+    const items: ReactElement[] = [];
+    for (let i = 1; i <= 7; i++) {
+      const [x, y, a] = qAt(p0, p1, p2, i / 8);
+      const s = 0.9 + 0.5 * Math.sin((i / 8) * Math.PI);
+      const rot = a + (i % 2 ? 52 : -52);
+      items.push(<Path key={`l${i}`} d={`M0 0 C 9 -11 25 -11 34 0 C 25 11 9 11 0 0 Z M3 0 H28`} stroke={t.shapeA} strokeWidth={1.3 / s} fill="none" strokeLinejoin="round" transform={`translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(0)}) scale(${s.toFixed(2)})`} />);
+    }
+    return (
+      <G>
+        <Path d={blob(268, 96, 70, 17)} fill={t.shapeC} />
+        <Circle cx={300} cy={150} r={26} fill={t.shapeB} opacity={0.35} />
+        <Path d={`M${p0[0]} ${p0[1]} Q ${p1[0]} ${p1[1]} ${p2[0]} ${p2[1]}`} stroke={t.shapeA} strokeWidth={1.4} fill="none" strokeLinecap="round" />
+        {items}
+        <Path d="M312 26 c 3 -9 12 -11 16 -4" stroke={t.shapeA} strokeWidth={1.3} fill="none" strokeLinecap="round" />
+        <Path d="M40 62 Q 80 52 130 22" stroke={t.shapeA} strokeWidth={1.1} fill="none" strokeLinecap="round" opacity={0.75} />
+        {[[70, 54, -50], [94, 44, 20], [112, 34, -60]].map(([x, y, a], i) => (
+          <Path key={`s${i}`} d="M0 0 C 6 -7 16 -7 22 0 C 16 7 6 7 0 0 Z" stroke={t.shapeA} strokeWidth={1.1} fill="none" opacity={0.75} transform={`translate(${x} ${y}) rotate(${a})`} />
+        ))}
+        <Circle cx={132} cy={21} r={2.2} fill={t.shapeB} />
       </G>
     );
   },

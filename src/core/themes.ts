@@ -8,14 +8,16 @@ export type ThemeKey =
   | 'kina_kirmizi' | 'mor_gece'
   | 'konfeti' | 'limon' | 'deniz' | 'pembe' | 'gokkusagi' | 'kurumsal' | 'saha_yesil' | 'parke' | 'file'
   | 'sakura' | 'lale' | 'sehzade' | 'nur' | 'bulut' | 'pamuk' | 'kep' | 'isilti'
-  | 'siyah_altin' | 'osmanli' | 'cini';
+  | 'siyah_altin' | 'osmanli' | 'cini'
+  | 'suluboya' | 'mavi_suluboya' | 'boho' | 'kil' | 'mermer' | 'akdeniz' | 'retro' | 'neon' | 'tropik' | 'kis' | 'ask' | 'simli' | 'cizgi';
 
 /** Görsel alandaki desen. */
 export type Motif =
   | 'arch' | 'botanical' | 'frame' | 'deco' | 'confetti' | 'waves' | 'stars' | 'sun' | 'rainbow' | 'petals'
   | 'ottoman' | 'minimal' | 'pitch' | 'balloons' | 'court' | 'net'
   | 'sakura' | 'tulips' | 'crown' | 'geometric' | 'clouds' | 'caps' | 'disco'
-  | 'luxe' | 'rumi' | 'tiles';
+  | 'luxe' | 'rumi' | 'tiles'
+  | 'watercolor' | 'boho' | 'marble' | 'citrus' | 'retro' | 'neon' | 'tropical' | 'winter' | 'hearts' | 'foil' | 'lineart';
 
 /** Davetiye görselinin üstünde süzülen hareket (davetli sayfası ve önizleme). */
 export type ThemeEffect = 'none' | 'petals' | 'confetti' | 'sparkles' | 'stars' | 'bubbles' | 'hearts';
@@ -57,6 +59,8 @@ const MOTIF_EFFECT: Record<Motif, ThemeEffect> = {
   sun: 'sparkles', rainbow: 'confetti', petals: 'petals', ottoman: 'sparkles', minimal: 'none', pitch: 'none', balloons: 'bubbles',
   court: 'none', net: 'none', sakura: 'petals', tulips: 'petals', crown: 'sparkles', geometric: 'stars', clouds: 'bubbles', caps: 'confetti', disco: 'sparkles',
   luxe: 'sparkles', rumi: 'none', tiles: 'none',
+  watercolor: 'petals', boho: 'petals', marble: 'sparkles', citrus: 'sparkles', retro: 'confetti', neon: 'sparkles', tropical: 'petals',
+  winter: 'sparkles', hearts: 'hearts', foil: 'sparkles', lineart: 'none',
 };
 
 const LIGHT_CHIP = 'rgba(255,255,255,0.82)';
@@ -110,6 +114,20 @@ const DEFS: Record<ThemeKey, Def> = {
   osmanli: { bg: '#FAF3E6', shapeA: '#7A1F2B', shapeB: '#C9A044', shapeC: '#F1E3C8', ink: '#33140F', soft: '#674A40', key_: '#7A1F2B', dark: false, motif: 'rumi', font: 'formal', group: 'wedding', palette: ['#7A1F2B', '#C9A044', '#F1E3C8'] },
   cini: { bg: '#F5F8FC', shapeA: '#1F4E8C', shapeB: '#2BA3A6', shapeC: '#E3ECF7', ink: '#132744', soft: '#4A5C78', key_: '#1F4E8C', dark: false, motif: 'tiles', font: 'formal', group: 'tradition', palette: ['#1F4E8C', '#2BA3A6', '#C8414B'] },
   isilti: { bg: '#1D1430', shapeA: '#B57BE8', shapeB: '#F5C86A', shapeC: '#2E2148', ink: '#F8F1FF', soft: '#CDBEDF', key_: '#F5C86A', chip: 'rgba(29,20,48,0.6)', dark: true, motif: 'disco', font: 'script', group: 'celebration', palette: ['#B57BE8', '#F5C86A', '#FF8FB1'] },
+  // Yeni tarzlar: suluboya, boho, mermer, akdeniz, retro, neon, tropik, kış, aşk, simli, çizgi
+  suluboya: { bg: '#FFF6F2', shapeA: '#F4B7B0', shapeB: '#F7CBA4', shapeC: '#FBE1DA', ink: '#3A2422', soft: '#6E514D', key_: '#A44E4A', dark: false, motif: 'watercolor', font: 'serif', group: 'wedding', palette: ['#F4B7B0', '#F7CBA4', '#E9A9B8', '#FBE1DA'] },
+  mavi_suluboya: { bg: '#F2F6F8', shapeA: '#A9C3D6', shapeB: '#B9CDB5', shapeC: '#DCE7EE', ink: '#1D2D3A', soft: '#4C5D6A', key_: '#3E6584', dark: false, motif: 'watercolor', font: 'serif', group: 'wedding', palette: ['#A9C3D6', '#B9CDB5', '#C3CCE6', '#DCE7EE'] },
+  boho: { bg: '#F8F0E6', shapeA: '#C8734F', shapeB: '#E3C9A6', shapeC: '#F0E0CC', ink: '#35231A', soft: '#6A5242', key_: '#9C4A2B', dark: false, motif: 'boho', font: 'script', group: 'wedding', palette: ['#C8734F', '#D9A77E', '#E3C9A6', '#9A7B5A'] },
+  kil: { bg: '#F4E0D2', shapeA: '#A9472C', shapeB: '#E6B48C', shapeC: '#E6C2A6', ink: '#3A1E14', soft: '#674236', key_: '#8E3B24', dark: false, motif: 'boho', font: 'serif', group: 'celebration', palette: ['#A9472C', '#E39A6E', '#F3D3B5', '#6E3A26'] },
+  mermer: { bg: '#FAFAF8', shapeA: '#CFCFCB', shapeB: '#C6A35A', shapeC: '#EEEEEB', ink: '#232323', soft: '#5E5E5E', key_: '#7F6328', dark: false, motif: 'marble', font: 'formal', group: 'wedding', palette: ['#C6A35A', '#BDBDB9', '#E5E5E2'] },
+  akdeniz: { bg: '#F5F8FC', shapeA: '#F4CF3C', shapeB: '#2F6FA8', shapeC: '#DDE8F4', ink: '#132A44', soft: '#46597A', key_: '#235C95', dark: false, motif: 'citrus', font: 'serif', group: 'wedding', palette: ['#F4CF3C', '#5E8F4A', '#2F6FA8', '#FFFFFF'] },
+  retro: { bg: '#FBF1DE', shapeA: '#E0A030', shapeB: '#D9622B', shapeC: '#8A4B2A', ink: '#2E1C10', soft: '#634A36', key_: '#A3461A', dark: false, motif: 'retro', font: 'sans', group: 'celebration', palette: ['#E0A030', '#D9622B', '#8A4B2A', '#F0C98A'] },
+  neon: { bg: '#120E24', shapeA: '#FF3EA5', shapeB: '#2CE6F2', shapeC: '#1E1838', ink: '#F7F2FF', soft: '#C9C0E0', key_: '#2CE6F2', chip: 'rgba(18,14,36,0.65)', dark: true, motif: 'neon', font: 'sans', group: 'celebration', palette: ['#FF3EA5', '#2CE6F2', '#B26BFF', '#FFE14D'] },
+  tropik: { bg: '#F1F7F0', shapeA: '#2F7A4F', shapeB: '#F28C6B', shapeC: '#D6EAD9', ink: '#15301F', soft: '#46604F', key_: '#2B6A44', dark: false, motif: 'tropical', font: 'sans', group: 'celebration', palette: ['#2F7A4F', '#4E9A62', '#7DBB7F', '#F28C6B'] },
+  kis: { bg: '#F2F7FB', shapeA: '#A9CBE3', shapeB: '#3F6E5A', shapeC: '#DCEAF4', ink: '#152638', soft: '#475B6E', key_: '#2F5D82', dark: false, motif: 'winter', font: 'formal', group: 'wedding', palette: ['#A9CBE3', '#3F6E5A', '#FFFFFF'] },
+  ask: { bg: '#FFF2F3', shapeA: '#E2425C', shapeB: '#F7A1B0', shapeC: '#FDDDE2', ink: '#3A1820', soft: '#6E4851', key_: '#B02741', dark: false, motif: 'hearts', font: 'script', group: 'wedding', palette: ['#E2425C', '#F7A1B0', '#C9184A', '#FDDDE2'] },
+  simli: { bg: '#FCF8F0', shapeA: '#EADCBF', shapeB: '#C8A048', shapeC: '#F5ECDA', ink: '#2C2416', soft: '#655843', key_: '#83631F', dark: false, motif: 'foil', font: 'formal', group: 'wedding', palette: ['#C8A048', '#E2C77E', '#A88232'] },
+  cizgi: { bg: '#FAF8F3', shapeA: '#2B2B2B', shapeB: '#C9B79C', shapeC: '#EFEBE2', ink: '#222120', soft: '#5F5C57', key_: '#4A4744', dark: false, motif: 'lineart', font: 'serif', group: 'wedding', palette: ['#2B2B2B', '#C9B79C'] },
 };
 
 export const THEMES = Object.fromEntries(
@@ -118,9 +136,9 @@ export const THEMES = Object.fromEntries(
 
 /** Seçicideki sıra: düğüne uygunlar önce. */
 export const THEME_ORDER: ThemeKey[] = [
-  'fildisi', 'siyah_altin', 'osmanli', 'sakura', 'adacayi', 'gul', 'okaliptus', 'pudra', 'sampanya', 'beyaz', 'lale', 'zeytin', 'bordo', 'zumrut', 'lacivert', 'lavanta', 'mor_gece', 'kina_kirmizi',
+  'fildisi', 'siyah_altin', 'mermer', 'simli', 'osmanli', 'suluboya', 'sakura', 'adacayi', 'gul', 'mavi_suluboya', 'okaliptus', 'boho', 'cizgi', 'pudra', 'ask', 'sampanya', 'beyaz', 'akdeniz', 'lale', 'zeytin', 'bordo', 'kis', 'zumrut', 'lacivert', 'lavanta', 'mor_gece', 'kina_kirmizi',
   'sehzade', 'nur', 'cini',
-  'konfeti', 'gokkusagi', 'pembe', 'bulut', 'pamuk', 'kep', 'isilti', 'limon', 'deniz', 'mercan', 'altin',
+  'konfeti', 'gokkusagi', 'retro', 'neon', 'pembe', 'tropik', 'bulut', 'pamuk', 'kep', 'isilti', 'limon', 'deniz', 'kil', 'mercan', 'altin',
   'kurumsal', 'gece', 'saha_yesil', 'parke', 'file',
 ];
 
