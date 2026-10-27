@@ -209,11 +209,11 @@ export default function GuestRsvp() {
     <View style={{ gap: 14 }}>
       {weather && weather.available ? <WeatherCard theme={theme} w={weather} t={t} /> : null}
       {settings.program?.length ? <ProgramList theme={theme} items={settings.program} t={t} locale={locale} /> : null}
-      {settings.info ? <InfoCard theme={theme} info={settings.info} t={t} /> : null}
-      {media?.gallery?.length ? <Gallery theme={theme} photos={media.gallery} t={t} /> : null}
       {inv.status === 'yes' && settings.program_rsvp && (settings.program?.length ?? 0) > 1 ? (
         <ProgramRsvpCard theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} />
       ) : null}
+      {settings.info ? <InfoCard theme={theme} info={settings.info} t={t} /> : null}
+      {media?.gallery?.length ? <Gallery theme={theme} photos={media.gallery} t={t} /> : null}
       {inv.poll ? <PollCard theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
       {inv.signup?.length ? <SignupCard theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
       {sportOf(inv.event.type) ? <SahaCards theme={theme} inv={inv} token={token} t={t} locale={locale} onUpdate={setData} onError={onGuestError} /> : null}
