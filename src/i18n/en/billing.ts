@@ -29,7 +29,7 @@ export const billing: typeof TR = {
     design: 'Upload your own invitation design',
     import: 'Bulk import guests from Excel/CSV',
     rsvp: 'Guest page and live RSVP tracking',
-    page: '37 templates, 4 layouts, photo invitations, envelope opening, countdown, programme, gift/IBAN card',
+    page: '50 templates, 4 layouts, photo invitations, envelope opening, countdown, programme, gift/IBAN card',
     gallery: { one: '{count} gallery photo', other: '{count} gallery photos' },
     music: 'Background music',
     video: 'Video invitation',
