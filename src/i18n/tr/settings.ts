@@ -25,6 +25,8 @@ export const settings = {
   notifyRsvp: 'Davetli cevap verince bildir',
   notifyRsvpHint: 'Telefonuna anlık bildirim gelir. Bildirim izni telefon ayarlarından da yönetilir.',
   notifyFailed: 'Tercih kaydedilemedi.',
+  helpTitle: 'Yardım',
+  helpBody: 'Bir sorun mu var ya da bir şey mi soracaksın? Bize yaz, en kısa sürede dönelim.',
   legalTitle: 'Yasal',
   legalPrivacy: 'Gizlilik Politikası',
   legalTerms: 'Kullanım Koşulları',

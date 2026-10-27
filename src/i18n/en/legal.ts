@@ -77,7 +77,7 @@ export const legal: typeof TR = {
           id: 'haklar',
           title: '7. Your rights',
           body: [
-            'You have the right to access, correct, delete and object to the processing of your data (KVKK Art. 11). Send requests to [email].',
+            'You have the right to access, correct, delete and object to the processing of your data (KVKK Art. 11). Send requests to info@invitefolk.com.',
             'If you are a guest with a request about your details, you can contact the organiser who invited you or write to us; we will pass it on and help.',
           ],
         },
@@ -89,7 +89,7 @@ export const legal: typeof TR = {
         {
           id: 'iletisim',
           title: '9. Contact and changes',
-          body: ['[Company Name], [Address], [Registered e-mail (KEP)], [email].', 'We may update this policy; we will announce important changes in the app.'],
+          body: ['[Company Name], [Address], [Registered e-mail (KEP)], info@invitefolk.com.', 'We may update this policy; we will announce important changes in the app.'],
         },
       ],
     },
@@ -136,7 +136,7 @@ export const legal: typeof TR = {
           body: [
             'Paid plans are a one-time payment valid for one year; nothing renews automatically. When a plan ends your account returns to Free and your data is kept.',
             'Prices are shown in Turkish lira including VAT. Web payments are taken by iyzico; in-app payments by Apple or Google.',
-            'A plan is a digital service activated on your account as soon as payment is confirmed. Under Article 15(1)(ğ) of the Turkish Distance Contracts Regulation, there is no right of withdrawal for digital services performed instantly; if a technical problem prevents you from using the service, write to [email] and we will consider a refund. Store purchases are refunded under Apple’s or Google’s rules.',
+            'A plan is a digital service activated on your account as soon as payment is confirmed. Under Article 15(1)(ğ) of the Turkish Distance Contracts Regulation, there is no right of withdrawal for digital services performed instantly; if a technical problem prevents you from using the service, write to info@invitefolk.com and we will consider a refund. Store purchases are refunded under Apple’s or Google’s rules.',
           ],
         },
         {
@@ -158,7 +158,7 @@ export const legal: typeof TR = {
         {
           id: 'hukuk',
           title: '8. Governing law',
-          body: ['These terms are governed by the laws of the Republic of Türkiye. For consumer matters, Consumer Arbitration Committees and Consumer Courts have jurisdiction.', '[Company Name], [Address], [MERSIS no.], [email].'],
+          body: ['These terms are governed by the laws of the Republic of Türkiye. For consumer matters, Consumer Arbitration Committees and Consumer Courts have jurisdiction.', '[Company Name], [Address], [MERSIS no.], info@invitefolk.com.'],
         },
       ],
     },
@@ -170,7 +170,7 @@ export const legal: typeof TR = {
           id: 'sorumlu',
           title: '1. Data controller and processor',
           body: [
-            'Data controller for organiser account data: [Company Name], [Address], [Registered e-mail (KEP)], [email].',
+            'Data controller for organiser account data: [Company Name], [Address], [Registered e-mail (KEP)], info@invitefolk.com.',
             'For guest data, the data controller is the organiser who sent the invitation. Invitefolk processes that data as a data processor, on the organiser’s behalf and instructions.',
           ],
         },
@@ -223,7 +223,7 @@ export const legal: typeof TR = {
           title: '7. Your rights (KVKK Art. 11)',
           body: [
             'You have the right to learn whether your data is processed and request information about it, learn the purpose of processing and whether it is used accordingly, know the third parties it is transferred to, request correction of incomplete or inaccurate data, request deletion or destruction under KVKK Art. 7, request that these actions be notified to third parties, object to a result against you arising from automated analysis, and claim compensation for damage caused by unlawful processing.',
-            'Send requests to [email] or in writing to [Address]. Requests are concluded free of charge within 30 days at the latest.',
+            'Send requests to info@invitefolk.com or in writing to [Address]. Requests are concluded free of charge within 30 days at the latest.',
             'If you are a guest, you can first contact the organiser who invited you; we will forward any request we receive to the organiser and help resolve it.',
           ],
         },

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Pressable, Text, TextInput, useWindowDimensions, View, Linking } from 'react-native';
 
 import { LANG_NAMES, LANGS, type Lang, useI18n } from '@/i18n';
 import { deleteMyAccount, setProfileLocale } from '@/lib/api';
@@ -10,6 +10,7 @@ import { Icon } from '@/ui/Icon';
 import { Body, Button, Caption, Display, DisplayAccent, IconButton, Label, Notice, Pill, Surface, Title, ToggleRow } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { color, font, radius } from '@/ui/tokens';
+import { SUPPORT_EMAIL, supportMailto } from '@/core/contact';
 
 /** Ayarlar: uygulama dili, hesap, güvenlik ve hesabı kalıcı silme (App Store kuralı, KVKK). */
 export default function SettingsScreen() {
@@ -130,6 +131,13 @@ export default function SettingsScreen() {
             </View>
             <ToggleRow label={t('settings.notifyRsvp')} hint={t('settings.notifyRsvpHint')} value={notifyValue} onChange={changeNotify} disabled={!profile} />
             {notifyErr && <Notice tone="error" text={t('settings.notifyFailed')} />}
+          </Surface>
+
+          {/* Yardım */}
+          <Surface style={{ gap: 8 }}>
+            <Title>{t('settings.helpTitle')}</Title>
+            <Body>{t('settings.helpBody')}</Body>
+            <Button label={SUPPORT_EMAIL} icon="mail" variant="secondary" onPress={() => Linking.openURL(supportMailto('Invitefolk'))} style={{ alignSelf: 'flex-start' }} />
           </Surface>
 
           {/* Yasal */}

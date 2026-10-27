@@ -79,7 +79,7 @@ export const legal = {
           id: 'haklar',
           title: '7. Hakların',
           body: [
-            'Verilerine erişme, düzeltme, silme ve itiraz etme hakkın vardır (KVKK md. 11). Taleplerini [e-posta] adresine iletebilirsin.',
+            'Verilerine erişme, düzeltme, silme ve itiraz etme hakkın vardır (KVKK md. 11). Taleplerini info@invitefolk.com adresine iletebilirsin.',
             'Davetliysen ve bilgilerinle ilgili bir talebin varsa, seni davet eden organizatöre başvurabilir ya da bize yazabilirsin; talebini organizatöre iletir ve yardımcı oluruz.',
           ],
         },
@@ -92,7 +92,7 @@ export const legal = {
           id: 'iletisim',
           title: '9. İletişim ve değişiklikler',
           body: [
-            '[Şirket Unvanı], [Adres], [KEP adresi], [e-posta].',
+            '[Şirket Unvanı], [Adres], [KEP adresi], info@invitefolk.com.',
             'Bu politikayı güncelleyebiliriz; önemli değişiklikleri uygulama içinde duyururuz.',
           ],
         },
@@ -141,7 +141,7 @@ export const legal = {
           body: [
             'Ücretli paketler tek seferlik ödemeyle bir yıl geçerlidir; otomatik yenileme yoktur. Süre bitince hesap ücretsiz pakete döner, verilerin silinmez.',
             'Fiyatlar KDV dahil Türk lirası olarak gösterilir. Web ödemeleri iyzico, uygulama içi ödemeler Apple veya Google üzerinden alınır.',
-            'Paket, ödeme onaylanır onaylanmaz hesabına tanımlanan dijital bir hizmettir. Mesafeli Sözleşmeler Yönetmeliği md. 15/1-(ğ) uyarınca, anında ifa edilen dijital içeriklerde cayma hakkı bulunmamaktadır; teknik bir sorun nedeniyle hizmeti kullanamazsan [e-posta] adresine yaz, iade talebini değerlendiririz. Mağaza ödemelerinde iadeler Apple veya Google\'ın kurallarına tabidir.',
+            'Paket, ödeme onaylanır onaylanmaz hesabına tanımlanan dijital bir hizmettir. Mesafeli Sözleşmeler Yönetmeliği md. 15/1-(ğ) uyarınca, anında ifa edilen dijital içeriklerde cayma hakkı bulunmamaktadır; teknik bir sorun nedeniyle hizmeti kullanamazsan info@invitefolk.com adresine yaz, iade talebini değerlendiririz. Mağaza ödemelerinde iadeler Apple veya Google\'ın kurallarına tabidir.',
           ],
         },
         {
@@ -163,7 +163,7 @@ export const legal = {
         {
           id: 'hukuk',
           title: '8. Uygulanacak hukuk',
-          body: ['Bu koşullara Türkiye Cumhuriyeti hukuku uygulanır. Tüketici işlemlerinde Tüketici Hakem Heyetleri ve Tüketici Mahkemeleri yetkilidir.', '[Şirket Unvanı], [Adres], [MERSİS no], [e-posta].'],
+          body: ['Bu koşullara Türkiye Cumhuriyeti hukuku uygulanır. Tüketici işlemlerinde Tüketici Hakem Heyetleri ve Tüketici Mahkemeleri yetkilidir.', '[Şirket Unvanı], [Adres], [MERSİS no], info@invitefolk.com.'],
         },
       ],
     } as LegalDoc,
@@ -176,7 +176,7 @@ export const legal = {
           id: 'sorumlu',
           title: '1. Veri sorumlusu ve veri işleyen',
           body: [
-            'Organizatör hesap verileri bakımından veri sorumlusu: [Şirket Unvanı], [Adres], [KEP adresi], [e-posta].',
+            'Organizatör hesap verileri bakımından veri sorumlusu: [Şirket Unvanı], [Adres], [KEP adresi], info@invitefolk.com.',
             'Davetli verileri bakımından veri sorumlusu, davetiyeyi gönderen organizatördür. Invitefolk bu verileri organizatör adına ve talimatı doğrultusunda veri işleyen sıfatıyla işler.',
           ],
         },
@@ -229,7 +229,7 @@ export const legal = {
           title: '7. Haklarınız (KVKK md. 11)',
           body: [
             'Kişisel verilerinizin işlenip işlenmediğini öğrenme, işlenmişse bilgi talep etme, işlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme, aktarıldığı üçüncü kişileri bilme, eksik veya yanlış işlenmişse düzeltilmesini, KVKK md. 7 şartlarında silinmesini veya yok edilmesini isteme, bu işlemlerin aktarılan üçüncü kişilere bildirilmesini isteme, otomatik sistemlerle analiz sonucu aleyhinize bir sonuca itiraz etme ve kanuna aykırı işleme nedeniyle zararın giderilmesini talep etme haklarına sahipsiniz.',
-            'Başvurularınızı [e-posta] adresine veya [Adres] adresine yazılı olarak iletebilirsiniz. Başvurular en geç 30 gün içinde ücretsiz sonuçlandırılır.',
+            'Başvurularınızı info@invitefolk.com adresine veya [Adres] adresine yazılı olarak iletebilirsiniz. Başvurular en geç 30 gün içinde ücretsiz sonuçlandırılır.',
             'Davetliyseniz, verilerinizle ilgili başvurunuzu öncelikle sizi davet eden organizatöre yapabilirsiniz; bize ulaşan başvuruları organizatöre iletir ve sonuçlanmasına yardımcı oluruz.',
           ],
         },

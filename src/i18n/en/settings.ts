@@ -27,6 +27,8 @@ export const settings: typeof TR = {
   notifyRsvp: 'Notify me when a guest replies',
   notifyRsvpHint: 'You get an instant notification on your phone. Notification permission is also managed in your phone settings.',
   notifyFailed: 'Could not save your preference.',
+  helpTitle: 'Help',
+  helpBody: 'Something wrong, or a question? Write to us and we will get back to you soon.',
   legalTitle: 'Legal',
   legalPrivacy: 'Privacy Policy',
   legalTerms: 'Terms of Use',

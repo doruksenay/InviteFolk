@@ -73,6 +73,7 @@ export const landing = {
     freeCta: 'Ücretsiz başla',
   },
   faq: {
+    more: 'Cevabını bulamadın mı? Bize yaz:',
     kicker: 'SORULAR',
     title: 'Merak',
     titleAccent: 'edilenler',

@@ -70,6 +70,7 @@ export const landing: typeof TR = {
     freeCta: 'Start for free',
   },
   faq: {
+    more: 'Can’t find your answer? Write to us:',
     kicker: 'FAQ',
     title: 'Good',
     titleAccent: 'questions',
