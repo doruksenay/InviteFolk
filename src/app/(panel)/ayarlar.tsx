@@ -10,7 +10,7 @@ import { Icon } from '@/ui/Icon';
 import { Body, Button, Caption, Display, DisplayAccent, IconButton, Label, Notice, Pill, Surface, Title, ToggleRow } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { color, font, radius } from '@/ui/tokens';
-import { SUPPORT_EMAIL, supportMailto } from '@/core/contact';
+import { mailto, supportEmail } from '@/core/contact';
 
 /** Ayarlar: uygulama dili, hesap, güvenlik ve hesabı kalıcı silme (App Store kuralı, KVKK). */
 export default function SettingsScreen() {
@@ -137,7 +137,7 @@ export default function SettingsScreen() {
           <Surface style={{ gap: 8 }}>
             <Title>{t('settings.helpTitle')}</Title>
             <Body>{t('settings.helpBody')}</Body>
-            <Button label={SUPPORT_EMAIL} icon="mail" variant="secondary" onPress={() => Linking.openURL(supportMailto('Invitefolk'))} style={{ alignSelf: 'flex-start' }} />
+            <Button label={supportEmail(lang)} icon="mail" variant="secondary" onPress={() => Linking.openURL(mailto(supportEmail(lang), 'Invitefolk'))} style={{ alignSelf: 'flex-start' }} />
           </Surface>
 
           {/* Yasal */}

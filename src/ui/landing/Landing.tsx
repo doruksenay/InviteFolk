@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Linking, Pressable, ScrollView, type ScrollViewInstance, Text, useWindowDimensions, View } from 'react-native';
 
-import { SUPPORT_EMAIL, supportMailto } from '@/core/contact';
+import { INFO_EMAIL, mailto, supportEmail } from '@/core/contact';
 import { eventCopy } from '@/core/event-types';
 import { getTheme } from '@/core/themes';
 import { LANGS, type Lang, useI18n } from '@/i18n';
@@ -293,8 +293,8 @@ export function Landing() {
             </View>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
               <Text style={{ fontFamily: font.medium, fontSize: 15, color: color.inkSoft }}>{L.faq.more}</Text>
-              <Pressable accessibilityRole="link" onPress={() => Linking.openURL(supportMailto('Invitefolk'))} hitSlop={6}>
-                <Text style={{ fontFamily: font.bold, fontSize: 15, color: color.lavenderInk, textDecorationLine: 'underline' }}>{SUPPORT_EMAIL}</Text>
+              <Pressable accessibilityRole="link" onPress={() => Linking.openURL(mailto(supportEmail(lang), 'Invitefolk'))} hitSlop={6}>
+                <Text style={{ fontFamily: font.bold, fontSize: 15, color: color.lavenderInk, textDecorationLine: 'underline' }}>{supportEmail(lang)}</Text>
               </Pressable>
             </View>
           </View>
@@ -311,9 +311,9 @@ export function Landing() {
               <Text style={{ fontFamily: font.medium, fontSize: 13, color: color.muted }}>{L.footer.tagline}</Text>
             </View>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 18, alignItems: 'center' }}>
-              <Pressable accessibilityRole="link" onPress={() => Linking.openURL(supportMailto('Invitefolk'))} hitSlop={6} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Pressable accessibilityRole="link" onPress={() => Linking.openURL(mailto(INFO_EMAIL, 'Invitefolk'))} hitSlop={6} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <Icon name="mail" size={14} color={color.inkSoft} />
-                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: color.inkSoft }}>{SUPPORT_EMAIL}</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: color.inkSoft }}>{INFO_EMAIL}</Text>
               </Pressable>
               {(['gizlilik', 'kosullar', 'kvkk'] as const).map((doc) => (
                 <Pressable key={doc} accessibilityRole="link" onPress={() => router.push({ pathname: '/yasal/[doc]', params: { doc } })} hitSlop={6}>

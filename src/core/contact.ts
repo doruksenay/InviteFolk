@@ -1,7 +1,12 @@
-// İletişim bilgileri tek yerde: tanıtım sayfası, sık sorulanlar, ayarlar ve yasal metinler bunları kullanır.
-// (Yasal metinler i18n/*/legal.ts içinde adresi düz yazı olarak taşır; değişirse orada da güncellenmeli.)
-export const SUPPORT_EMAIL = 'info@invitefolk.com';
+// İletişim bilgileri tek yerde.
+//  - Destek (sorun, soru, fatura): Türkçede destek@, İngilizcede support@
+//  - Genel bilgilendirme (alt bilgi, yasal metinler, iş birlikleri): info@
+// (Yasal metinler i18n/*/legal.ts içinde info@ adresini düz yazı olarak taşır; değişirse orada da güncellenmeli.)
+import type { Lang } from '@/i18n';
+
+export const INFO_EMAIL = 'info@invitefolk.com';
+export const supportEmail = (lang: Lang) => (lang === 'en' ? 'support@invitefolk.com' : 'destek@invitefolk.com');
 /** WhatsApp destek hattı (uluslararası biçimde, + ve boşluksuz). Henüz yok. */
 export const SUPPORT_WHATSAPP: string | null = null;
 
-export const supportMailto = (subject?: string) => `mailto:${SUPPORT_EMAIL}${subject ? `?subject=${encodeURIComponent(subject)}` : ''}`;
+export const mailto = (address: string, subject?: string) => `mailto:${address}${subject ? `?subject=${encodeURIComponent(subject)}` : ''}`;
