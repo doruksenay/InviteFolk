@@ -315,7 +315,7 @@ export const tools = {
     tabGuestbook: 'Anı defteri',
     tabPeople: 'Kişiler',
     people: {
-      privacy: 'Yüzler yalnızca bu tarayıcıda işlenir; sunucuya hiçbir yüz verisi gönderilmez. Verileri istediğin an silebilirsin. Sonuçlar tahmindir.',
+      privacy: 'Yüzler yalnızca bu cihazda işlenir; sunucuya hiçbir yüz verisi gönderilmez. Verileri istediğin an silebilirsin. Sonuçlar tahmindir.',
       scan: { one: 'Fotoğrafları tara ({count})', other: 'Fotoğrafları tara ({count})' },
       rescan: 'Yeniden tara',
       loading: 'Yüz tanıma hazırlanıyor…',

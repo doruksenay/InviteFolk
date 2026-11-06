@@ -2,11 +2,13 @@
 // Kütüphane (Human) ve modeller kendi alan adımızdan, /face altından yüklenir (CSP "script-src 'self'"); bkz. public/face/README.md.
 // Selfie vektörleri yalnızca bu cihazın localStorage'ında, fotoğraf vektörleri yalnızca IndexedDB önbelleğinde durur.
 // Sunucuya hiçbir yüz verisi gönderilmez. Kullanıcı "yüzümü sil" derse ya da organizatör özelliği kapatırsa hepsi silinir.
-import { type Embedding, type FaceHit, mergeFaces, MIN_FACE_PX, MIN_FACE_SCORE } from '@/core/face-match';
+import { type FaceHit, faceSimilarity, mergeFaces, MIN_FACE_PX, MIN_FACE_SCORE } from '@/core/face-match';
 
-import type { FaceEngine } from './face';
+import type { FaceEngine, SelfieSource } from './face';
+import { rejectedKey, removeKeys, selfieKey } from './face-store';
 
-export type { FaceEngine, SelfieResult } from './face';
+export type { FaceEngine, SelfieResult, SelfieSource } from './face';
+export { loadJson, loadRejected, loadSelfies, saveJson, saveRejected, saveSelfies } from './face-store';
 
 type Face = { embedding?: number[]; box: number[]; score: number };
 type HumanInstance = {
@@ -177,15 +179,15 @@ async function createEngine(): Promise<Engine> {
     setSlug: (s) => {
       slug = s;
     },
-    similarity: (a, b) => h.match.similarity(a, b),
+    similarity: faceSimilarity,
     prefetch(url) {
       if (pending.has(url) || pending.size > 6) return;
       const p = loadImage(url, true);
       p.catch(() => {}); // hata, asıl çağrıda ele alınır
       pending.set(url, p);
     },
-    async analyzeSelfie(file) {
-      const url = URL.createObjectURL(file);
+    async analyzeSelfie(src) {
+      const url = URL.createObjectURL(toBlob(src));
       try {
         const img = await loadImage(url, false);
         const w = img.naturalWidth;
@@ -248,7 +250,7 @@ export function loadFaceEngine(slug?: string): Promise<FaceEngine> {
 // Selfie seçimi
 // ---------------------------------------------------------------------------
 /** Ön kamerayı (camera) ya da galeriyi (gallery) açar; iptal edilirse null döner. */
-export function pickSelfie(source: 'camera' | 'gallery'): Promise<File | null> {
+export function pickSelfie(source: 'camera' | 'gallery'): Promise<SelfieSource | null> {
   return new Promise((resolve) => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -269,60 +271,20 @@ export function pickSelfie(source: 'camera' | 'gallery'): Promise<File | null> {
   });
 }
 
+/** Selfie girdisi: web'de seçilen dosya, uygulamada (WebView köprüsü) data URL. */
+function toBlob(src: SelfieSource): Blob {
+  if (src instanceof Blob) return src;
+  const [head, body] = src.dataUrl.split(',', 2);
+  const mime = /data:([^;]+)/.exec(head)?.[1] ?? 'image/jpeg';
+  const bin = atob(body ?? '');
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+
 // ---------------------------------------------------------------------------
-// Yerel depolama (yalnızca bu cihaz)
+// Fotoğraf önbelleği (IndexedDB, yalnızca bu cihaz)
 // ---------------------------------------------------------------------------
-const selfieKey = (slug: string) => `davet:face:${slug}`;
-
-export function loadSelfies(slug: string): Embedding[] {
-  try {
-    const raw = window.localStorage.getItem(selfieKey(slug));
-    const v = raw ? (JSON.parse(raw) as unknown) : null;
-    if (!Array.isArray(v)) return [];
-    return v.filter((e): e is number[] => Array.isArray(e) && e.length > 0 && e.every((n) => typeof n === 'number')).slice(0, 3);
-  } catch {
-    return [];
-  }
-}
-
-export function saveSelfies(slug: string, embeddings: Embedding[]): void {
-  try {
-    window.localStorage.setItem(selfieKey(slug), JSON.stringify(embeddings));
-  } catch {
-    // Özel pencere ya da dolu depolama: bu oturumda çalışır, kalıcı olmaz.
-  }
-}
-
-// ---- Genel yardımcılar: etkinlik başına küçük JSON kayıtları (yalnızca bu cihaz)
-export function loadJson<T>(key: string, fallback: T): T {
-  try {
-    const raw = window.localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-export function saveJson(key: string, value: unknown): void {
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Özel pencere ya da dolu depolama: bu oturumda çalışır, kalıcı olmaz.
-  }
-}
-
-const rejectedKey = (slug: string) => `davet:face-no:${slug}`;
-
-/** "Bu ben değilim" diye elenen fotoğrafların anahtarları (yüz verisi değil, yalnızca fotoğraf adresi). */
-export function loadRejected(slug: string): string[] {
-  const v = loadJson<unknown>(rejectedKey(slug), []);
-  return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string').slice(0, 2000) : [];
-}
-
-export function saveRejected(slug: string, keys: string[]): void {
-  saveJson(rejectedKey(slug), keys.slice(-2000));
-}
-
 const DB = 'davet-face';
 const STORE = 'photos';
 const CACHE_V = 'v2'; // v1: yalnızca vektör dizisi; v2: vektör + konum + en/boy oranı. Eski kayıtlar okunmaz.
@@ -393,12 +355,7 @@ async function cachePut(slug: string, key: string, entry: CacheEntry): Promise<v
 
 /** Bu etkinliğe ait tüm yerel yüz verisini siler: selfie vektörleri, fotoğraf önbelleği, elenenler. */
 export async function clearFaceData(slug: string): Promise<void> {
-  try {
-    window.localStorage.removeItem(selfieKey(slug));
-    window.localStorage.removeItem(rejectedKey(slug));
-  } catch {
-    // yok say
-  }
+  removeKeys([selfieKey(slug), rejectedKey(slug)]);
   const db = await openDb();
   if (!db) return;
   await new Promise<void>((resolve) => {

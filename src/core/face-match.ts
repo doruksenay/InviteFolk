@@ -8,6 +8,25 @@ export type Embedding = number[];
 export type FaceHit = { embedding: Embedding; box: [number, number, number, number] };
 
 /**
+ * İki yüz vektörünün 0–1 benzerliği. Human'ın `match.similarity` varsayılanlarının birebir aynısıdır
+ * (Öklid uzaklığı, çarpan 25, 0.2–0.8 aralığına normalize, iki basamağa yuvarlanır); böylece web ve uygulama
+ * aynı eşiklerle çalışır ve uygulama tarafı motoru beklemeden senkron hesaplayabilir.
+ */
+export function faceSimilarity(a: Embedding, b: Embedding): number {
+  if (!a?.length || !b?.length) return 0;
+  let sum = 0;
+  const n = Math.min(a.length, b.length);
+  for (let i = 0; i < n; i++) {
+    const d = a[i] - b[i];
+    sum += d * d;
+  }
+  const dist = Math.round(100 * 25 * sum) / 100;
+  if (dist === 0) return 1;
+  const norm = (1 - Math.sqrt(dist) / 100 - 0.2) / (0.8 - 0.2);
+  return Math.round(100 * Math.max(Math.min(norm, 1), 0)) / 100;
+}
+
+/**
  * Benzerlik eşikleri (Human'ın 0–1 benzerlik ölçeği). Ölçüm: 8 kişilik, kırpık ve gri tonlu halka açık bir veri
  * kümesinde aynı kişi çiftleri medyan 0.45, farklı kişiler en çok 0.40 verdi.
  *  - SURE: bunun üstü "sen olmalısın" (o veri kümesinde yanlış eşleşme yok).

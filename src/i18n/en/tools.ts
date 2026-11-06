@@ -309,7 +309,7 @@ export const tools: typeof TR = {
     tabGuestbook: 'Guestbook',
     tabPeople: 'People',
     people: {
-      privacy: 'Faces are processed only in this browser; no face data is sent to the server. You can delete the data any time. Results are guesses.',
+      privacy: 'Faces are processed only on this device; no face data is sent to the server. You can delete the data any time. Results are guesses.',
       scan: { one: 'Scan photos ({count})', other: 'Scan photos ({count})' },
       rescan: 'Scan again',
       loading: 'Getting face matching ready…',

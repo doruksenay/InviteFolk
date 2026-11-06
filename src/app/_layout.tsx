@@ -19,6 +19,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { I18nProvider, useI18n } from '@/i18n';
 import { SessionProvider, useSession } from '@/lib/session';
+import { FaceBridgeHost } from '@/ui/FaceBridgeHost';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Body, Display, Surface } from '@/ui/primitives';
 import { color } from '@/ui/tokens';
@@ -112,6 +113,7 @@ export default function RootLayout() {
         ) : (
           <ConfigMissing />
         )}
+        <FaceBridgeHost />
       </I18nProvider>
     </SafeAreaProvider>
   );
