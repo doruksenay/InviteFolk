@@ -2,6 +2,7 @@
 // Tüm koordinatlar "salon birimi" cinsindendir (ekran pikselinden bağımsız); x, y öğenin merkezidir.
 import type { TFn } from '@/i18n';
 
+import { groupKey } from './groups';
 import type { InvitationWithContact, SeatingItem, SeatingKind, Side } from './types';
 
 export const HALL_W = 1400;
@@ -236,26 +237,53 @@ export function buildQuickLayout(q: QuickSetup, t: TFn): NewSeatingItem[] {
 const SIDE_ORDER: (Side | null)[] = ['gelin', 'damat', 'ortak', null];
 
 /**
- * Masası olmayan haneleri yerleştirir; mevcut atamalara dokunmaz.
- * Aynı taraftaki aileler yan yana düşsün diye gelin tarafı salonun solundan,
- * damat tarafı sağından, ortaklar ortadan doldurulur. Bir hane bölünmez.
+ * Masası olmayan haneleri yerleştirir; mevcut atamalara dokunmaz. Bir hane bölünmez.
+ *
+ * Sıra: önce gruplar (kalabalık grup önce), en sonda grupsuzlar. Bir grubun haneleri aynı masaya,
+ * sığmazsa grubun masalarına en yakın boş masaya oturur; başka grubun masasına ancak başka yer
+ * kalmadıysa karışır. Gruplar kendi içinde ve grupsuzlar arasında tarafa göre dizilir:
+ * gelin tarafı salonun solundan, damat tarafı sağından, ortaklar ortadan doldurulur.
  */
 export function autoAssign(items: SeatingItem[], invitations: InvitationWithContact[]) {
   const tables = items.filter((it) => it.kind === 'table' && !isHeadTable(it.label));
+  const byId = new Map(tables.map((t) => [t.id, t]));
   const loads = tableLoads(items, invitations);
   const sides = new Map<string, Map<string, number>>();
-  for (const t of tables) sides.set(t.id, new Map());
+  const tableGroups = new Map<string, Map<string, number>>(); // masa -> grup anahtarı -> hane sayısı
+  for (const t of tables) {
+    sides.set(t.id, new Map());
+    tableGroups.set(t.id, new Map());
+  }
+  const groupTables = new Map<string, Set<string>>(); // grup anahtarı -> kullandığı masalar
+  const note = (tableId: string, side: string, gk: string) => {
+    const m = sides.get(tableId)!;
+    m.set(side, (m.get(side) ?? 0) + 1);
+    if (!gk) return;
+    const g = tableGroups.get(tableId)!;
+    g.set(gk, (g.get(gk) ?? 0) + 1);
+    if (!groupTables.has(gk)) groupTables.set(gk, new Set());
+    groupTables.get(gk)!.add(tableId);
+  };
   for (const inv of invitations) {
-    if (inv.table_id && sides.has(inv.table_id)) {
-      const m = sides.get(inv.table_id)!;
-      const k = inv.contacts.side ?? '-';
-      m.set(k, (m.get(k) ?? 0) + 1);
-    }
+    if (inv.table_id && sides.has(inv.table_id)) note(inv.table_id, inv.contacts.side ?? '-', groupKey(inv.contacts.group_label));
+  }
+
+  // Grup büyüklüğü (koltuk): bekleyen + yerleşmiş haneler birlikte sayılır.
+  const groupSeats = new Map<string, number>();
+  for (const inv of invitations) {
+    const gk = groupKey(inv.contacts.group_label);
+    if (gk) groupSeats.set(gk, (groupSeats.get(gk) ?? 0) + seatsFor(inv));
   }
 
   const waiting = invitations
     .filter((i) => !i.table_id && seatsFor(i) > 0)
-    .sort((a, b) => SIDE_ORDER.indexOf(a.contacts.side) - SIDE_ORDER.indexOf(b.contacts.side) || seatsFor(b) - seatsFor(a));
+    .sort((a, b) => {
+      const ga = groupKey(a.contacts.group_label);
+      const gb = groupKey(b.contacts.group_label);
+      if (!ga !== !gb) return ga ? -1 : 1; // gruplular önce
+      if (ga !== gb) return (groupSeats.get(gb) ?? 0) - (groupSeats.get(ga) ?? 0) || ga.localeCompare(gb); // aynı grup bir arada
+      return SIDE_ORDER.indexOf(a.contacts.side) - SIDE_ORDER.indexOf(b.contacts.side) || seatsFor(b) - seatsFor(a);
+    });
 
   const cx = HALL_W / 2;
   const orderFor = (side: Side | null) =>
@@ -263,24 +291,45 @@ export function autoAssign(items: SeatingItem[], invitations: InvitationWithCont
       side === 'gelin' ? a.x - b.x || a.y - b.y : side === 'damat' ? b.x - a.x || a.y - b.y : Math.abs(a.x - cx) - Math.abs(b.x - cx) || a.y - b.y,
     );
 
+  // Grubun masalarının ağırlık merkezine yakınlığa göre sıralar (grubun masası yoksa sırayı bozmaz).
+  const nearGroup = (list: SeatingItem[], gk: string) => {
+    const used = [...(groupTables.get(gk) ?? [])].map((id) => byId.get(id)).filter((t): t is SeatingItem => !!t);
+    if (!used.length) return list;
+    const mx = used.reduce((a, t) => a + t.x, 0) / used.length;
+    const my = used.reduce((a, t) => a + t.y, 0) / used.length;
+    return [...list].sort((a, b) => Math.hypot(a.x - mx, a.y - my) - Math.hypot(b.x - mx, b.y - my));
+  };
+
   const assignments: { id: string; table_id: string }[] = [];
   let unplaced = 0;
   for (const inv of waiting) {
     const need = seatsFor(inv);
     const side = inv.contacts.side ?? '-';
+    const gk = groupKey(inv.contacts.group_label);
     const order = orderFor(inv.contacts.side);
     const free = (t: SeatingItem) => t.capacity - loads.get(t.id)!.used;
-    const sameSide = order.find((t) => free(t) >= need && (sides.get(t.id)!.get(side) ?? 0) > 0);
-    const empty = order.find((t) => free(t) >= need && loads.get(t.id)!.used === 0);
-    const any = order.find((t) => free(t) >= need);
-    const pick = sameSide ?? empty ?? any;
+    const fits = (t: SeatingItem) => free(t) >= need;
+    // Başka bir grubun oturduğu masa, bu hane için "dolu" sayılır; yalnızca son çare olarak kullanılır.
+    const foreign = (t: SeatingItem) => [...tableGroups.get(t.id)!.keys()].some((k) => k !== gk);
+    const clean = order.filter((t) => !foreign(t));
+
+    let pick: SeatingItem | undefined;
+    if (gk) {
+      const own = nearGroup(order, gk).find((t) => fits(t) && tableGroups.get(t.id)!.has(gk));
+      const empty = nearGroup(order, gk).find((t) => fits(t) && loads.get(t.id)!.used === 0);
+      const sameSide = clean.find((t) => fits(t) && (sides.get(t.id)!.get(side) ?? 0) > 0);
+      pick = own ?? empty ?? sameSide ?? nearGroup(clean, gk).find(fits) ?? nearGroup(order, gk).find(fits);
+    } else {
+      const sameSide = (list: SeatingItem[]) => list.find((t) => fits(t) && (sides.get(t.id)!.get(side) ?? 0) > 0);
+      const empty = (list: SeatingItem[]) => list.find((t) => fits(t) && loads.get(t.id)!.used === 0);
+      pick = sameSide(clean) ?? empty(clean) ?? clean.find(fits) ?? sameSide(order) ?? empty(order) ?? order.find(fits);
+    }
     if (!pick) {
       unplaced++;
       continue;
     }
     loads.get(pick.id)!.used += need;
-    const m = sides.get(pick.id)!;
-    m.set(side, (m.get(side) ?? 0) + 1);
+    note(pick.id, side, gk);
     assignments.push({ id: inv.id, table_id: pick.id });
   }
   return { assignments, unplaced };

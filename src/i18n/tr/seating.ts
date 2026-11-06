@@ -67,9 +67,10 @@ export const seating = {
     clearSelection: 'Seçimi kaldır',
     tableA11y: '{label}, {used} / {capacity} kişi',
   },
-  legend: { empty: 'Boş sandalye' },
+  legend: { empty: 'Boş sandalye', bySide: 'Tarafa göre', byGroup: 'Gruba göre', noGroup: 'Grupsuz' },
   // Davetli havuzu
   pool: {
+    allGroups: 'Tüm gruplar',
     title: 'Masası olmayanlar',
     summary: '{households} · {people}. Birine dokun, sonra salondaki masaya dokun.',
     allSeated: 'Herkes bir masaya yerleşti.',

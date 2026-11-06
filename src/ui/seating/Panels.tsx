@@ -1,6 +1,7 @@
 import { type ReactNode, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
+import { collectGroups, groupKey } from '@/core/groups';
 import { OBJECTS, objectName, objectSpec, seatsFor, type TableLoad } from '@/core/seating';
 import type { InvitationWithContact, SeatingItem, SeatingKind } from '@/core/types';
 import { useI18n } from '@/i18n';
@@ -173,6 +174,7 @@ function GuestRow({ inv, onPress, trailing, active }: { inv: InvitationWithConta
           {t('seating.guest.party', { count: n })}
           {inv.status === 'yes' ? '' : t('seating.guest.awaiting')}
           {inv.menu ? ` · ${inv.menu}` : ''}
+          {inv.contacts.group_label ? ` · ${inv.contacts.group_label}` : ''}
         </Caption>
       </View>
       {trailing && (
@@ -202,19 +204,49 @@ function PanelHeader({ kicker, onClose, children }: { kicker: string; onClose: (
 // ---------------------------------------------------------------------------
 // Salon lejantı ve nesne menüsü
 // ---------------------------------------------------------------------------
-export function SideLegend() {
+export function SideLegend({
+  colorBy = 'side',
+  onColorBy,
+  groups = [],
+}: {
+  colorBy?: 'side' | 'group';
+  onColorBy?: (v: 'side' | 'group') => void;
+  groups?: ReturnType<typeof collectGroups>;
+}) {
   const { t } = useI18n();
+  const byGroup = colorBy === 'group' && groups.length > 0;
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14, paddingHorizontal: 4 }}>
-      {SIDE_KEYS.map((k) => (
-        <View key={k} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: SIDE_COLOR[k] }} />
-          <Caption>{t(`status.side.${k}`)}</Caption>
+    <View style={{ gap: 10, paddingHorizontal: 4 }}>
+      {onColorBy && groups.length > 0 && (
+        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+          <Chip small label={t('seating.legend.bySide')} active={colorBy === 'side'} onPress={() => onColorBy('side')} />
+          <Chip small label={t('seating.legend.byGroup')} active={colorBy === 'group'} onPress={() => onColorBy('group')} />
         </View>
-      ))}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-        <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#FFFFFF', boxShadow: `inset 0 0 0 1.5px ${color.ring}` }} />
-        <Caption>{t('seating.legend.empty')}</Caption>
+      )}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
+        {byGroup
+          ? groups.map((g) => (
+              <View key={g.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: g.color }} />
+                <Caption>{g.label}</Caption>
+              </View>
+            ))
+          : SIDE_KEYS.map((k) => (
+              <View key={k} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: SIDE_COLOR[k] }} />
+                <Caption>{t(`status.side.${k}`)}</Caption>
+              </View>
+            ))}
+        {byGroup && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: SIDE_COLOR.none }} />
+            <Caption>{t('seating.legend.noGroup')}</Caption>
+          </View>
+        )}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#FFFFFF', boxShadow: `inset 0 0 0 1.5px ${color.ring}` }} />
+          <Caption>{t('seating.legend.empty')}</Caption>
+        </View>
       </View>
     </View>
   );
@@ -258,9 +290,13 @@ export function GuestPool({
 }) {
   const { t, locale } = useI18n();
   const [search, setSearch] = useState('');
+  const [group, setGroup] = useState<string | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
   const term = search.trim().toLocaleLowerCase(locale);
-  const list = term ? unseated.filter((i) => i.contacts.name.toLocaleLowerCase(locale).includes(term)) : unseated;
+  const groups = collectGroups(unseated);
+  const activeGroup = group && groups.some((g) => g.key === group) ? group : null;
+  const byGroup = activeGroup ? unseated.filter((i) => groupKey(i.contacts.group_label) === activeGroup) : unseated;
+  const list = term ? byGroup.filter((i) => i.contacts.name.toLocaleLowerCase(locale).includes(term)) : byGroup;
   const people = unseated.reduce((a, i) => a + seatsFor(i), 0);
 
   return (
@@ -285,6 +321,15 @@ export function GuestPool({
           accessibilityLabel={t('seating.pool.searchA11y')}
           style={{ height: 44, borderRadius: radius.pill, backgroundColor: color.surfaceSoft, paddingHorizontal: 16, fontFamily: font.medium, fontSize: 14, color: color.ink }}
         />
+      )}
+
+      {groups.length > 0 && (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+          <Chip small label={t('seating.pool.allGroups')} active={!activeGroup} onPress={() => setGroup(null)} />
+          {groups.map((g) => (
+            <Chip key={g.key} small label={`${g.label} · ${g.households}`} active={activeGroup === g.key} onPress={() => setGroup(activeGroup === g.key ? null : g.key)} />
+          ))}
+        </View>
       )}
 
       <View>

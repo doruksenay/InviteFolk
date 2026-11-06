@@ -3,11 +3,13 @@ import { router } from 'expo-router';
 import { Platform, Text, View } from 'react-native';
 
 import { getEventType } from '@/core/event-types';
+import { cleanGroupLabel } from '@/core/groups';
 import { normalizePhone } from '@/core/format';
 import { EMAIL_RE } from '@/core/importer';
 import type { EventRow, Side } from '@/core/types';
 import { useI18n } from '@/i18n';
-import { importGuests, type ImportResult } from '@/lib/api-guests';
+import { useQuery } from '@/lib/api';
+import { importGuests, type ImportResult, listGroupLabels } from '@/lib/api-guests';
 import { Button, Caption, Field, Label, Notice, Surface, Title } from '@/ui/primitives';
 import { color, font } from '@/ui/tokens';
 
@@ -35,6 +37,7 @@ export function GuestAdder({ event, onAdded, style, remaining }: { event: EventR
   const [group, setGroup] = useState('');
   const [maxParty, setMaxParty] = useState(2);
   const [adding, setAdding] = useState(false);
+  const groupLabels = useQuery(() => listGroupLabels().catch(() => [] as string[]), []);
   const [formError, setFormError] = useState<string | null>(null);
 
   const summarize = (r: ImportResult) => {
@@ -62,7 +65,7 @@ export function GuestAdder({ event, onAdded, style, remaining }: { event: EventR
           phone: normalized,
           email: mail || null,
           side: usesSides(event.type) ? side : null,
-          group: usesSides(event.type) ? null : group.trim() || null,
+          group: cleanGroupLabel(group),
           max_party: cfg.questions.partySize ? maxParty : 1,
         },
       ]);
@@ -116,7 +119,7 @@ export function GuestAdder({ event, onAdded, style, remaining }: { event: EventR
           onChangeText={setEmail}
           hint={t('guests.adder.emailHint')}
         />
-        <SideOrGroup type={event.type} side={side} onSide={setSide} group={group} onGroup={setGroup} />
+        <SideOrGroup type={event.type} side={side} onSide={setSide} group={group} onGroup={setGroup} groupSuggestions={groupLabels.data ?? []} />
         {cfg.questions.partySize && (
           <View style={{ gap: 8 }}>
             <Label>{t('guests.adder.maxParty')}</Label>

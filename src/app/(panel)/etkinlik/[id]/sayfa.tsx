@@ -112,6 +112,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
   const [albumOn, setAlbumOn] = useState(!!s0.album?.enabled);
   const [albumPublic, setAlbumPublic] = useState(!!s0.album?.public);
   const [albumModerate, setAlbumModerate] = useState(!!s0.album?.moderate);
+  const [albumFace, setAlbumFace] = useState(!!s0.album?.face);
   const [gbOn, setGbOn] = useState(!!s0.guestbook?.enabled);
   const [gbPublic, setGbPublic] = useState(s0.guestbook ? !!s0.guestbook.public : true);
   const [gbModerate, setGbModerate] = useState(!!s0.guestbook?.moderate);
@@ -179,7 +180,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
       ask_names: askNames,
       checkin,
       collector,
-      album: { enabled: albumOn, public: albumPublic, moderate: albumModerate },
+      album: { enabled: albumOn, public: albumPublic, moderate: albumModerate, face: albumOn && albumPublic && albumFace },
       guestbook: { enabled: gbOn, public: gbPublic, moderate: gbModerate },
       sms_fallback: smsFallback,
     };
@@ -428,6 +429,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
           disabled={!!L && L.album_photos <= 0 && !albumOn}
         />
         {albumOn && <ToggleRow label={t('tools.page.tools.albumPublic')} value={albumPublic} onChange={setAlbumPublic} />}
+        {albumOn && albumPublic && <ToggleRow label={t('tools.page.tools.albumFace')} hint={t('tools.page.tools.albumFaceHint')} value={albumFace} onChange={setAlbumFace} />}
         {albumOn && <ToggleRow label={t('tools.page.tools.albumModerate')} hint={t('tools.page.tools.albumModerateHint')} value={albumModerate} onChange={setAlbumModerate} />}
         <ToggleRow label={t('tools.page.tools.guestbook')} hint={t('tools.page.tools.guestbookHint')} value={gbOn} onChange={setGbOn} />
         {gbOn && <ToggleRow label={t('tools.page.tools.guestbookPublic')} value={gbPublic} onChange={setGbPublic} />}

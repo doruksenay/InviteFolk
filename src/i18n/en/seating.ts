@@ -67,8 +67,9 @@ export const seating: typeof TR = {
     clearSelection: 'Clear selection',
     tableA11y: '{label}, {used} / {capacity} people',
   },
-  legend: { empty: 'Empty chair' },
+  legend: { empty: 'Empty chair', bySide: 'By side', byGroup: 'By group', noGroup: 'No group' },
   pool: {
+    allGroups: 'All groups',
     title: 'Without a table',
     summary: '{households} · {people}. Tap one, then tap a table in the room.',
     allSeated: 'Everyone has a table.',

@@ -209,6 +209,8 @@ export type PublicEvent = {
   album: boolean;
   album_public: boolean;
   album_moderate?: boolean;
+  /** Yüz önerisi açık mı (albüm açık ve herkese açıkken). */
+  album_face?: boolean;
   guestbook?: boolean;
   guestbook_public?: boolean;
 };
@@ -281,7 +283,8 @@ export type EventSettings = {
   /** Araçlar */
   checkin?: boolean;
   collector?: boolean;
-  album?: { enabled?: boolean; public?: boolean; moderate?: boolean };
+  /** face: davetliler selfie ile fotoğraflarını bulabilir (eşleştirme davetlinin cihazında; yalnızca albüm herkese açıkken). */
+  album?: { enabled?: boolean; public?: boolean; moderate?: boolean; face?: boolean };
   sms_fallback?: boolean;
   /** Davetiye görselindeki hareket; yoksa temanın varsayılanı. */
   effect?: import('./themes').ThemeEffect;

@@ -50,3 +50,8 @@ supabase/.temp/
 
 # mağaza gönderim anahtarları
 secrets/
+
+# yüz önerisi: node_modules'tan kopyalanır (scripts/vendor-face.mjs)
+public/face/*
+!public/face/loader.mjs
+!public/face/README.md

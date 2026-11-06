@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { PanResponder, Platform, Text, View, type ViewStyle } from 'react-native';
 
+import { groupColor } from '@/core/groups';
 import { bodySize, CHAIR_SIZE, chairPositions, footprint, seatsFor, type TableLoad } from '@/core/seating';
 import type { SeatingItem, Side } from '@/core/types';
 import { useI18n } from '@/i18n';
@@ -32,6 +33,8 @@ type Props = {
   selected: boolean;
   editable: boolean;
   highlight: Highlight;
+  /** Sandalyeler tarafa mı gruba mı göre boyansın. */
+  colorBy?: 'side' | 'group';
   onPress: (id: string) => void;
   onMove: (id: string, x: number, y: number) => void;
   onDragState: (dragging: boolean) => void;
@@ -53,7 +56,7 @@ function shortLabel(label: string) {
  * Salondaki tek bir öğe. Sürükleme RN'in PanResponder'ı ile yapılır; iOS, Android ve webde aynı çalışır.
  * Sürükleme sırasında yalnızca bu bileşen yeniden çizilir, bırakınca konum üst bileşene bildirilir.
  */
-export const HallItemView = memo(function HallItemView({ item, scale, load, selected, editable, highlight, onPress, onMove, onDragState }: Props) {
+export const HallItemView = memo(function HallItemView({ item, scale, load, selected, editable, highlight, colorBy = 'side', onPress, onMove, onDragState }: Props) {
   const { t } = useI18n();
   const [drag, setDrag] = useState<{ dx: number; dy: number } | null>(null);
   const latest = useRef({ item, scale, editable, onPress, onMove, onDragState });
@@ -95,7 +98,10 @@ export const HallItemView = memo(function HallItemView({ item, scale, load, sele
   // Sandalyeleri hane sırasıyla, tarafına göre boya.
   const chairColors: (string | null)[] = [];
   if (isTable && load) {
-    for (const g of load.guests) for (let k = 0; k < seatsFor(g); k++) chairColors.push(SIDE_COLOR[g.contacts.side ?? 'none']);
+    for (const g of load.guests) {
+      const c = colorBy === 'group' ? (groupColor(g.contacts.group_label) ?? SIDE_COLOR.none) : SIDE_COLOR[g.contacts.side ?? 'none'];
+      for (let k = 0; k < seatsFor(g); k++) chairColors.push(c);
+    }
   }
 
   const ring = selected

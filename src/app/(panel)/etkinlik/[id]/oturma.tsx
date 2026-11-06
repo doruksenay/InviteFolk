@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 
 import { getEventType } from '@/core/event-types';
+import { collectGroups } from '@/core/groups';
 import { formatNumber, formatWhen } from '@/core/format';
 import {
   autoAssign,
@@ -62,6 +63,7 @@ export default function SeatingScreen() {
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [printOpen, setPrintOpen] = useState(false);
   const [printing, setPrinting] = useState(false);
+  const [colorBy, setColorBy] = useState<'side' | 'group'>('side');
 
   const items = useMemo(() => q.data?.items ?? [], [q.data]);
   // Silinmiş/bilinmeyen bir masaya işaret eden davet masasız sayılır (veritabanı zaten null'lar; bu yalnızca savunma).
@@ -70,6 +72,7 @@ export default function SeatingScreen() {
     return (q.data?.invitations ?? []).map((i) => (i.table_id && !ids.has(i.table_id) ? { ...i, table_id: null } : i));
   }, [q.data]);
   const loads = useMemo(() => tableLoads(items, invitations), [items, invitations]);
+  const groups = useMemo(() => collectGroups(invitations), [invitations]);
   const hallH = hallHeight(items);
 
   const pool = invitations.filter((i) => seatsFor(i) > 0);
@@ -461,6 +464,7 @@ export default function SeatingScreen() {
             editable={!preview && !placing}
             preview={preview}
             highlightFor={highlightFor}
+            colorBy={colorBy}
             onPressItem={pressItem}
             onMoveItem={moveItem}
             onBackgroundPress={() => {
@@ -485,7 +489,7 @@ export default function SeatingScreen() {
           </View>
         )}
       </View>
-      <SideLegend />
+      <SideLegend colorBy={colorBy} onColorBy={setColorBy} groups={groups} />
     </View>
   );
 
