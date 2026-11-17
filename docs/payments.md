@@ -2,11 +2,13 @@
 
 Paketler tek seferlik ödemeyle **1 yıl** geçerlidir; otomatik yenileme yoktur.
 
-| Paket | Fiyat (TRY) | Ürün kimliği (mağaza) |
-|---|---|---|
-| Temel | 500 | `invitefolk_temel` |
-| Otomatik | 750 | `invitefolk_otomatik` |
-| Tam | 1.000 | `invitefolk_tam` |
+| Paket (uygulamadaki ad) | İç ad | Fiyat (TRY) | Ürün kimliği (mağaza) |
+|---|---|---|---|
+| Davet | `temel` | 499 | `invitefolk_temel` |
+| Düğün | `otomatik` | 999 | `invitefolk_otomatik` |
+| Düğün Tam | `tam` | 1.749 | `invitefolk_tam` |
+
+İç adlar ve ürün kimlikleri ilk fiyatlandırmadan kaldı; değiştirmek mağaza ürünlerini ve satın alma kayıtlarını bozacağı için yalnızca görünen adlar değişti (`src/i18n/*/status.ts`).
 
 Web fiyatları `public.plan_prices` tablosundan gelir (istemci fiyat gönderemez). Mağaza fiyatları App Store Connect ve Play Console'da ayrıca ayarlanır; uygulama mağazanın gösterdiği yerel fiyatı kullanır.
 
@@ -50,7 +52,7 @@ Web fiyatları `public.plan_prices` tablosundan gelir (istemci fiyat gönderemez
 
 ## 2. iOS ve Android: RevenueCat
 
-1. **App Store Connect** → uygulama → *Uygulama İçi Satın Almalar* → üç **Tüketilebilir (Consumable)** ürün: `invitefolk_temel`, `invitefolk_otomatik`, `invitefolk_tam`. Fiyat katmanlarını 500/750/1000 ₺'ye en yakın seçin; ekran görüntüsü ve açıklama ekleyin.
+1. **App Store Connect** → uygulama → *Uygulama İçi Satın Almalar* → üç **Tüketilebilir (Consumable)** ürün: `invitefolk_temel`, `invitefolk_otomatik`, `invitefolk_tam`. Fiyatları 499 / 999 / 1.749 ₺ olarak (ya da en yakın fiyat noktasına) ayarlayın; ekran görüntüsü ve açıklama ekleyin.
    - Neden tüketilebilir? Paket bir yıl sonra yeniden satın alınabilmeli; kalıcı (non-consumable) ürün ikinci kez satın alınamaz.
 2. **Play Console** → *Ürünler → Uygulama içi ürünler* → aynı üç ürün kimliği.
 3. **RevenueCat** (<https://app.revenuecat.com>):

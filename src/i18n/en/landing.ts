@@ -76,7 +76,7 @@ export const landing: typeof TR = {
     titleAccent: 'questions',
     items: [
       { q: 'Do my guests need to download an app?', a: 'No. Guests tap the link they get on WhatsApp, the invitation opens in their phone’s browser and they reply in two taps.' },
-      { q: 'How are WhatsApp messages sent?', a: 'On the free plan you send each guest a ready-made message from your own WhatsApp with one tap. On the automatic plans messages go out on their own through the official WhatsApp Business platform.' },
+      { q: 'How are WhatsApp messages sent?', a: 'On the free plan you send each guest a ready-made message from your own WhatsApp with one tap. On the Wedding plans, reminders to guests who haven’t replied also go out on their own through the official WhatsApp Business platform.' },
       { q: 'Can I use my own invitation design?', a: 'Yes. Upload the design from your printer or your own image; each guest’s name is written on it. Video invitations work too.' },
       { q: 'Who can see the photos uploaded to the album?', a: 'By default only you and your co-hosts. You can open the album to guests, or approve every upload first.' },
       { q: 'Do you collect gift money?', a: 'No, we never handle money. We show your IBAN on the invitation; guests send gifts from their own bank.' },

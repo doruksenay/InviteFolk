@@ -37,6 +37,8 @@ export function friendlyError(err: DbError | Error | unknown): Error {
     return new Error(t('errors.quota', { what: label }));
   }
   if (msg.includes('plan_feature')) {
+    // Otomatik WhatsApp tüketici paketlerinde yalnızca hatırlatma içindir; yükseltme önermek yanıltıcı olur.
+    if (e.details === 'whatsapp_auto') return new Error(t('errors.waAutoRemindersOnly'));
     const what = (e.details ?? '') as keyof ReturnType<typeof dict>['errors']['planFeatureWhat'];
     return new Error(t('errors.planFeature', { what: dict(currentLang()).errors.planFeatureWhat[what] ?? '' }));
   }
@@ -117,7 +119,7 @@ export async function sendInvitations(eventId: string, kind: 'invite' | 'reminde
     const ctx = (error as { context?: Response }).context;
     const payload = ctx && typeof ctx.json === 'function' ? await ctx.json().catch(() => null) : null;
     if (payload?.error === 'quota_exceeded') throw friendlyError({ message: 'quota_exceeded', details: payload.detail ?? 'whatsapp' });
-    throw friendlyError(payload?.error ? { message: String(payload.error) } : error);
+    throw friendlyError(payload?.error ? { message: String(payload.error), details: payload.detail } : error);
   }
   return data as { sent: number; failed: number; skipped: number; quota_left?: number };
 }

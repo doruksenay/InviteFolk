@@ -8,6 +8,7 @@ import { getTheme } from '@/core/themes';
 import { LANGS, type Lang, useI18n } from '@/i18n';
 import { useQuery } from '@/lib/api';
 import { getPlanCatalog, PAID_PLANS, type PaidPlan } from '@/lib/api-billing';
+import { eventsPerk, hasSeating, sendingPerks } from '@/lib/plan-perks';
 import { BrandMark, Wordmark } from '@/ui/BrandBar';
 import { Icon } from '@/ui/Icon';
 import { InvitationCard } from '@/ui/InvitationCard';
@@ -17,7 +18,7 @@ import { color, font, radius, shadow } from '@/ui/tokens';
 import { TypePicker } from './TypePicker';
 
 // Fiyat tablosu okunamazsa (ör. bağlantı yok) gösterilen değerler; asıl fiyat her zaman sunucudadır.
-const FALLBACK_PRICES: Record<PaidPlan, number> = { temel: 500, otomatik: 750, tam: 1000 };
+const FALLBACK_PRICES: Record<PaidPlan, number> = { temel: 499, otomatik: 999, tam: 1749 };
 const MAX = 1180;
 
 type Section = 'features' | 'pricing' | 'faq';
@@ -70,10 +71,10 @@ export function Landing() {
     const l = catalog.data?.limits.find((x) => x.plan === p);
     if (!l) return [];
     return [
-      t('billing.included.events', { count: l.max_events }),
+      eventsPerk(t, l),
       t('billing.included.guests', { count: nf(l.max_guests_per_event) }),
-      l.whatsapp_per_day > 0 ? t('billing.included.whatsappAuto', { count: nf(l.whatsapp_per_day) }) : t('billing.included.whatsappManual'),
-      t('billing.included.seating'),
+      ...sendingPerks(t, l, nf).slice(-1),
+      ...(hasSeating(l) ? [t('billing.included.seating')] : []),
       ...(l.album_photos > 0 ? [t('billing.included.album', { count: nf(l.album_photos) })] : []),
       ...(l.checkin ? [t('billing.included.checkin')] : []),
       ...(l.max_cohosts > 0 ? [t('billing.included.cohosts', { count: l.max_cohosts })] : []),

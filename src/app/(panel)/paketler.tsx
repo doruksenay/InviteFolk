@@ -7,6 +7,7 @@ import type { MyPlan, Plan } from '@/core/types';
 import { dict, useI18n } from '@/i18n';
 import { getMyPlan, useQuery } from '@/lib/api';
 import { getPlanCatalog, type PaidPlan, PAID_PLANS, type PlanLimits, startWebCheckout } from '@/lib/api-billing';
+import { eventsPerk, hasSeating, sendingPerks } from '@/lib/plan-perks';
 import { getStorePrices, IN_APP_PURCHASES, purchasePlan, storeAvailability } from '@/lib/purchases';
 import { useSession } from '@/lib/session';
 import { Icon } from '@/ui/Icon';
@@ -138,13 +139,12 @@ export default function PlansScreen() {
     if (!l) return [] as string[];
     const n = (v: number) => formatNumber(v, locale);
     return [
-      t('billing.included.events', { count: l.max_events }),
+      eventsPerk(t, l),
       t('billing.included.guests', { count: n(l.max_guests_per_event) }),
-      l.whatsapp_per_day > 0 ? t('billing.included.whatsappAuto', { count: n(l.whatsapp_per_day) }) : t('billing.included.whatsappManual'),
+      ...sendingPerks(t, l, n),
       t('billing.included.email', { count: n(l.email_per_day) }),
-      ...(l.whatsapp_per_day > 0 ? [t('billing.included.reminders')] : []),
       t('billing.included.rsvp'),
-      t('billing.included.seating'),
+      ...(hasSeating(l) ? [t('billing.included.seating')] : []),
       t('billing.included.design'),
       t('billing.included.import'),
       t('billing.included.page'),

@@ -195,7 +195,7 @@ export const tools: typeof TR = {
     leave: 'Leave this event',
     leaveConfirm: "If you leave, you won't see this event any more.",
     limit: { one: 'Your plan includes {count} co-host.', other: 'Your plan includes {count} co-hosts.' },
-    noPlan: 'Co-hosts are included in the Basic, Automatic and Complete plans.',
+    noPlan: 'Co-hosts are included in the Invite, Wedding and Wedding Plus plans.',
     note: 'The link only works for someone signing in with this email address, and only once.',
     shared: 'Shared',
   },

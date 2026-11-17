@@ -79,7 +79,7 @@ export const landing = {
     titleAccent: 'edilenler',
     items: [
       { q: 'Davetlilerin uygulama indirmesi gerekiyor mu?', a: 'Hayır. Davetli WhatsApp’tan gelen linke dokunur, davetiye telefonunun tarayıcısında açılır; cevabı iki dokunuşla verir.' },
-      { q: 'WhatsApp mesajları nasıl gidiyor?', a: 'Ücretsiz pakette her davetliye hazır mesajı tek dokunuşla kendi WhatsApp’ından gönderirsin. Otomatik paketlerde mesajlar resmî WhatsApp Business altyapısıyla kendiliğinden gider.' },
+      { q: 'WhatsApp mesajları nasıl gidiyor?', a: 'Ücretsiz pakette her davetliye hazır mesajı tek dokunuşla kendi WhatsApp’ından gönderirsin. Düğün paketlerinde cevap vermeyenlere hatırlatma da resmî WhatsApp Business altyapısıyla kendiliğinden gider.' },
       { q: 'Kendi davetiye tasarımımı kullanabilir miyim?', a: 'Evet. Matbaadan gelen tasarımı ya da kendi görselini yükle; davetlinin adı üzerine yazılır. Video davetiye de olur.' },
       { q: 'Albüme yüklenen fotoğrafları kimler görür?', a: 'Varsayılan olarak yalnızca sen ve ortak yöneticilerin. İstersen albümü davetlilere açarsın, istersen her yüklemeyi önce sen onaylarsın.' },
       { q: 'Takı ve hediye için para topluyor musunuz?', a: 'Hayır, aracılık yapmıyoruz. IBAN bilgini davetiyede gösteriyoruz; gönderimi davetli kendi bankasından yapar.' },

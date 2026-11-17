@@ -20,6 +20,7 @@ export const errors: typeof TR = {
     cohosts: 'number of co-hosts',
     album: 'album photos',
     signup: 'items left',
+    reminders: 'automatic reminders per guest',
   },
   planFeature: "This isn't included in your plan: {what}. You can upgrade on the Plans page.",
   planFeatureWhat: {
@@ -30,6 +31,8 @@ export const errors: typeof TR = {
     collector: 'guest sign-up link',
     album: 'photo album',
     sms: 'text messages',
+    seating: 'seating plan',
   },
+  waAutoRemindersOnly: 'In your plan, automatic WhatsApp is only for reminding guests who haven’t replied. Send this one with WhatsApp links, email or text instead.',
   notFound: "We couldn't find what you were looking for.",
 };

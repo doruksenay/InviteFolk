@@ -132,9 +132,9 @@ Start free. Bigger events have one-time plans, no subscription.
 
 | Ürün kimliği | Ad | Açıklama |
 |---|---|---|
-| `invitefolk_temel` | Temel paket (1 yıl) | 10 etkinlik, etkinlik başına 150 davetli, otomatik WhatsApp ve hatırlatma |
-| `invitefolk_otomatik` | Otomatik paket (1 yıl) | 10 etkinlik, etkinlik başına 400 davetli, günde 800 WhatsApp mesajı |
-| `invitefolk_tam` | Tam paket (1 yıl) | 20 etkinlik, etkinlik başına 1.000 davetli, günde 2.000 WhatsApp mesajı |
+| `invitefolk_temel` | Davet paketi | 1 etkinlik (nişan, kına, sünnet, doğum günü), 200 davetli, tüm şablonlar, fon müziği |
+| `invitefolk_otomatik` | Düğün paketi | 1 düğün, 500 davetli, oturma planı ve masa kartları, kapıda karekodla giriş, otomatik WhatsApp hatırlatması |
+| `invitefolk_tam` | Düğün Tam paketi | Nişan, kına ve düğün (3 etkinlik), 1.000 davetli, canlı albüm, video davetiye, SMS yedeği, 2 otomatik hatırlatma |
 
 Bu sınırlar `public.plan_limits` tablosuyla aynı olmalı. Tabloyu değiştirirseniz bu metinleri de güncelleyin.
 

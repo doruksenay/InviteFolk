@@ -27,6 +27,9 @@ export const send: typeof TR = {
     noQuota: 'Your plan doesn’t include automatic WhatsApp, or today’s allowance is used up. Send one by one, or upgrade your plan.',
     noPhone: { one: '{count} guest has no phone number', other: '{count} guests have no phone number' },
     button: { one: 'Send to {count} household', other: 'Send to {count} households' },
+    remindersOnly: 'In your plan, automatic WhatsApp is for reminding guests who haven’t replied. Send invitations below with WhatsApp links one by one, or by email.',
+    noReminders: 'Automatic WhatsApp reminders come with the Wedding and Wedding Plus plans.',
+    perGuest: { one: '{count} reminder per guest', other: '{count} reminders per guest' },
   },
   waManual: {
     title: 'WhatsApp, one by one',
@@ -45,7 +48,7 @@ export const send: typeof TR = {
     title: 'SMS',
     body: "Guests who don't use WhatsApp get their personal link by text message.",
     quota: 'Left today: {count} texts',
-    noQuota: 'Text messages are included in the Automatic and Complete plans.',
+    noQuota: 'Text messages are included in the Wedding Plus plan.',
     button: { one: 'Text {count} guest', other: 'Text {count} guests' },
   },
   links: {

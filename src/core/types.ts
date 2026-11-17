@@ -313,6 +313,10 @@ export type PlanLimits = {
   video: boolean;
   checkin: boolean;
   collector: boolean;
+  /** Davetli başına en fazla otomatik hatırlatma. */
+  auto_reminders: number;
+  /** Otomatik WhatsApp ile davet/masa/duyuru (false: WhatsApp otomatiği yalnızca hatırlatma). */
+  wa_broadcast: boolean;
 };
 
 export type TeamMember = { id: string | null; user_id: string | null; full_name: string | null; email: string; role: 'owner' | 'cohost'; accepted: boolean; created_at: string };

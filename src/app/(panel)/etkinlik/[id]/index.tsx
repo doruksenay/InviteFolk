@@ -101,6 +101,8 @@ export default function EventDetail() {
   const go = (path: '/etkinlik/[id]/sayfa' | '/etkinlik/[id]/ekip' | '/etkinlik/[id]/giris' | '/etkinlik/[id]/album' | '/etkinlik/[id]/basvurular' | '/etkinlik/[id]/takim') =>
     router.push({ pathname: path, params: { id: event.id } });
   const plan = (k: 'temel' | 'otomatik' | 'tam') => t('tools.locked', { plan: t(`status.plan.${k}`) });
+  // Oturma planı Düğün ve üstü paketlerde (salon öğesi hakkı 0 ise kapalı); masa yerleşimi olan etkinlikte kilitlenmez.
+  const seatingLocked = !!L && L.max_hall_items_per_event <= 0 && !invitations.some((i) => i.table_id);
   const tiles: ToolTile[] = [
     { key: 'page', icon: 'envelope', title: t('tools.card.page.title'), body: t('tools.card.page.body'), tint: color.coralTint, ink: color.coralInk, onPress: () => go('/etkinlik/[id]/sayfa') },
     ...(saha
@@ -337,12 +339,14 @@ export default function EventDetail() {
             ink={color.lavenderInk}
             title={t('event.seatingCard.title')}
             body={
-              invitations.some((i) => i.status !== 'no')
-                ? t('event.seatingCard.progress', { seated: invitations.filter((i) => i.status !== 'no' && i.table_id).length, total: invitations.filter((i) => i.status !== 'no').length })
-                : t('event.seatingCard.empty')
+              seatingLocked
+                ? plan('otomatik')
+                : invitations.some((i) => i.status !== 'no')
+                  ? t('event.seatingCard.progress', { seated: invitations.filter((i) => i.status !== 'no' && i.table_id).length, total: invitations.filter((i) => i.status !== 'no').length })
+                  : t('event.seatingCard.empty')
             }
-            cta={t('event.seatingCard.open')}
-            onPress={() => router.push({ pathname: '/etkinlik/[id]/oturma', params: { id: event.id } })}
+            cta={seatingLocked ? t('send.plans') : t('event.seatingCard.open')}
+            onPress={() => (seatingLocked ? router.push('/paketler') : router.push({ pathname: '/etkinlik/[id]/oturma', params: { id: event.id } }))}
           />
         )}
         <FeatureCard

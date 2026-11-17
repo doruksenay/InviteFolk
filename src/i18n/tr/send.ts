@@ -25,6 +25,9 @@ export const send = {
     noQuota: 'Paketinde otomatik WhatsApp gönderimi yok ya da bugünkü hakkın bitti. Tek tek gönderebilir ya da paketini yükseltebilirsin.',
     noPhone: { one: '{count} davetlinin telefonu yok', other: '{count} davetlinin telefonu yok' },
     button: { one: '{count} haneye gönder', other: '{count} haneye gönder' },
+    remindersOnly: 'Paketinde otomatik WhatsApp, cevap vermeyenlere hatırlatma içindir. Davetleri aşağıdan WhatsApp linkleriyle sırayla gönder ya da e-postayla gönder.',
+    noReminders: 'Otomatik WhatsApp hatırlatması Düğün ve Düğün Tam paketlerinde var.',
+    perGuest: { one: 'Davetli başına {count} hatırlatma', other: 'Davetli başına {count} hatırlatma' },
   },
   waManual: {
     title: 'WhatsApp, tek tek',
@@ -43,7 +46,7 @@ export const send = {
     title: 'SMS',
     body: 'WhatsApp kullanmayanlara kısa mesajla kişiye özel link gider.',
     quota: 'Bugün kalan hakkın: {count} SMS',
-    noQuota: 'SMS gönderimi Otomatik ve Tam paketlerde var.',
+    noQuota: 'SMS gönderimi Düğün Tam paketinde var.',
     button: { one: '{count} kişiye SMS gönder', other: '{count} kişiye SMS gönder' },
   },
   links: {

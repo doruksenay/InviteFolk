@@ -197,7 +197,7 @@ export const tools = {
     leave: 'Etkinlikten ayrıl',
     leaveConfirm: 'Ayrılırsan bu etkinliği artık göremezsin.',
     limit: { one: 'Paketinde {count} ortak yönetici hakkı var.', other: 'Paketinde {count} ortak yönetici hakkı var.' },
-    noPlan: 'Ortak yönetici Temel, Otomatik ve Tam paketlerde var.',
+    noPlan: 'Ortak yönetici Davet, Düğün ve Düğün Tam paketlerinde var.',
     note: 'Link yalnızca bu e-postayla giriş yapan kişi tarafından ve bir kez kabul edilebilir.',
     shared: 'Ortak',
   },
