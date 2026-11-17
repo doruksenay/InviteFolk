@@ -3,6 +3,7 @@ import type { tools as TR } from '../tr/tools';
 export const tools: typeof TR = {
   section: 'Tools',
   locked: 'In the {plan} plan',
+  lockedAlbum: 'Memory album add-on',
   card: {
     page: { title: 'Invitation page', body: 'Envelope, music, countdown, programme, gallery, gift details' },
     team: { title: 'Co-hosts', body: 'Plan it together with your partner, family or friends' },

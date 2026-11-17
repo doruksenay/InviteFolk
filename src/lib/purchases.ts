@@ -1,14 +1,23 @@
 // Uygulama içi satın alma (iOS / Android) — RevenueCat.
 // Ürünler App Store Connect ve Play Console'da tüketilebilir (consumable) tek seferlik ürün olarak tanımlanır:
-//   invitefolk_temel, invitefolk_otomatik, invitefolk_tam
-// Paketi uygulama değil, RevenueCat'in sunucu bildirimi (revenuecat-webhook) verir; uygulama yalnızca satın almayı başlatır.
+//   paketler      invitefolk_temel, invitefolk_otomatik, invitefolk_tam
+//   yükseltmeler  invitefolk_up_temel_otomatik, invitefolk_up_temel_tam, invitefolk_up_otomatik_tam (yalnızca fark)
+//   eklenti       invitefolk_album (Anı albümü)
+// Hangi ürünün satılacağına sunucu karar verir (my_quotes); paketi uygulama değil, RevenueCat'in sunucu bildirimi
+// (revenuecat-webhook) verir. Uygulama yalnızca satın almayı başlatır.
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
 import Purchases, { PRODUCT_CATEGORY, type PurchasesStoreProduct } from 'react-native-purchases';
 
-import type { PaidPlan } from './api-billing';
-
-export const PRODUCT_IDS: Record<PaidPlan, string> = { temel: 'invitefolk_temel', otomatik: 'invitefolk_otomatik', tam: 'invitefolk_tam' };
+export const PRODUCT_IDS = [
+  'invitefolk_temel',
+  'invitefolk_otomatik',
+  'invitefolk_tam',
+  'invitefolk_up_temel_otomatik',
+  'invitefolk_up_temel_tam',
+  'invitefolk_up_otomatik_tam',
+  'invitefolk_album',
+] as const;
 
 const API_KEY = Platform.OS === 'ios' ? process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY : process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY;
 
@@ -33,25 +42,24 @@ async function ensureConfigured(userId: string) {
   configuredFor = userId;
 }
 
-/** Mağazadaki yerel fiyatlar (ör. "₺499,99"). Bulunamazsa boş. */
-export async function getStorePrices(userId: string): Promise<Partial<Record<PaidPlan, string>>> {
+/** Mağazadaki yerel fiyatlar, ürün kimliğine göre (ör. "₺499,99"). Bulunamazsa boş. */
+export async function getStorePrices(userId: string): Promise<Record<string, string>> {
   if (storeAvailability() !== 'ready') return {};
   await ensureConfigured(userId);
-  const products = await Purchases.getProducts(Object.values(PRODUCT_IDS), PRODUCT_CATEGORY.NON_SUBSCRIPTION);
-  const out: Partial<Record<PaidPlan, string>> = {};
-  for (const [plan, id] of Object.entries(PRODUCT_IDS) as [PaidPlan, string][]) {
-    const p = products.find((x: PurchasesStoreProduct) => x.identifier === id);
-    if (p) out[plan] = p.priceString;
-  }
+  const products = await Purchases.getProducts([...PRODUCT_IDS], PRODUCT_CATEGORY.NON_SUBSCRIPTION);
+  const out: Record<string, string> = {};
+  for (const p of products as PurchasesStoreProduct[]) out[p.identifier] = p.priceString;
   return out;
 }
 
 export type PurchaseOutcome = 'purchased' | 'cancelled';
 
-export async function purchasePlan(userId: string, plan: PaidPlan): Promise<PurchaseOutcome> {
+/** Sunucunun teklif ettiği ürünü satın alır (ürün kimliği my_quotes'tan gelir). */
+export async function purchaseProduct(userId: string, productId: string): Promise<PurchaseOutcome> {
   if (storeAvailability() !== 'ready') throw new Error('store_unavailable');
+  if (!(PRODUCT_IDS as readonly string[]).includes(productId)) throw new Error('product_not_found');
   await ensureConfigured(userId);
-  const [product] = await Purchases.getProducts([PRODUCT_IDS[plan]], PRODUCT_CATEGORY.NON_SUBSCRIPTION);
+  const [product] = await Purchases.getProducts([productId], PRODUCT_CATEGORY.NON_SUBSCRIPTION);
   if (!product) throw new Error('product_not_found');
   try {
     await Purchases.purchaseStoreProduct(product);

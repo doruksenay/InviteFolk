@@ -3,6 +3,7 @@
 export const tools = {
   section: 'Araçlar',
   locked: '{plan} pakette',
+  lockedAlbum: 'Anı albümü eklentisi',
   card: {
     page: { title: 'Davetiye sayfası', body: 'Zarf, müzik, geri sayım, program, galeri, takı/IBAN' },
     team: { title: 'Ortak yöneticiler', body: 'Eşin, annen ya da arkadaşın birlikte yönetsin' },

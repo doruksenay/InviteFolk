@@ -135,6 +135,10 @@ Start free. Bigger events have one-time plans, no subscription.
 | `invitefolk_temel` | Davet paketi | 1 etkinlik (nişan, kına, sünnet, doğum günü), 200 davetli, tüm şablonlar, fon müziği |
 | `invitefolk_otomatik` | Düğün paketi | 1 düğün, 500 davetli, oturma planı ve masa kartları, kapıda karekodla giriş, otomatik WhatsApp hatırlatması |
 | `invitefolk_tam` | Düğün Tam paketi | Nişan, kına ve düğün (3 etkinlik), 1.000 davetli, canlı albüm, video davetiye, SMS yedeği, 2 otomatik hatırlatma |
+| `invitefolk_up_temel_otomatik` | Davet'ten Düğün'e geçiş | Davet paketinden Düğün paketine yükseltme; yalnızca fark ödenir |
+| `invitefolk_up_temel_tam` | Davet'ten Düğün Tam'a geçiş | Davet paketinden Düğün Tam paketine yükseltme; yalnızca fark ödenir |
+| `invitefolk_up_otomatik_tam` | Düğün'den Düğün Tam'a geçiş | Düğün paketinden Düğün Tam paketine yükseltme; yalnızca fark ödenir |
+| `invitefolk_album` | Anı albümü | Davetliler karekodla 1.500 fotoğraf ve video yükler; anı defteri ve salon ekranı. Etkinlikten 1 yıl sonrasına kadar açık |
 
 Bu sınırlar `public.plan_limits` tablosuyla aynı olmalı. Tabloyu değiştirirseniz bu metinleri de güncelleyin.
 

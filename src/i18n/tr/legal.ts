@@ -139,7 +139,7 @@ export const legal = {
           id: 'paketler',
           title: '5. Paketler ve ödeme',
           body: [
-            'Ücretli paketler tek seferlik ödemeyle bir yıl geçerlidir; otomatik yenileme yoktur. Süre bitince hesap ücretsiz pakete döner, verilerin silinmez.',
+            'Ücretli paketler tek seferlik ödemeyle en az bir yıl, paket döneminde oluşturulan etkinliğin tarihi daha ileriyse etkinlikten altı ay sonrasına kadar (satın almadan en fazla üç yıl) geçerlidir; otomatik yenileme yoktur. Üst pakete geçişte yalnızca paket fiyatları arasındaki fark ödenir ve süre değişmez. Anı albümü eklentisi en az bir yıl, etkinlikten bir yıl sonrasına kadar açık kalır. Süre bitince hesap ücretsiz pakete döner, verilerin silinmez.',
             'Fiyatlar KDV dahil Türk lirası olarak gösterilir. Web ödemeleri iyzico, uygulama içi ödemeler Apple veya Google üzerinden alınır.',
             'Paket, ödeme onaylanır onaylanmaz hesabına tanımlanan dijital bir hizmettir. Mesafeli Sözleşmeler Yönetmeliği md. 15/1-(ğ) uyarınca, anında ifa edilen dijital içeriklerde cayma hakkı bulunmamaktadır; teknik bir sorun nedeniyle hizmeti kullanamazsan info@invitefolk.com adresine yaz, iade talebini değerlendiririz. Mağaza ödemelerinde iadeler Apple veya Google\'ın kurallarına tabidir.',
           ],

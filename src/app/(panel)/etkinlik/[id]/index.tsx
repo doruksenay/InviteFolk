@@ -151,7 +151,7 @@ export default function EventDetail() {
             icon: 'camera' as const,
             title: t('tools.card.album.title'),
             body: t('tools.card.album.body'),
-            locked: L && L.album_photos <= 0 && !settings.guestbook?.enabled ? plan('otomatik') : null,
+            locked: L && L.album_photos <= 0 && !settings.guestbook?.enabled ? t('tools.lockedAlbum') : null,
             badge: lim.data?.album_used ? String(lim.data.album_used) : null,
             tint: color.coralTint,
             ink: color.coralInk,

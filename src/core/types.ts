@@ -344,6 +344,8 @@ export type MatchRow = {
 export type MyPlan = {
   plan: Plan;
   expires_at: string | null;
+  /** Anı albümünün (eklenti ya da albümlü paket) açık olduğu son tarih. */
+  album_until: string | null;
   limits: PlanLimits;
   usage: { events: number; contacts: number };
 };

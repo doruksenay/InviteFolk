@@ -38,7 +38,7 @@ Invitefolk; düğün, nişan, kına, sünnet, bebek partisi ve cinsiyet partisi,
 - Hava durumu: etkinliğe 14 gün kala davetli sayfasında tahmin.
 - Takım sporları (halı saha, basketbol, voleybol): kadro ve yedek listesi (kadro dolunca yedeğe, biri çıkınca ilk yedek kadroya), kişi başı ücret ve "kim ödedi" takibi (oyuncu "ödedim" der, organizatör onaylar), her hafta otomatik tekrar ve davet, seviye ve mevkiye göre dengeli takım (kaleci; oyun kurucu/pivot; pasör/libero takımlara eşit dağılır), maç skoru ve gol/sayılar, maçın oyuncusu oylaması, gol krallığı, takvime abone olma (her hafta kendiliğinden).
 - Rehber: tüm etkinliklerde ortak kişi listesi.
-- Paketler: Ücretsiz / Davet 499 ₺ / Düğün 999 ₺ / Düğün Tam 1.749 ₺ (bir yıl geçerli; etkinlik hakkı satın almadan sonra oluşturulan etkinliklerle sayılır). iOS ve Android'de mağaza içi satın alma (RevenueCat), web'de iyzico.
+- Paketler: Ücretsiz / Davet 499 ₺ / Düğün 999 ₺ / Düğün Tam 1.749 ₺ (en az bir yıl, etkinlikten 6 ay sonrasına kadar geçerli; üst pakete geçişte yalnızca fark ödenir; etkinlik hakkı satın almadan sonra oluşturulan etkinliklerle sayılır) ve 499 ₺'lik Anı albümü eklentisi. iOS ve Android'de mağaza içi satın alma (RevenueCat), web'de iyzico.
 - Telefon bildirimi: davetli cevap verince, yedekten kadroya geçişte, paket tanımlanınca.
 - Ayarlar: dil, bildirim tercihi, paketler, yasal metinler, hesabı kalıcı silme.
 
