@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   if (!/^[A-Za-z0-9-]{8,100}$/.test(token)) return redirect(false);
 
   const db = adminClient();
-  const { data: session } = await db.from('checkout_sessions').select('id, user_id, package, amount_try, status').eq('provider_token', token).maybeSingle();
+  const { data: session } = await db.from('checkout_sessions').select('id, user_id, package, product_id, amount_try, status').eq('provider_token', token).maybeSingle();
   if (!session) return redirect(false);
   if (session.status === 'paid') return redirect(true, session.package);
 
@@ -61,7 +61,8 @@ Deno.serve(async (req) => {
     p_amount: Number(session.amount_try),
     p_provider: 'iyzico',
     p_ref: String(result.paymentId),
-    p_product: `invitefolk_${session.package}`,
+    // Ürün kimliği yükseltmeyi (invitefolk_up_<eski>_<yeni>) ve eklentiyi ayırt eder.
+    p_product: session.product_id ?? `invitefolk_${session.package}`,
   });
   if (error) {
     // Ödeme alındı ama paket verilemedi: oturum "pending" kalır, yeniden denenebilir; kayıt sunucu günlüğünde.

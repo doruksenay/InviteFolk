@@ -18,6 +18,7 @@ export const errors = {
     cohosts: 'ortak yönetici sayısı',
     album: 'albüm fotoğrafı',
     signup: 'kalan adet',
+    reminders: 'davetli başına otomatik hatırlatma',
   },
   planFeature: 'Bu özellik paketinde yok: {what}. Paketler sayfasından yükseltebilirsin.',
   planFeatureWhat: {
@@ -28,6 +29,8 @@ export const errors = {
     collector: 'bilgi toplama linki',
     album: 'fotoğraf albümü',
     sms: 'SMS',
+    seating: 'oturma planı',
   },
+  waAutoRemindersOnly: 'Otomatik WhatsApp paketinde yalnızca cevap vermeyenlere hatırlatma için. Bu mesajı WhatsApp linkleriyle, e-postayla ya da SMS ile gönderebilirsin.',
   notFound: 'Aradığın kayıt bulunamadı.',
 };

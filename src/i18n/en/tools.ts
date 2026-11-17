@@ -3,6 +3,7 @@ import type { tools as TR } from '../tr/tools';
 export const tools: typeof TR = {
   section: 'Tools',
   locked: 'In the {plan} plan',
+  lockedAlbum: 'Memory album add-on',
   card: {
     page: { title: 'Invitation page', body: 'Envelope, music, countdown, programme, gallery, gift details' },
     team: { title: 'Co-hosts', body: 'Plan it together with your partner, family or friends' },
@@ -195,7 +196,7 @@ export const tools: typeof TR = {
     leave: 'Leave this event',
     leaveConfirm: "If you leave, you won't see this event any more.",
     limit: { one: 'Your plan includes {count} co-host.', other: 'Your plan includes {count} co-hosts.' },
-    noPlan: 'Co-hosts are included in the Basic, Automatic and Complete plans.',
+    noPlan: 'Co-hosts are included in the Invite, Wedding and Wedding Plus plans.',
     note: 'The link only works for someone signing in with this email address, and only once.',
     shared: 'Shared',
   },

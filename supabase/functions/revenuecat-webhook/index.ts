@@ -6,10 +6,16 @@
 
 import { adminClient, readBody, UUID } from '../_shared/supabase.ts';
 
-const PRODUCT_TO_PACKAGE: Record<string, 'temel' | 'otomatik' | 'tam'> = {
+// Ürün → verilecek paket. Yükseltme ürünleri (invitefolk_up_<eski>_<yeni>) yeni paketi verir, yalnızca fark ödenir;
+// grant_purchase türü ürün kimliğinden çıkarır. invitefolk_album: Anı albümü eklentisi.
+const PRODUCT_TO_PACKAGE: Record<string, 'temel' | 'otomatik' | 'tam' | 'album'> = {
   invitefolk_temel: 'temel',
   invitefolk_otomatik: 'otomatik',
   invitefolk_tam: 'tam',
+  invitefolk_up_temel_otomatik: 'otomatik',
+  invitefolk_up_temel_tam: 'tam',
+  invitefolk_up_otomatik_tam: 'tam',
+  invitefolk_album: 'album',
 };
 const STORE: Record<string, 'app_store' | 'google_play'> = { APP_STORE: 'app_store', PLAY_STORE: 'google_play' };
 

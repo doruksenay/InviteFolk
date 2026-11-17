@@ -21,7 +21,7 @@ export async function sendToGuests(channel: SendChannel, eventId: string, kind: 
     const payload = ctx && typeof ctx.json === 'function' ? await ctx.json().catch(() => null) : null;
     if (payload?.error === 'quota_exceeded') throw friendlyError({ message: 'quota_exceeded', details: payload.detail ?? channel });
     if (payload?.error === 'not_configured') throw new Error(makeT(currentLang())('notifications.emailNotConfigured'));
-    throw friendlyError(payload?.error ? { message: String(payload.error) } : error);
+    throw friendlyError(payload?.error ? { message: String(payload.error), details: payload.detail } : error);
   }
   return data as SendResult;
 }

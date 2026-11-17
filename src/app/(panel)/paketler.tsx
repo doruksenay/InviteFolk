@@ -6,8 +6,9 @@ import { formatNumber, formatShortDate, formatTry } from '@/core/format';
 import type { MyPlan, Plan } from '@/core/types';
 import { dict, useI18n } from '@/i18n';
 import { getMyPlan, useQuery } from '@/lib/api';
-import { getPlanCatalog, type PaidPlan, PAID_PLANS, type PlanLimits, startWebCheckout } from '@/lib/api-billing';
-import { getStorePrices, IN_APP_PURCHASES, purchasePlan, storeAvailability } from '@/lib/purchases';
+import { getPlanCatalog, getQuotes, type PaidPlan, PAID_PLANS, type PlanLimits, type Purchasable, type Quote, startWebCheckout } from '@/lib/api-billing';
+import { eventsPerk, hasSeating, sendingPerks } from '@/lib/plan-perks';
+import { getStorePrices, IN_APP_PURCHASES, purchaseProduct, storeAvailability } from '@/lib/purchases';
 import { useSession } from '@/lib/session';
 import { Icon } from '@/ui/Icon';
 import { Body, Button, Caption, Display, DisplayAccent, IconButton, Notice, Pill, Skeleton, Surface, Title } from '@/ui/primitives';
@@ -27,11 +28,14 @@ type Banner = { tone: 'success' | 'info' | 'warning' | 'error'; text: string } |
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Ödeme sunucuda doğrulanıp paket tanımlanana kadar my_plan'ı yoklar (en fazla ~40 sn). */
-async function waitForPlan(target: PaidPlan): Promise<MyPlan | null> {
+const albumOpen = (p: MyPlan | null | undefined) => !!p?.album_until && new Date(p.album_until).getTime() > Date.now();
+
+/** Ödeme sunucuda doğrulanıp paket (ya da albüm) tanımlanana kadar my_plan'ı yoklar (en fazla ~40 sn). */
+async function waitForPurchase(target: Purchasable, before: MyPlan | null | undefined): Promise<MyPlan | null> {
   for (let i = 0; i < 20; i++) {
     const p = await getMyPlan().catch(() => null);
-    if (p && RANK[p.plan] >= RANK[target]) return p;
+    if (p && target === 'album' && albumOpen(p) && p.album_until !== before?.album_until) return p;
+    if (p && target !== 'album' && RANK[p.plan] >= RANK[target]) return p;
     await sleep(2000);
   }
   return null;
@@ -46,8 +50,10 @@ export default function PlansScreen() {
 
   const catalog = useQuery(getPlanCatalog, []);
   const mine = useQuery(getMyPlan, []);
-  const [storePrices, setStorePrices] = useState<Partial<Record<PaidPlan, string>>>({});
-  const [busy, setBusy] = useState<PaidPlan | null>(null);
+  // Kullanıcıya özel teklif: yükseltmede yalnızca fark, albüm eklentisi (sunucu hesaplar).
+  const quotes = useQuery(getQuotes, []);
+  const [storePrices, setStorePrices] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<Purchasable | null>(null);
 
   const availability = storeAvailability();
   const planName = (p: Plan) => t(`status.plan.${p}`);
@@ -73,13 +79,14 @@ export default function PlansScreen() {
   useEffect(() => {
     if (durum !== 'basarili') return;
     let alive = true;
-    const target = (PAID_PLANS as string[]).includes(returned ?? '') ? (returned as PaidPlan) : 'temel';
-    waitForPlan(target).then((p) => {
+    const target: Purchasable = returned === 'album' ? 'album' : (PAID_PLANS as string[]).includes(returned ?? '') ? (returned as PaidPlan) : 'temel';
+    waitForPurchase(target, null).then((p) => {
       if (!alive) return;
       if (p) {
         mine.setData(p);
+        quotes.reload();
         refreshProfile();
-        setBanner({ tone: 'success', text: t('billing.success', { plan: t(`status.plan.${p.plan}`) }) });
+        setBanner({ tone: 'success', text: target === 'album' ? t('billing.album.success') : t('billing.success', { plan: t(`status.plan.${p.plan}`) }) });
       } else setBanner({ tone: 'warning', text: t('billing.pending') });
     });
     return () => {
@@ -88,8 +95,10 @@ export default function PlansScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [durum, returned]);
 
-  const buy = async (plan: PaidPlan) => {
+  const buy = async (plan: Purchasable) => {
     if (!profile) return;
+    const quote = quotes.data?.[plan];
+    if (!quote?.available) return;
     setBanner(null);
     setBusy(plan);
     try {
@@ -106,17 +115,19 @@ export default function PlansScreen() {
         setBanner({ tone: 'warning', text: t('billing.notConfigured') });
         return;
       }
-      const outcome = await purchasePlan(profile.id, plan);
+      const before = mine.data;
+      const outcome = await purchaseProduct(profile.id, quote.product);
       if (outcome === 'cancelled') {
         setBanner({ tone: 'info', text: t('billing.cancelled') });
         return;
       }
       setBanner({ tone: 'info', text: t('billing.waiting') });
-      const p = await waitForPlan(plan);
+      const p = await waitForPurchase(plan, before);
       if (p) {
         mine.setData(p);
+        quotes.reload();
         await refreshProfile();
-        setBanner({ tone: 'success', text: t('billing.success', { plan: planName(p.plan) }) });
+        setBanner({ tone: 'success', text: plan === 'album' ? t('billing.album.success') : t('billing.success', { plan: planName(p.plan) }) });
       } else setBanner({ tone: 'warning', text: t('billing.pending') });
     } catch {
       setBanner({ tone: 'error', text: Platform.OS === 'web' ? t('billing.checkoutFailed') : t('billing.failed') });
@@ -127,8 +138,12 @@ export default function PlansScreen() {
 
   const current: Plan = mine.data?.plan ?? 'free';
   const limitsFor = (p: Plan): PlanLimits | undefined => catalog.data?.limits.find((l) => l.plan === p);
+  const quoteFor = (p: Purchasable): Quote | undefined => quotes.data?.[p];
+  /** Gösterilen fiyat: teklif varsa (yükseltmede fark) mağazanın yerel fiyatı ya da teklif tutarı; yoksa liste fiyatı. */
   const priceFor = (p: PaidPlan) => {
-    if (storePrices[p]) return storePrices[p]!;
+    const q = quoteFor(p);
+    if (q?.available) return storePrices[q.product] ?? formatTry(q.amount, locale);
+    if (storePrices[`invitefolk_${p}`]) return storePrices[`invitefolk_${p}`];
     const row = catalog.data?.prices.find((x) => x.plan === p);
     return row ? formatTry(row.amount_try, locale) : '—';
   };
@@ -138,13 +153,12 @@ export default function PlansScreen() {
     if (!l) return [] as string[];
     const n = (v: number) => formatNumber(v, locale);
     return [
-      t('billing.included.events', { count: l.max_events }),
+      eventsPerk(t, l),
       t('billing.included.guests', { count: n(l.max_guests_per_event) }),
-      l.whatsapp_per_day > 0 ? t('billing.included.whatsappAuto', { count: n(l.whatsapp_per_day) }) : t('billing.included.whatsappManual'),
+      ...sendingPerks(t, l, n),
       t('billing.included.email', { count: n(l.email_per_day) }),
-      ...(l.whatsapp_per_day > 0 ? [t('billing.included.reminders')] : []),
       t('billing.included.rsvp'),
-      t('billing.included.seating'),
+      ...(hasSeating(l) ? [t('billing.included.seating')] : []),
       t('billing.included.design'),
       t('billing.included.import'),
       t('billing.included.page'),
@@ -165,6 +179,8 @@ export default function PlansScreen() {
     const dark = p === 'otomatik';
     const isCurrent = current === p;
     const lower = RANK[p] < RANK[current];
+    const q = p === 'free' ? undefined : quoteFor(p);
+    const upgrade = q?.available && q.kind === 'upgrade' ? q : null;
     return (
       <View
         key={p}
@@ -197,7 +213,11 @@ export default function PlansScreen() {
 
         <View style={{ gap: 2 }}>
           <Text style={{ fontFamily: font.display, fontSize: 37, lineHeight: 41, color: a.ink }}>{p === 'free' ? t('billing.freePrice') : priceFor(p)}</Text>
-          {p !== 'free' && <Caption color={dark ? 'rgba(255,255,255,0.7)' : color.muted}>{t('billing.perYear')}</Caption>}
+          {p !== 'free' && (
+            <Caption color={dark ? 'rgba(255,255,255,0.7)' : color.muted}>
+              {upgrade ? t('billing.upgradeNote', { full: formatTry(upgrade.full, locale) }) : t('billing.perYear')}
+            </Caption>
+          )}
         </View>
         <Text style={{ fontFamily: font.medium, fontSize: 14, lineHeight: 20, color: dark ? 'rgba(255,255,255,0.85)' : color.inkSoft }}>{t(`billing.planBlurb.${p}`)}</Text>
 
@@ -214,15 +234,53 @@ export default function PlansScreen() {
 
         {p !== 'free' && (
           <Button
-            label={busy === p ? t('billing.buying') : isCurrent ? t('billing.yourPlan') : t('billing.choose')}
+            label={busy === p ? t('billing.buying') : upgrade ? t('billing.upgrade') : isCurrent ? t('billing.renew') : t('billing.choose')}
             variant={dark ? 'accent' : 'primary'}
             size="lg"
             loading={busy === p}
-            disabled={!!busy || lower || !catalog.data}
+            disabled={!!busy || lower || !catalog.data || !q?.available}
             onPress={() => buy(p)}
           />
         )}
       </View>
+    );
+  };
+
+  // Anı albümü eklentisi: Düğün Tam ve İşletme paketinde dahil; diğer paketlere sonradan eklenir.
+  const albumCard = () => {
+    const q = quoteFor('album');
+    if (!q) return null;
+    const open = albumOpen(mine.data);
+    const included = !q.available && q.reason === 'included';
+    return (
+      <Surface style={{ flexDirection: wide ? 'row' : 'column', alignItems: wide ? 'center' : 'flex-start', gap: 16 }}>
+        <View style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: color.coralTint, alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name="camera" size={22} color={color.coralInk} />
+        </View>
+        <View style={{ flex: wide ? 1 : undefined, gap: 4 }}>
+          <Title>{t('billing.album.title')}</Title>
+          <Body>{t('billing.album.body')}</Body>
+          <Caption>
+            {open && mine.data?.album_until
+              ? t('billing.album.until', { date: formatShortDate(mine.data.album_until, locale) })
+              : included
+                ? t('billing.album.included')
+                : t('billing.album.validity')}
+          </Caption>
+        </View>
+        {q.available && !open && (
+          <View style={{ gap: 8, alignItems: wide ? 'flex-end' : 'flex-start' }}>
+            <Text style={{ fontFamily: font.display, fontSize: 30, lineHeight: 34, color: color.ink }}>{storePrices[q.product] ?? formatTry(q.amount, locale)}</Text>
+            <Button
+              label={busy === 'album' ? t('billing.buying') : t('billing.album.buy')}
+              variant="secondary"
+              loading={busy === 'album'}
+              disabled={!!busy}
+              onPress={() => buy('album')}
+            />
+          </View>
+        )}
+      </Surface>
     );
   };
 
@@ -288,6 +346,8 @@ export default function PlansScreen() {
           {PAID_PLANS.map(card)}
         </View>
       )}
+
+      {albumCard()}
 
       <View style={{ gap: 8, maxWidth: 760 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>

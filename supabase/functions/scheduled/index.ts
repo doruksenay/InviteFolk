@@ -58,12 +58,18 @@ async function hostNames(db: SupabaseClient, owners: string[]) {
   return map;
 }
 
-/** Önce WhatsApp (numara ve hak varsa), olmazsa e-posta (adres ve hak varsa). */
+/**
+ * Önce WhatsApp (numara ve hak varsa), olmazsa e-posta (adres ve hak varsa).
+ * WhatsApp paket kuralıyla atlanırsa (ör. davetli başı hatırlatma sınırı, otomatik davet kapalı) e-postaya düşer.
+ */
 async function deliverBest(db: SupabaseClient, quotas: Quotas, ev: EventRow, t: DeliveryTarget, kind: 'invite' | 'reminder', host: string | null) {
   const lang: Lang = langOf(ev.settings);
   if (canWhatsApp(t) && (await quotas.left(ev.owner_id, 'whatsapp')) > 0) {
-    quotas.use(ev.owner_id, 'whatsapp');
-    return deliverWhatsApp(db, ev, t, kind, lang);
+    const out = await deliverWhatsApp(db, ev, t, kind, lang);
+    if (out !== 'skipped') {
+      quotas.use(ev.owner_id, 'whatsapp');
+      return out;
+    }
   }
   if (canEmail(t) && appWebUrl() && (await quotas.left(ev.owner_id, 'email')) > 0) {
     quotas.use(ev.owner_id, 'email');

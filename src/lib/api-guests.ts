@@ -162,7 +162,7 @@ async function invokeSend(fn: 'send-invitations' | 'send-email' | 'send-sms', bo
     const ctx = (error as { context?: Response }).context;
     const payload = ctx && typeof ctx.json === 'function' ? await ctx.json().catch(() => null) : null;
     if (payload?.error === 'quota_exceeded') throw friendlyError({ message: 'quota_exceeded', details: payload.detail ?? quotaDetail });
-    throw friendlyError(payload?.error ? { message: String(payload.error) } : error);
+    throw friendlyError(payload?.error ? { message: String(payload.error), details: payload.detail } : error);
   }
   return data as SendResult;
 }
