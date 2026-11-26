@@ -48,9 +48,25 @@ function scrubBreadcrumb(b: Loose): Loose {
 
 let started = false;
 
+/** Web'de Sentry paketi (~380 KB) sayfa yüklenip tarayıcı boşta kalınca indirilir; davetiye sayfasının açılışını yavaşlatmaz. */
+function whenIdle(fn: () => void) {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return fn();
+  const idle = () => {
+    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void }).requestIdleCallback;
+    if (ric) ric(fn, { timeout: 8000 });
+    else setTimeout(fn, 3000);
+  };
+  if (document.readyState === 'complete') idle();
+  else window.addEventListener('load', idle, { once: true });
+}
+
 export function initMonitoring(): void {
   if (started || !DSN) return;
   started = true;
+  whenIdle(load);
+}
+
+function load() {
   import('@sentry/react-native')
     .then((Sentry) => {
       Sentry.init({
