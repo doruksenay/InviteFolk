@@ -38,7 +38,7 @@ Invitefolk; düğün, nişan, kına, sünnet, bebek partisi ve cinsiyet partisi,
 - Hava durumu: etkinliğe 14 gün kala davetli sayfasında tahmin.
 - Takım sporları (halı saha, basketbol, voleybol): kadro ve yedek listesi (kadro dolunca yedeğe, biri çıkınca ilk yedek kadroya), kişi başı ücret ve "kim ödedi" takibi (oyuncu "ödedim" der, organizatör onaylar), her hafta otomatik tekrar ve davet, seviye ve mevkiye göre dengeli takım (kaleci; oyun kurucu/pivot; pasör/libero takımlara eşit dağılır), maç skoru ve gol/sayılar, maçın oyuncusu oylaması, gol krallığı, takvime abone olma (her hafta kendiliğinden).
 - Rehber: tüm etkinliklerde ortak kişi listesi.
-- Paketler: ücretsiz / Temel 500 ₺ / Otomatik 750 ₺ / Tam 1.000 ₺ (bir yıl geçerli). iOS ve Android'de mağaza içi satın alma (RevenueCat), web'de iyzico.
+- Paketler: Ücretsiz / Davet 499 ₺ / Düğün 999 ₺ / Düğün Tam 1.749 ₺ (en az bir yıl, etkinlikten 6 ay sonrasına kadar geçerli; üst pakete geçişte yalnızca fark ödenir; etkinlik hakkı satın almadan sonra oluşturulan etkinliklerle sayılır) ve 499 ₺'lik Anı albümü eklentisi. iOS ve Android'de mağaza içi satın alma (RevenueCat), web'de iyzico.
 - Telefon bildirimi: davetli cevap verince, yedekten kadroya geçişte, paket tanımlanınca.
 - Ayarlar: dil, bildirim tercihi, paketler, yasal metinler, hesabı kalıcı silme.
 
@@ -103,21 +103,26 @@ npx expo start               # Expo Go ile telefonda dene; w: web
    ```
 6. Paket sınırlarını kontrol edin (`plan_limits`), fiyatları (`plan_prices`). Varsayılanlar:
 
-   | Paket | Fiyat | Etkinlik | Etkinlik başına davetli | WhatsApp/gün | E-posta/gün |
-   |---|---|---|---|---|---|
-   | free | 0 | 3 | 50 | 0 (wa.me linkleri) | 30 |
-   | temel | 500 ₺ | 10 | 150 | 300 | 300 |
-   | otomatik | 750 ₺ | 10 | 400 | 800 | 800 |
-   | tam | 1.000 ₺ | 20 | 1.000 | 2.000 | 2.000 |
-   | b2b | — | 200 | 5.000 | 20.000 | 20.000 |
+   İç adlar (`temel`, `otomatik`, `tam`) ve mağaza ürün kimlikleri değişmedi; uygulamada görünen adlar Davet, Düğün ve Düğün Tam.
 
-   | Paket | Ortak yönetici | Galeri | Albüm | SMS/gün | Müzik | Video | Kapıda giriş | Bilgi toplama |
-   |---|---|---|---|---|---|---|---|---|
-   | free | 0 | 3 | — | — | — | — | — | — |
-   | temel | 1 | 8 | — | — | ✓ | — | — | ✓ |
-   | otomatik | 2 | 12 | 300 | 100 | ✓ | — | ✓ | ✓ |
-   | tam | 5 | 24 | 1.500 | 300 | ✓ | ✓ | ✓ | ✓ |
-   | b2b | 20 | 24 | 5.000 | 2.000 | ✓ | ✓ | ✓ | ✓ |
+   | Paket | Ad | Fiyat | Etkinlik | Etkinlik başına davetli | Oturma planı (salon öğesi) | E-posta/gün |
+   |---|---|---|---|---|---|---|
+   | free | Ücretsiz | 0 | 1 | 50 | — | 30 |
+   | temel | Davet | 499 ₺ | 1 | 200 | — | 300 |
+   | otomatik | Düğün | 999 ₺ | 1 | 500 | 300 | 800 |
+   | tam | Düğün Tam | 1.749 ₺ | 3 (nişan, kına, düğün) | 1.000 | 400 | 2.000 |
+   | b2b | İşletme | — | 200 | 5.000 | 600 | 20.000 |
+
+   | Paket | WhatsApp/gün | Davetli başına otomatik hatırlatma | Toplu otomatik WhatsApp | Ortak yönetici | Galeri | Albüm | SMS/gün | Müzik | Video | Kapıda giriş | Bilgi toplama |
+   |---|---|---|---|---|---|---|---|---|---|---|---|
+   | free | 0 (wa.me linkleri) | — | — | 0 | 3 | — | — | — | — | — | — |
+   | temel | 0 (wa.me linkleri) | — | — | 1 | 8 | — | — | ✓ | — | — | ✓ |
+   | otomatik | 250 | 1 | — | 2 | 12 | — | — | ✓ | — | ✓ | ✓ |
+   | tam | 500 | 2 | — | 5 | 24 | 1.500 | 300 | ✓ | ✓ | ✓ | ✓ |
+   | b2b | 20.000 | 2 | ✓ | 20 | 24 | 5.000 | 2.000 | ✓ | ✓ | ✓ | ✓ |
+
+   - **Etkinlik hakkı:** ücretli pakette satın almadan sonra oluşturulan etkinlikler sayılır (arşivlenenler dahil); aynı paket yeniden alınınca ya da üst pakete geçilince sayaç sıfırlanır. Ücretsiz ve işletme paketinde arşivlenmemiş etkinlikler sayılır.
+   - **Otomatik WhatsApp:** Meta mesaj başı ücret aldığı için tüketici paketlerinde yalnızca cevap vermeyenlere hatırlatma gider (davetli başına sınırlı). Davet, masa ve duyuru mesajları WhatsApp linkleriyle, e-postayla ya da SMS ile gönderilir; otomatik WhatsApp ile toplu gönderim (`wa_broadcast`) yalnızca işletme paketinde.
 
    Ortak yöneticinin işlemleri etkinlik sahibinin paketinden ve kotalarından düşer.
 

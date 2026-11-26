@@ -31,6 +31,7 @@ POST { event_id, invitation_ids?: uuid[], kind?: 'invite' | 'reminder' | 'table'
        announcement_id?: uuid (duyuruda zorunlu, son 24 saatte yazılmış), audience?: 'all' | 'yes' }
 → 200 { sent, failed, skipped, quota_left, via_sms? }
 → 402 { error: 'quota_exceeded', detail: 'whatsapp' | 'email' | 'sms' }
+→ 402 { error: 'plan_feature', detail: 'whatsapp_auto' }   (yalnızca send-invitations: paket toplu otomatik WhatsApp'a izin vermiyor)
 ```
 
 `send-sms` de aynı sözleşmeyi kullanır. Duyuruda metin istemciden alınmaz: uygulama duyuruyu önce `event_announcements` tablosuna yazar (günde 10; silmek sınırı sıfırlamaz) ve gönderimde yalnızca `announcement_id` verir. Fonksiyon metni kayıttan okur; her duyuru her kanaldan bir kez gönderilir (`409 already_sent`). Ortak yöneticinin gönderimleri etkinlik sahibinin günlük hakkından düşer.
@@ -126,7 +127,7 @@ Her çalıştırmada sırasıyla şunlar yapılır:
    - Cevaplar ve "kim ödedi" bilgisi sıfırlanır.
    - `settings.auto_invite = true` ise davetler yeniden gönderilir: önce WhatsApp (numara ve hak varsa), olmazsa e-posta.
 2. **Otomatik hatırlatma.** `settings.reminders = { auto: true, days_before: 3 }` olan etkinliklerde, son cevap gününe (yoksa etkinlik tarihine) `days_before` gün kala, daveti gönderilmiş ama cevap vermemiş kişilere hatırlatma gider.
-   - Her davetliye en fazla 2 hatırlatma gönderilir.
+   - Her davetliye paketin izin verdiği kadar hatırlatma gönderilir (`plan_limits.auto_reminders`: Düğün 1, Düğün Tam 2; Ücretsiz ve Davet paketlerinde otomatik hatırlatma yok). WhatsApp hatırlatması sınırı doluysa e-postaya düşer.
    - İki hatırlatma arasında en az 2 gün bulunur.
 3. **Bildirimler.** Davetli cevap verdiğinde ya da yedekten kadroya geçtiğinde veritabanı `notification_queue` tablosuna kayıt düşer.
    - Bu kayıtlar organizatörün telefonlarına Expo Push ile, organizatörün dilinde gönderilir. Örnek: "Ahmet Yılmaz katılıyor · 3 kişi".

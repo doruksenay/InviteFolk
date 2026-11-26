@@ -1,7 +1,13 @@
 // Web: uygulama içi satın alma yok; ödeme iyzico ile (api-billing.startWebCheckout).
-import type { PaidPlan } from './api-billing';
-
-export const PRODUCT_IDS: Record<PaidPlan, string> = { temel: 'invitefolk_temel', otomatik: 'invitefolk_otomatik', tam: 'invitefolk_tam' };
+export const PRODUCT_IDS = [
+  'invitefolk_temel',
+  'invitefolk_otomatik',
+  'invitefolk_tam',
+  'invitefolk_up_temel_otomatik',
+  'invitefolk_up_temel_tam',
+  'invitefolk_up_otomatik_tam',
+  'invitefolk_album',
+] as const;
 
 export type StoreAvailability = 'ready' | 'expo-go' | 'not-configured';
 export type PurchaseOutcome = 'purchased' | 'cancelled';
@@ -10,11 +16,11 @@ export function storeAvailability(): StoreAvailability {
   return 'not-configured';
 }
 
-export async function getStorePrices(_userId: string): Promise<Partial<Record<PaidPlan, string>>> {
+export async function getStorePrices(_userId: string): Promise<Record<string, string>> {
   return {};
 }
 
-export async function purchasePlan(_userId: string, _plan: PaidPlan): Promise<PurchaseOutcome> {
+export async function purchaseProduct(_userId: string, _productId: string): Promise<PurchaseOutcome> {
   throw new Error('store_unavailable');
 }
 

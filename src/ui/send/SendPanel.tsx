@@ -8,6 +8,7 @@ import type { EventRow, EventSettings, InvitationWithContact } from '@/core/type
 import { eventLang, LOCALE_TAG, makeT, useI18n } from '@/i18n';
 import { useQuery } from '@/lib/api';
 import { emailQuotaLeft, quotaLeft, sendEmail, sendSms, sendWhatsApp, whatsappQuotaLeft } from '@/lib/api-guests';
+import { getEventLimits } from '@/lib/api-tools';
 import { Icon, type IconName } from '@/ui/Icon';
 import { Body, Button, Caption, Notice, Surface, Title, ToggleRow } from '@/ui/primitives';
 import { Sheet } from '@/ui/Sheet';
@@ -50,6 +51,11 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
   const waQuota = useQuery(() => whatsappQuotaLeft(event.id).catch(() => 0), [event.id]);
   const mailQuota = useQuery(() => emailQuotaLeft(event.id).catch(() => 0), [event.id]);
   const smsQuota = useQuery(() => quotaLeft(event.id, 'sms').catch(() => 0), [event.id]);
+  // Paket kuralı: otomatik WhatsApp tüketici paketlerinde yalnızca hatırlatma içindir (sunucu da uygular).
+  const lim = useQuery(() => getEventLimits(event.id).catch(() => null), [event.id]);
+  const L = lim.data?.limits ?? null;
+  const waInviteLocked = !!L && kind === 'invite' && !L.wa_broadcast;
+  const waReminderLocked = !!L && kind === 'reminder' && !L.wa_broadcast && L.auto_reminders <= 0;
 
   const active = invitations.filter((i) => i.status !== 'no');
   const notSent = active.filter((i) => i.delivery === 'not_sent');
@@ -195,8 +201,23 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
                 ink={color.sageInk}
                 title={t('send.waAuto.title')}
                 body={t('send.waAuto.body')}
-                meta={[waQuota.data !== null ? t('send.waAuto.quota', { count: waLeft }) : null, targets.length > withPhone.length ? t('send.waAuto.noPhone', { count: targets.length - withPhone.length }) : null]}>
-                {waQuota.data !== null && waLeft <= 0 ? (
+                meta={
+                  waInviteLocked || waReminderLocked
+                    ? []
+                    : [
+                        waQuota.data !== null ? t('send.waAuto.quota', { count: waLeft }) : null,
+                        kind === 'reminder' && L && !L.wa_broadcast ? t('send.waAuto.perGuest', { count: L.auto_reminders }) : null,
+                        targets.length > withPhone.length ? t('send.waAuto.noPhone', { count: targets.length - withPhone.length }) : null,
+                      ]
+                }>
+                {waInviteLocked ? (
+                  <Caption>{t('send.waAuto.remindersOnly')}</Caption>
+                ) : waReminderLocked ? (
+                  <View style={{ gap: 10 }}>
+                    <Caption>{t('send.waAuto.noReminders')}</Caption>
+                    <Button label={t('send.plans')} icon="star" variant="secondary" onPress={() => router.push('/paketler')} style={{ alignSelf: 'flex-start' }} />
+                  </View>
+                ) : waQuota.data !== null && waLeft <= 0 ? (
                   <View style={{ gap: 10 }}>
                     <Caption>{t('send.waAuto.noQuota')}</Caption>
                     <Button label={t('send.plans')} icon="star" variant="secondary" onPress={() => router.push('/paketler')} style={{ alignSelf: 'flex-start' }} />
@@ -215,7 +236,14 @@ export function SendPanel({ event, invitations, onSent, flat }: { event: EventRo
               </Channel>
 
               <Channel icon="whatsapp" tint={color.surfaceSoft} ink={color.ink} title={t('send.waManual.title')} body={t('send.waManual.body')} meta={[]}>
-                <Button label={t('send.waManual.button')} icon="arrowRight" variant="secondary" disabled={!withPhone.length} onPress={() => setQueueOpen(true)} style={{ alignSelf: 'flex-start' }} />
+                <Button
+                  label={t('send.waManual.button')}
+                  icon="arrowRight"
+                  variant={waInviteLocked || waReminderLocked ? 'accent' : 'secondary'}
+                  disabled={!withPhone.length}
+                  onPress={() => setQueueOpen(true)}
+                  style={{ alignSelf: 'flex-start' }}
+                />
               </Channel>
 
               <Channel

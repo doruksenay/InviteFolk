@@ -1,14 +1,26 @@
 # Ödemeler: paketler, App Store / Google Play (RevenueCat) ve web (iyzico)
 
-Paketler tek seferlik ödemeyle **1 yıl** geçerlidir; otomatik yenileme yoktur.
+Paketler tek seferlik ödemeyle satılır; otomatik yenileme yoktur.
 
-| Paket | Fiyat (TRY) | Ürün kimliği (mağaza) |
-|---|---|---|
-| Temel | 500 | `invitefolk_temel` |
-| Otomatik | 750 | `invitefolk_otomatik` |
-| Tam | 1.000 | `invitefolk_tam` |
+- **Süre:** en az 1 yıl; paket döneminde oluşturulan etkinliğin tarihi daha ileriyse etkinlikten 6 ay sonrasına kadar (satın almadan en fazla 3 yıl). Etkinlik tarihi eklenince ya da değişince `private.refresh_validity` süreyi yeniden hesaplar; süre yalnızca uzar.
+- **Yükseltme:** geçerli ücretli paketten üst pakete geçen yalnızca farkı öder. Yükseltme dönemi değiştirmez: süre ve etkinlik hakkı eski satın almanın döneminden devam eder (`purchases.period_start`).
+- **Anı albümü eklentisi (499 ₺):** Ücretsiz, Davet ve Düğün paketlerine eklenir (Düğün Tam'da dahil). Albüm hakkı `profiles.album_until` tarihine kadar açıktır: en az 1 yıl, etkinlikten 1 yıl sonrasına kadar.
+- **Teklif:** hangi ürünün hangi fiyata satılacağını sunucu belirler (`public.my_quotes()`); web ödemesi ve uygulama aynı teklifi kullanır.
 
-Web fiyatları `public.plan_prices` tablosundan gelir (istemci fiyat gönderemez). Mağaza fiyatları App Store Connect ve Play Console'da ayrıca ayarlanır; uygulama mağazanın gösterdiği yerel fiyatı kullanır.
+| Paket (uygulamadaki ad) | İç ad | Fiyat (TRY) | Ürün kimliği (mağaza) |
+|---|---|---|---|
+| Davet | `temel` | 499 | `invitefolk_temel` |
+| Düğün | `otomatik` | 999 | `invitefolk_otomatik` |
+| Düğün Tam | `tam` | 1.749 | `invitefolk_tam` |
+
+| Davet → Düğün (yükseltme) | | 500 | `invitefolk_up_temel_otomatik` |
+| Davet → Düğün Tam (yükseltme) | | 1.250 | `invitefolk_up_temel_tam` |
+| Düğün → Düğün Tam (yükseltme) | | 750 | `invitefolk_up_otomatik_tam` |
+| Anı albümü (eklenti) | | 499 | `invitefolk_album` |
+
+İç adlar ve ürün kimlikleri ilk fiyatlandırmadan kaldı; değiştirmek mağaza ürünlerini ve satın alma kayıtlarını bozacağı için yalnızca görünen adlar değişti (`src/i18n/*/status.ts`).
+
+Web fiyatları `public.plan_prices` ve `public.addon_prices` tablolarından, yükseltme farkı bunlardan sunucuda hesaplanır (istemci fiyat gönderemez). Mağaza fiyatları App Store Connect ve Play Console'da ayrıca ayarlanır; uygulama mağazanın gösterdiği yerel fiyatı kullanır.
 
 ## Güvenlik modeli
 
@@ -50,12 +62,12 @@ Web fiyatları `public.plan_prices` tablosundan gelir (istemci fiyat gönderemez
 
 ## 2. iOS ve Android: RevenueCat
 
-1. **App Store Connect** → uygulama → *Uygulama İçi Satın Almalar* → üç **Tüketilebilir (Consumable)** ürün: `invitefolk_temel`, `invitefolk_otomatik`, `invitefolk_tam`. Fiyat katmanlarını 500/750/1000 ₺'ye en yakın seçin; ekran görüntüsü ve açıklama ekleyin.
+1. **App Store Connect** → uygulama → *Uygulama İçi Satın Almalar* → yedi **Tüketilebilir (Consumable)** ürün: `invitefolk_temel` (499 ₺), `invitefolk_otomatik` (999 ₺), `invitefolk_tam` (1.749 ₺), `invitefolk_up_temel_otomatik` (500 ₺), `invitefolk_up_temel_tam` (1.250 ₺), `invitefolk_up_otomatik_tam` (750 ₺), `invitefolk_album` (499 ₺). Fiyatları bu tutarlara (ya da en yakın fiyat noktasına) ayarlayın; ekran görüntüsü ve açıklama ekleyin.
    - Neden tüketilebilir? Paket bir yıl sonra yeniden satın alınabilmeli; kalıcı (non-consumable) ürün ikinci kez satın alınamaz.
-2. **Play Console** → *Ürünler → Uygulama içi ürünler* → aynı üç ürün kimliği.
+2. **Play Console** → *Ürünler → Uygulama içi ürünler* → aynı yedi ürün kimliği.
 3. **RevenueCat** (<https://app.revenuecat.com>):
    - Proje oluşturun, App Store ve Play Store uygulamalarını bağlayın (App Store Connect API anahtarı, Play servis hesabı).
-   - *Products* bölümüne üç ürünü ekleyin.
+   - *Products* bölümüne yedi ürünü ekleyin.
    - *API keys*: iOS ve Android public SDK anahtarlarını EAS ortam değişkeni yapın:
      ```bash
      npx eas-cli@latest env:create --name EXPO_PUBLIC_REVENUECAT_IOS_KEY --value appl_... --environment production

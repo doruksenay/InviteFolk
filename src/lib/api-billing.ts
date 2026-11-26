@@ -8,6 +8,28 @@ export type PaidPlan = 'temel' | 'otomatik' | 'tam';
 export const PAID_PLANS: PaidPlan[] = ['temel', 'otomatik', 'tam'];
 
 export type PlanPrice = { plan: PaidPlan; amount_try: number; rank: number };
+/** Satılabilen ürünler: paketler ve Anı albümü eklentisi. */
+export type Purchasable = PaidPlan | 'album';
+
+/**
+ * Kullanıcıya özel fiyat teklifi (sunucu hesaplar): yükseltmede yalnızca fark, albümde eklenti fiyatı.
+ * product: mağaza ürün kimliği (invitefolk_temel, invitefolk_up_temel_otomatik, invitefolk_album…).
+ */
+export type Quote =
+  | { available: true; kind: 'plan' | 'upgrade' | 'addon'; product: string; amount: number; full: number; from?: PaidPlan }
+  | { available: false; reason: 'lower' | 'included' | 'b2b' | 'unknown' };
+
+export async function getQuotes(): Promise<Record<Purchasable, Quote>> {
+  const data = must(await supabase.rpc('my_quotes')) as Record<Purchasable, Quote> | null;
+  if (!data) throw new Error('not_found');
+  for (const q of Object.values(data)) {
+    if (q.available) {
+      q.amount = Number(q.amount);
+      q.full = Number(q.full);
+    }
+  }
+  return data;
+}
 export type { PlanLimits } from '@/core/types';
 
 export async function getPlanCatalog(): Promise<{ prices: PlanPrice[]; limits: PlanLimits[] }> {
@@ -22,7 +44,7 @@ export async function getPlanCatalog(): Promise<{ prices: PlanPrice[]; limits: P
 }
 
 /** Web ödemesi (iyzico): sunucu ödeme oturumunu açar, kullanıcıyı iyzico'nun güvenli sayfasına gönderir. */
-export async function startWebCheckout(plan: PaidPlan, lang: 'tr' | 'en' = 'tr'): Promise<string> {
+export async function startWebCheckout(plan: Purchasable, lang: 'tr' | 'en' = 'tr'): Promise<string> {
   const { data, error } = await supabase.functions.invoke('iyzico-checkout', { body: { package: plan, lang } });
   const url = (data as { paymentPageUrl?: string } | null)?.paymentPageUrl;
   if (error || !url || !/^https:\/\//.test(url)) throw new Error('checkout_failed');

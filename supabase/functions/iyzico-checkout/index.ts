@@ -1,9 +1,10 @@
-// POST { package: 'temel' | 'otomatik' | 'tam', lang?: 'tr' | 'en' }  → { paymentPageUrl }
-// Web'de paket satın alma: iyzico Ortak Ödeme Sayfası (Checkout Form) başlatır.
+// POST { package: 'temel' | 'otomatik' | 'tam' | 'album', lang?: 'tr' | 'en' }  → { paymentPageUrl }
+// Web'de paket, yükseltme ya da albüm eklentisi satın alma: iyzico Ortak Ödeme Sayfası (Checkout Form) başlatır.
 //
 // Güvenlik:
 // - Kullanıcı JWT ile doğrulanır (verify_jwt = true + getUser).
-// - Fiyat istemciden ALINMAZ; public.plan_prices tablosundan okunur.
+// - Fiyat istemciden ALINMAZ; veritabanındaki teklif (my_quotes) belirler: geçerli paketten üst pakete geçişte
+//   yalnızca fark, albüm eklentisinde eklenti fiyatı. Ürün kimliği de teklifle birlikte oturuma yazılır.
 // - Ödeme oturumu sunucuda açılır (checkout_sessions); dönüşte sonuç iyzico'dan sunucu tarafında sorgulanır.
 // - Hata ayrıntısı istemciye dönmez.
 // Ortam: IYZICO_API_KEY, IYZICO_SECRET_KEY, IYZICO_BASE_URL, ALLOWED_ORIGINS
@@ -11,8 +12,14 @@
 import { adminClient, corsHeaders, json, readBody, userClient } from '../_shared/supabase.ts';
 import { CF_INIT, iyzicoPost, iyzicoPrice } from './iyzico.ts';
 
-const PACKAGES = ['temel', 'otomatik', 'tam'] as const;
+const PACKAGES = ['temel', 'otomatik', 'tam', 'album'] as const;
 type Pkg = (typeof PACKAGES)[number];
+const ITEM_NAMES: Record<Pkg, string> = {
+  temel: 'Invitefolk Davet paketi',
+  otomatik: 'Invitefolk Düğün paketi',
+  tam: 'Invitefolk Düğün Tam paketi',
+  album: 'Invitefolk Anı albümü',
+};
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) });
@@ -36,18 +43,18 @@ Deno.serve(async (req) => {
   if (!user?.email) return json(req, { error: 'unauthorized' }, 401);
 
   const db = adminClient();
-  const [{ data: price }, { data: profile }] = await Promise.all([
-    db.from('plan_prices').select('amount_try').eq('plan', pkg).single(),
+  const [{ data: quotes }, { data: profile }] = await Promise.all([
+    asUser.rpc('my_quotes'),
     db.from('profiles').select('full_name, phone, suspended_at').eq('id', user.id).single(),
   ]);
-  if (!price || !profile) return json(req, { error: 'server_error' }, 500);
+  if (!profile) return json(req, { error: 'server_error' }, 500);
   if (profile.suspended_at) return json(req, { error: 'forbidden' }, 403);
-  // Geçerli bir üst paket varken daha düşük paket satılmaz (süre/iade istismarını da engeller).
-  const { data: plans } = await db.from('plan_prices').select('plan, rank');
-  const { data: eff } = await asUser.rpc('my_plan');
-  const rankOf = (p: string) => plans?.find((x) => x.plan === p)?.rank ?? 0;
-  if (eff && rankOf(String((eff as { plan?: string }).plan ?? 'free')) > rankOf(pkg)) return json(req, { error: 'invalid_input' }, 409);
-  const amount = Number(price.amount_try);
+  // Teklif: geçerli üst paket varken daha düşük paket, albümü içeren pakette eklenti satılmaz.
+  const quote = (quotes as Record<string, { available?: boolean; amount?: number | string; product?: string }> | null)?.[pkg];
+  if (!quote?.available || !quote.product || !/^invitefolk_[a-z_]{3,40}$/.test(quote.product)) return json(req, { error: 'invalid_input' }, 409);
+  const amount = Number(quote.amount);
+  const product = quote.product;
+  if (!Number.isFinite(amount) || amount <= 0) return json(req, { error: 'server_error' }, 500);
 
   // Kısa sürede çok fazla ödeme oturumu açılmasın (kötüye kullanım freni).
   const { count } = await db
@@ -59,7 +66,7 @@ Deno.serve(async (req) => {
 
   const { data: session, error: sErr } = await db
     .from('checkout_sessions')
-    .insert({ user_id: user.id, package: pkg, amount_try: amount })
+    .insert({ user_id: user.id, package: pkg, amount_try: amount, product_id: product })
     .select('id')
     .single();
   if (sErr || !session) {
@@ -100,7 +107,7 @@ Deno.serve(async (req) => {
       country: address.country,
     },
     billingAddress: address,
-    basketItems: [{ id: `invitefolk_${pkg}`, name: `Invitefolk ${pkg} (1 yıl)`, category1: 'Dijital hizmet', itemType: 'VIRTUAL', price: p }],
+    basketItems: [{ id: product, name: ITEM_NAMES[pkg], category1: 'Dijital hizmet', itemType: 'VIRTUAL', price: p }],
   });
 
   if (init.status !== 'success' || !init.token || !init.paymentPageUrl?.startsWith('https://')) {

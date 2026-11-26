@@ -313,6 +313,10 @@ export type PlanLimits = {
   video: boolean;
   checkin: boolean;
   collector: boolean;
+  /** Davetli başına en fazla otomatik hatırlatma. */
+  auto_reminders: number;
+  /** Otomatik WhatsApp ile davet/masa/duyuru (false: WhatsApp otomatiği yalnızca hatırlatma). */
+  wa_broadcast: boolean;
 };
 
 export type TeamMember = { id: string | null; user_id: string | null; full_name: string | null; email: string; role: 'owner' | 'cohost'; accepted: boolean; created_at: string };
@@ -340,6 +344,8 @@ export type MatchRow = {
 export type MyPlan = {
   plan: Plan;
   expires_at: string | null;
+  /** Anı albümünün (eklenti ya da albümlü paket) açık olduğu son tarih. */
+  album_until: string | null;
   limits: PlanLimits;
   usage: { events: number; contacts: number };
 };

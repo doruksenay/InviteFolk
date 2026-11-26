@@ -408,21 +408,21 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
         <Title>{t('tools.page.tools.title')}</Title>
         <ToggleRow
           label={t('tools.page.tools.checkin')}
-          hint={L && !L.checkin && !checkin ? locked('Otomatik') : t('tools.page.tools.checkinHint')}
+          hint={L && !L.checkin && !checkin ? locked(t('status.plan.otomatik')) : t('tools.page.tools.checkinHint')}
           value={checkin}
           onChange={setCheckin}
           disabled={!!L && !L.checkin && !checkin}
         />
         <ToggleRow
           label={t('tools.page.tools.collector')}
-          hint={L && !L.collector && !collector ? locked('Temel') : t('tools.page.tools.collectorHint')}
+          hint={L && !L.collector && !collector ? locked(t('status.plan.temel')) : t('tools.page.tools.collectorHint')}
           value={collector}
           onChange={setCollector}
           disabled={!!L && !L.collector && !collector}
         />
         <ToggleRow
           label={t('tools.page.tools.album')}
-          hint={L && L.album_photos <= 0 && !albumOn ? locked('Otomatik') : t('tools.page.tools.albumHint')}
+          hint={L && L.album_photos <= 0 && !albumOn ? t('tools.lockedAlbum') : t('tools.page.tools.albumHint')}
           value={albumOn}
           onChange={setAlbumOn}
           disabled={!!L && L.album_photos <= 0 && !albumOn}
@@ -434,7 +434,7 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
         {gbOn && <ToggleRow label={t('tools.page.tools.guestbookModerate')} value={gbModerate} onChange={setGbModerate} />}
         <ToggleRow
           label={t('tools.page.tools.sms')}
-          hint={L && L.sms_per_day <= 0 && !smsFallback ? locked('Otomatik') : t('tools.page.tools.smsHint')}
+          hint={L && L.sms_per_day <= 0 && !smsFallback ? locked(t('status.plan.tam')) : t('tools.page.tools.smsHint')}
           value={smsFallback}
           onChange={setSmsFallback}
           disabled={!!L && L.sms_per_day <= 0 && !smsFallback}

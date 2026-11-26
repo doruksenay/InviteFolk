@@ -8,6 +8,7 @@ import type { CustomQuestion, EventRow, EventSettings } from '@/core/types';
 import { eventLang, type Lang, useI18n } from '@/i18n';
 import { useQuery } from '@/lib/api';
 import { deleteEvent, getEventRow, updateEvent } from '@/lib/api-guests';
+import { getEventLimits } from '@/lib/api-tools';
 import { useSession } from '@/lib/session';
 import { OptionChip } from '@/ui/guests/common';
 import { cleanQuestions, MenuEditor, QuestionsEditor } from '@/ui/eventForm/Editors';
@@ -74,6 +75,10 @@ function Form({ event }: { event: EventRow }) {
   const [autoInvite, setAutoInvite] = useState(!!s0.auto_invite);
   const [fee, setFee] = useState(s0.fee ? String(s0.fee) : '');
   const [remindAuto, setRemindAuto] = useState(!!s0.reminders?.auto);
+  // Davetli başına otomatik hatırlatma sayısı paketten gelir; 0 ise kapalı (açık kalmış ayar yine kapatılabilir).
+  const lim = useQuery(() => getEventLimits(event.id).catch(() => null), [event.id]);
+  const maxReminders = lim.data?.limits.auto_reminders ?? null;
+  const remindLocked = maxReminders !== null && maxReminders <= 0 && !remindAuto;
   const [daysBefore, setDaysBefore] = useState(s0.reminders?.days_before ?? 3);
 
   const [saving, setSaving] = useState(false);
@@ -228,7 +233,19 @@ function Form({ event }: { event: EventRow }) {
 
           <Surface style={{ gap: 12 }}>
             <Title>{t('wizard.editor.reminders')}</Title>
-            <ToggleRow label={t('wizard.editor.remindAuto')} hint={t('wizard.editor.remindAutoHint')} value={remindAuto} onChange={setRemindAuto} />
+            {remindLocked ? (
+              <View style={{ gap: 10 }}>
+                <Caption>{t('wizard.editor.remindLocked')}</Caption>
+                <Button label={t('send.plans')} icon="star" variant="secondary" onPress={() => router.push('/paketler')} style={{ alignSelf: 'flex-start' }} />
+              </View>
+            ) : (
+              <ToggleRow
+                label={t('wizard.editor.remindAuto')}
+                hint={t('wizard.editor.remindAutoHint', { count: maxReminders && maxReminders > 0 ? maxReminders : 2 })}
+                value={remindAuto}
+                onChange={setRemindAuto}
+              />
+            )}
             {remindAuto && (
               <View style={{ gap: 8 }}>
                 <Caption>{t('wizard.editor.daysBefore')}</Caption>

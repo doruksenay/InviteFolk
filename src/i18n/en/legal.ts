@@ -134,7 +134,7 @@ export const legal: typeof TR = {
           id: 'paketler',
           title: '5. Plans and payment',
           body: [
-            'Paid plans are a one-time payment valid for one year; nothing renews automatically. When a plan ends your account returns to Free and your data is kept.',
+            'Paid plans are a one-time payment valid for at least one year, or until six months after an event created during the plan if that is later (at most three years from purchase); nothing renews automatically. Upgrading to a higher plan costs only the difference between plan prices and does not change the dates. The memory album add-on stays open for at least one year, until one year after the event. When a plan ends your account returns to Free and your data is kept.',
             'Prices are shown in Turkish lira including VAT. Web payments are taken by iyzico; in-app payments by Apple or Google.',
             'A plan is a digital service activated on your account as soon as payment is confirmed. Under Article 15(1)(ğ) of the Turkish Distance Contracts Regulation, there is no right of withdrawal for digital services performed instantly; if a technical problem prevents you from using the service, write to info@invitefolk.com and we will consider a refund. Store purchases are refunded under Apple’s or Google’s rules.',
           ],

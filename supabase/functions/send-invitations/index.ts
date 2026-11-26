@@ -4,6 +4,8 @@
 //   table           → WHATSAPP_TABLE_TEMPLATE (varsayılan davet_masa): {{1}} ad, {{2}} etkinlik, {{3}} masa
 //   announcement    → WHATSAPP_ANNOUNCE_TEMPLATE (varsayılan davet_duyuru): {{1}} ad, {{2}} etkinlik, {{3}} duyuru, {{4}} link
 // Etkinlikte "WhatsApp'a ulaşılamazsa SMS" açıksa ve SMS hakkı varsa, gönderilemeyen davetliye SMS gider.
+// Paket kuralı: wa_broadcast kapalıysa (tüketici paketleri) yalnızca 'reminder' gönderilir ve davetli başına
+// auto_reminders kadar hatırlatma gider (402 plan_feature / hatırlatma sınırı aşılanlar atlanır).
 // Ortam: WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_*_TEMPLATE, WHATSAPP_TEMPLATE_LANG(_EN), ALLOWED_ORIGINS
 //
 // Güvenlik:
@@ -24,6 +26,14 @@ Deno.serve(async (req) => {
 
   const r = await parseSendRequest(req, 'whatsapp');
   if ('error' in r) return json(req, { error: r.error }, r.status);
+
+  // Tüketici paketlerinde otomatik WhatsApp yalnızca hatırlatma içindir (veritabanı da aynı kuralı uygular).
+  if (r.kind !== 'reminder') {
+    const { data: lim } = await r.asUser.rpc('event_limits', { p_event: r.event.id });
+    if (!(lim as { limits?: { wa_broadcast?: boolean } } | null)?.limits?.wa_broadcast) {
+      return json(req, { error: 'plan_feature', detail: 'whatsapp_auto', sent: 0, failed: 0, skipped: r.targets.length }, 402);
+    }
+  }
 
   let quota = await quotaLeft(r, 'whatsapp');
   if (quota <= 0) return json(req, { error: 'quota_exceeded', detail: 'whatsapp', sent: 0, failed: 0, skipped: r.targets.length }, 402);
