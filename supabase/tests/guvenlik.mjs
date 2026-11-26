@@ -77,9 +77,9 @@ ok(await denied(U1, `update public.events set settings = jsonb_build_object('x',
 ok(await denied(U1, `update public.events set type='hack' where id='${ev}'`), 'bilinmeyen etkinlik türü reddedilir');
 
 console.log('Kotalar:');
-await as(U2, `insert into public.events (owner_id, type, theme, title) values ('${U2}','dogum','altin','1'),('${U2}','dogum','altin','2'),('${U2}','dogum','altin','3')`);
-const q = await denied(U2, `insert into public.events (owner_id, type, theme, title) values ('${U2}','dogum','altin','4')`);
-ok(q && q.includes('quota_exceeded'), 'ücretsiz pakette 4. etkinlik engellenir');
+await as(U2, `insert into public.events (owner_id, type, theme, title) values ('${U2}','dogum','altin','1')`);
+const q = await denied(U2, `insert into public.events (owner_id, type, theme, title) values ('${U2}','dogum','altin','2')`);
+ok(q && q.includes('quota_exceeded'), 'ücretsiz pakette 2. etkinlik engellenir');
 const ev2 = (await as(U2, `select id from public.events limit 1`)).rows[0].id;
 await as(U2, `insert into public.contacts (owner_id, name) select '${U2}', 'K' || g from generate_series(1, 51) g`);
 await as(U2, `insert into public.invitations (event_id, contact_id) select '${ev2}', id from public.contacts where owner_id='${U2}' limit 50`);
@@ -106,7 +106,10 @@ await db.exec(`update public.invitations set rsvp_window_start = now() - interva
 ok(await denied(null, `select public.respond_invitation('${inv.token}','yes',1)`), 'arşivlenmiş etkinliğe cevap verilemez');
 
 console.log('Hesap silme:');
-await as(U2, `select public.delete_my_account()`);
+ok(await denied(U2, `select public.delete_my_account()`), 'istemci hesap silme fonksiyonunu doğrudan çağıramaz (dosyalar önce silinmeli)');
+// delete-account fonksiyonu: dosyalar silindikten sonra servis rolüyle kullanıcı silinir.
+await db.exec(`set role service_role; select public.audit_account_deleted('${U2}'); reset role;`);
+await db.exec(`delete from auth.users where id='${U2}'`);
 ok((await db.query(`select count(*)::int n from public.events where owner_id='${U2}'`)).rows[0].n === 0, 'hesap silinince etkinlikler de silinir');
 ok((await db.query(`select count(*)::int n from public.contacts where owner_id='${U2}'`)).rows[0].n === 0, 'hesap silinince kişiler de silinir');
 ok((await db.query(`select count(*)::int n from private.audit_log where action='account.deleted'`)).rows[0].n === 1, 'silme denetim kaydına yazıldı');

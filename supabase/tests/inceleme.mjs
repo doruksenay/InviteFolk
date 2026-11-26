@@ -30,6 +30,8 @@ await db.exec(`grant all on all tables in schema public to service_role;`);
 const OWN = '11111111-1111-1111-1111-111111111111', CO = '22222222-2222-2222-2222-222222222222', EVIL = '44444444-4444-4444-4444-444444444444';
 await db.exec(`insert into auth.users (id, email) values ('${OWN}','gelin@x.com'),('${CO}','damat@x.com'),('${EVIL}','kotu@x.com');`);
 await db.exec(`update public.profiles set plan='otomatik' where id='${OWN}'`);
+// Bu dosya özellikleri sınar; etkinlik sayısı kotası fiyat.mjs'de ayrıca sınanır.
+await db.exec(`update public.plan_limits set max_events = 50`);
 
 const as = async (uid, q, role) => {
   const r = role ?? (uid ? 'authenticated' : 'anon');
@@ -70,8 +72,9 @@ ok((await tryq(CO, `insert into public.invitations (event_id, contact_id) values
 ok(!(await tryq(OWN, `update public.contacts set phone='+905550000000' where id='${coC}' returning id`)).r?.rows?.length, 'sahip ortak yöneticinin kişisini düzeltemez');
 
 console.log('Mesaj kotası (atomik):');
-await svc(`update public.profiles set plan='otomatik', plan_expires_at = now() + interval '1 year' where id='${OWN}'`);
-const smsLim = (await one(OWN, `select (private.limits_for('${OWN}')).sms_per_day n`).catch(() => null))?.n ?? 100;
+// SMS yalnızca Düğün Tam ve üstünde.
+await svc(`update public.profiles set plan='tam', plan_expires_at = now() + interval '1 year' where id='${OWN}'`);
+const smsLim = (await db.query(`select sms_per_day n from public.plan_limits where plan='tam'`)).rows[0].n;
 let okN = 0, rej = 0;
 for (let i = 0; i < smsLim + 5; i++) {
   const r = await tryq(null, `insert into public.messages (invitation_id, channel, kind, status) values ('${invMom}','sms','invite','queued')`, 'service_role');

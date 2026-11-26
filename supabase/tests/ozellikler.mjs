@@ -100,20 +100,24 @@ ok((await db.query(`select count(*)::int n from public.notification_queue`)).row
 ok(await denied(U2, `select * from public.roll_weekly_events()`), 'kullanıcı haftalık işi çağıramaz');
 
 console.log('Hatırlatma:');
+// Otomatik hatırlatma Düğün paketinden itibaren (davetli başına 1).
+await db.exec(`update public.profiles set plan='otomatik' where id='${U1}'`);
 await db.exec(`update public.events set rsvp_deadline = (now() + interval '3 days')::date where id='${ev}'; update public.invitations set delivery='sent', status='pending' where event_id='${ev}';`);
 const due = (await svc(`select * from public.due_reminders(100)`)).rows;
 ok(due.length === 2, `hatırlatma adayları: ${due.length}`);
 await svc(`select public.mark_reminded(array[${due.map((d) => `'${d.invitation_id}'::uuid`).join(',')}])`);
 ok((await svc(`select * from public.due_reminders(100)`)).rows.length === 0, 'iki gün içinde tekrar hatırlatılmaz');
 ok(await denied(U1, `select * from public.due_reminders(10)`), 'kullanıcı hatırlatma listesini çağıramaz');
+await db.exec(`update public.profiles set plan='free' where id='${U1}'`);
+ok((await svc(`select * from public.due_reminders(100)`)).rows.length === 0, 'ücretsiz pakette otomatik hatırlatma yok');
 ok((await as(U1, `select public.email_quota_left() n`)).rows[0].n === 30, 'ücretsiz pakette günlük e-posta hakkı 30');
 
 console.log('Ödeme:');
 ok(await denied(U1, `select public.grant_purchase('${U1}', 'tam', 1000, 'iyzico', 'r1')`), 'kullanıcı kendine paket veremez');
-ok((await svc(`select public.grant_purchase('${U1}', 'otomatik', 750, 'iyzico', 'r1') g`)).rows[0].g === true, 'webhook paketi verdi');
-ok((await svc(`select public.grant_purchase('${U1}', 'otomatik', 750, 'iyzico', 'r1') g`)).rows[0].g === false, 'aynı ödeme ikinci kez işlenmez');
+ok((await svc(`select public.grant_purchase('${U1}', 'otomatik', 999, 'iyzico', 'r1') g`)).rows[0].g === true, 'webhook paketi verdi');
+ok((await svc(`select public.grant_purchase('${U1}', 'otomatik', 999, 'iyzico', 'r1') g`)).rows[0].g === false, 'aynı ödeme ikinci kez işlenmez');
 const mp = (await as(U1, `select public.my_plan() p`)).rows[0].p;
-ok(mp.plan === 'otomatik' && mp.limits.max_guests_per_event === 400, 'my_plan yeni sınırları döner');
+ok(mp.plan === 'otomatik' && mp.limits.max_guests_per_event === 500, 'my_plan yeni sınırları döner');
 await db.exec(`update public.profiles set plan_expires_at = now() - interval '1 day' where id='${U1}'`);
 ok((await as(U1, `select public.my_plan() p`)).rows[0].p.plan === 'free', 'süresi dolan paket ücretsize düşer');
 await svc(`select public.refund_purchase('iyzico', 'r1')`);

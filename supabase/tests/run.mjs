@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const migDir = join(here, '..', 'migrations');
 const migrations = readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort().map((f) => join(migDir, f));
-const suites = ['guvenlik', 'ozellikler', 'gerileme', 'otomasyon', 'araclar', 'inceleme', 'sporlar', 'galeri'];
+const suites = ['guvenlik', 'ozellikler', 'gerileme', 'otomasyon', 'araclar', 'inceleme', 'sporlar', 'galeri', 'fiyat'];
 
 let failed = 0;
 for (const s of suites) {

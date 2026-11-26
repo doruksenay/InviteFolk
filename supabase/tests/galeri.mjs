@@ -30,6 +30,8 @@ await db.exec(`grant all on all tables in schema public to service_role;`);
 const OWN = '11111111-1111-1111-1111-111111111111', CO = '22222222-2222-2222-2222-222222222222', EVIL = '44444444-4444-4444-4444-444444444444';
 await db.exec(`insert into auth.users (id, email) values ('${OWN}','gelin@x.com'),('${CO}','damat@x.com'),('${EVIL}','kotu@x.com');`);
 await db.exec(`update public.profiles set plan='otomatik' where id='${OWN}'`);
+// Bu dosya özellikleri sınar; etkinlik sayısı kotası fiyat.mjs'de ayrıca sınanır.
+await db.exec(`update public.plan_limits set max_events = 50`);
 
 const as = async (uid, q, role) => {
   const r = role ?? (uid ? 'authenticated' : 'anon');
@@ -66,6 +68,10 @@ const tok = (await one(OWN, `select token from public.invitations where contact_
 console.log('Anı defteri:');
 ok((await errOf(null, `select public.guestbook_sign('${tok}', 'Mutluluklar!')`)).includes('not_found'), 'kapalıyken yazılamaz');
 await as(OWN, `update public.events set settings = settings || '{"guestbook":{"enabled":true,"public":true}}'::jsonb where id='${ev.id}'`);
+ok((await one(null, `select public.guestbook_sign('${tok}', 'Varsayılan onaylı') j`)).j.pending === true, 'onay ayarı yoksa mesaj varsayılan olarak beklemeye alınır');
+await svc(`delete from public.guestbook_entries`);
+// Organizatör onayı açıkça kapattı:
+await as(OWN, `update public.events set settings = settings || '{"guestbook":{"enabled":true,"public":true,"moderate":false}}'::jsonb where id='${ev.id}'`);
 ok((await one(null, `select public.guestbook_sign('${tok}', 'Mutluluklar dilerim!') j`)).j.pending === false, 'davetli kendi linkinden yazar, hemen yayında');
 ok((await one(null, `select public.guestbook_sign_slug('${ev.public_slug}', 'Kuzen Ali', 'Bir ömür boyu mutluluk') j`)).j.pending === false, 'masadaki karekoddan adıyla yazılır');
 const rows = (await as(OWN, `select name, message from public.guestbook_entries order by created_at`)).rows;
@@ -95,7 +101,7 @@ ok(lim.includes('rate_limited'), 'kişisel linkle günde en fazla 5 mesaj');
 
 console.log('Canlı galeri:');
 await svc(`update public.profiles set plan='tam', plan_expires_at = now() + interval '1 year' where id='${OWN}'`);
-await as(OWN, `update public.events set settings = settings || '{"album":{"enabled":true,"public":true}}'::jsonb where id='${ev.id}'`);
+await as(OWN, `update public.events set settings = settings || '{"album":{"enabled":true,"public":true,"moderate":false}}'::jsonb where id='${ev.id}'`);
 const v = (await svc(`select public.album_reserve('${ev.public_slug}','Ali','video/mp4') j`)).rows[0].j;
 ok(v.kind === 'video' && v.path.endsWith('.mp4'), 'video yüklemesi için yer ayrılır');
 const a = (await svc(`select public.album_reserve('${ev.public_slug}','Ayşe','audio/webm') j`)).rows[0].j;
@@ -124,8 +130,10 @@ await as(OWN, `update public.events set settings = jsonb_set(settings, '{album,f
 ok((await face()) === true, 'organizatör açınca davetli sayfası yüz önerisini bilir');
 await as(OWN, `update public.events set settings = jsonb_set(settings, '{album,public}', 'false'::jsonb) where id='${ev.id}'`);
 ok((await face()) === false, 'albüm herkese açık değilse yüz önerisi kapalı sayılır');
-await as(OWN, `update public.events set settings = jsonb_set(settings, '{album}', '{"enabled":true,"public":true,"face":"evet"}'::jsonb) where id='${ev.id}'`);
-ok((await face()) === false, 'bozuk yüz ayarı hata vermez, kapalı sayılır');
+ok((await errOf(OWN, `update public.events set settings = jsonb_set(settings, '{album}', '{"enabled":true,"public":true,"face":"evet"}'::jsonb) where id='${ev.id}'`)).includes('invalid_input'), 'bozuk yüz ayarı reddedilir');
+// Eski (doğrulama öncesi) veri: tetikleyiciler atlanarak yazılır.
+await db.exec(`set session_replication_role = replica; update public.events set settings = jsonb_set(settings, '{album}', '{"enabled":true,"public":true,"face":"evet"}'::jsonb) where id='${ev.id}'; set session_replication_role = origin;`);
+ok((await face()) === false, 'veritabanında bozuk yüz ayarı kalsa bile hata vermez, kapalı sayılır');
 await as(OWN, `update public.events set settings = jsonb_set(settings, '{album}', '{"enabled":true,"public":true,"moderate":true}'::jsonb) where id='${ev.id}'`);
 await as(OWN, `update public.events set settings = (settings - 'album') || '{"guestbook":{"enabled":true}}'::jsonb where id='${ev.id}'`);
 const pe2 = (await one(null, `select public.get_public_event('${ev.public_slug}') j`)).j;

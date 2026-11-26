@@ -30,6 +30,8 @@ await db.exec(`grant all on all tables in schema public to service_role;`);
 const OWN = '11111111-1111-1111-1111-111111111111', CO = '22222222-2222-2222-2222-222222222222', EVIL = '44444444-4444-4444-4444-444444444444', CO2 = '55555555-5555-5555-5555-555555555555';
 await db.exec(`insert into auth.users (id, email) values ('${OWN}','gelin@x.com'),('${CO}','damat@x.com'),('${EVIL}','kotu@x.com'),('${CO2}','anne@x.com');`);
 await db.exec(`update public.profiles set plan='otomatik' where id='${OWN}'`);
+// Bu dosya özellikleri sınar; etkinlik sayısı kotası fiyat.mjs'de ayrıca sınanır.
+await db.exec(`update public.plan_limits set max_events = 50`);
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { c ? pass++ : fail++; console.log(c ? '  ✓' : '  ✗', m); };
@@ -137,7 +139,7 @@ ok(await denied(EVIL, `insert into public.invitations (event_id, contact_id) val
 const team = (await as(CO, `select * from public.event_team('${ev.id}')`)).rows;
 ok(team.length === 2 && team[0].role === 'owner', 'ekip listesi: sahip + ortak yönetici');
 ok(await denied(EVIL, `select * from public.event_team('${ev.id}')`), 'yabancı ekip listesini alamaz');
-ok((await one(CO, `select public.event_quota_left('${ev.id}','whatsapp') n`)).n === 800, 'ortak yöneticinin kotası sahibin paketinden (Otomatik: 800)');
+ok((await one(CO, `select public.event_quota_left('${ev.id}','whatsapp') n`)).n === 250, 'ortak yöneticinin kotası sahibin paketinden (Düğün: 250)');
 ok(await denied(EVIL, `select public.event_quota_left('${ev.id}','whatsapp')`), 'yabancı kota soramaz');
 await as(OWN, `insert into storage.objects (bucket_id, name) values ('media', '${OWN}/${ev.id}/aaaaaaaa.mp3')`);
 ok((await as(CO, `insert into storage.objects (bucket_id, name) values ('media', '${OWN}/${ev.id}/bbbbbbbb.jpg') returning id`)).rows.length === 1, 'ortak yönetici etkinlik klasörüne yükler');
@@ -191,6 +193,8 @@ ok(await denied(EVIL, `select public.rotate_public_slug('${ev.id}')`), 'yabancı
 console.log('Fotoğraf albümü:');
 ok(await denied(null, `select public.album_reserve('${newSlug}','Ali','image/jpeg')`), 'anon albüm yeri ayıramaz (yalnızca sunucu)');
 ok((await denied(null, `select public.album_reserve('${newSlug}','Ali','image/jpeg')`)), 'albüm kapalıyken ve anon: reddedilir');
+// Düğün paketinde albüm yok: Anı albümü eklentisi alınmış sayılır.
+await db.exec(`update public.profiles set album_until = now() + interval '1 year' where id='${OWN}'`);
 await setS(OWN, { album: { enabled: true, public: false } });
 const res = (await svc(`select public.album_reserve('${newSlug}','Ali','image/jpeg') j`)).rows[0].j;
 ok(res.path.startsWith(`${OWN}/${ev.id}/album/`) && res.path.endsWith('.jpg'), 'sunucu albüm yolu ayırır (etkinlik klasöründe)');

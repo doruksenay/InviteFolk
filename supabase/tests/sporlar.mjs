@@ -30,6 +30,8 @@ await db.exec(`grant all on all tables in schema public to service_role;`);
 const OWN = '11111111-1111-1111-1111-111111111111', CO = '22222222-2222-2222-2222-222222222222', EVIL = '44444444-4444-4444-4444-444444444444';
 await db.exec(`insert into auth.users (id, email) values ('${OWN}','gelin@x.com'),('${CO}','damat@x.com'),('${EVIL}','kotu@x.com');`);
 await db.exec(`update public.profiles set plan='otomatik' where id='${OWN}'`);
+// Bu dosya özellikleri sınar; etkinlik sayısı kotası fiyat.mjs'de ayrıca sınanır.
+await db.exec(`update public.plan_limits set max_events = 50`);
 
 const as = async (uid, q, role) => {
   const r = role ?? (uid ? 'authenticated' : 'anon');
