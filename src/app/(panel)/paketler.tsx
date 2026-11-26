@@ -16,6 +16,8 @@ import { RichText } from '@/ui/RichText';
 import { Screen } from '@/ui/Screen';
 import { color, font, radius, shadow } from '@/ui/tokens';
 
+const WEB_PAYMENTS = process.env.EXPO_PUBLIC_WEB_PAYMENTS === 'true';
+
 const RANK: Record<Plan, number> = { free: 0, temel: 1, otomatik: 2, tam: 3, b2b: 9 };
 const ACCENT: Record<'free' | PaidPlan, { bg: string; ink: string; dot: string }> = {
   free: { bg: color.surface, ink: color.ink, dot: color.faint },
@@ -103,6 +105,11 @@ export default function PlansScreen() {
     setBusy(plan);
     try {
       if (Platform.OS === 'web') {
+        // Şirket kurulana kadar web'de ödeme alınmaz; paket uygulamadan alınır (EXPO_PUBLIC_WEB_PAYMENTS=true açar).
+        if (!WEB_PAYMENTS) {
+          setBanner({ tone: 'info', text: t('billing.webUseApp') });
+          return;
+        }
         const url = await startWebCheckout(plan, lang);
         window.location.assign(url);
         return; // sayfa iyzico'ya gidiyor
@@ -353,7 +360,7 @@ export default function PlansScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Icon name="lock" size={16} color={color.sage} />
           <Caption>
-            {Platform.OS === 'web' ? t('billing.webSecure') : t('billing.storeSecure', { store: Platform.OS === 'ios' ? t('billing.appStore') : t('billing.playStore') })}
+            {Platform.OS === 'web' ? (WEB_PAYMENTS ? t('billing.webSecure') : t('billing.webUseApp')) : t('billing.storeSecure', { store: Platform.OS === 'ios' ? t('billing.appStore') : t('billing.playStore') })}
           </Caption>
         </View>
         {Platform.OS !== 'web' && availability === 'expo-go' && <Notice tone="warning" text={t('billing.expoGo')} />}

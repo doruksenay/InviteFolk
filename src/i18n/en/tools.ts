@@ -164,6 +164,8 @@ export const tools: typeof TR = {
       album: 'Live album',
       albumHint: 'Guests upload photos, videos and voice messages from a QR code on the table; they stream live on the venue screen.',
       albumPublic: 'Let guests see the album too',
+      albumFace: 'Let guests find their photos with a selfie',
+      albumFaceHint: "Face matching runs only on the phone of a guest who explicitly consents, using their own selfie; no face data is sent to a server, you can't see it, and it stays on the device for at most 30 days. Turning it off stops it right away.",
       albumModerate: 'Let me approve first',
       albumModerateHint: 'Uploads reach the album and the venue screen once you approve them.',
       guestbook: 'Guestbook',

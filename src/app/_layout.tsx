@@ -14,15 +14,18 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { I18nProvider, useI18n } from '@/i18n';
+import { initMonitoring } from '@/lib/monitoring';
 import { SessionProvider, useSession } from '@/lib/session';
+import { FaceBridgeHost } from '@/ui/FaceBridgeHost';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Body, Display, Surface } from '@/ui/primitives';
 import { color } from '@/ui/tokens';
 
+initMonitoring();
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
@@ -99,7 +102,9 @@ export default function RootLayout() {
     GreatVibes_400Regular,
   });
 
-  if (!fontsLoaded && !fontError) return null;
+  // Web'de yazı tipleri beklenmez: davetiye sayfası (çoğu WhatsApp'tan mobilde açılır) hemen çizilir, yazı tipleri
+  // gelince yerine oturur. Uygulamada açılış ekranı zaten yazı tipleri yüklenene kadar görünür.
+  if (!fontsLoaded && !fontError && Platform.OS !== 'web') return null;
 
   return (
     <SafeAreaProvider>
@@ -112,6 +117,7 @@ export default function RootLayout() {
         ) : (
           <ConfigMissing />
         )}
+        <FaceBridgeHost />
       </I18nProvider>
     </SafeAreaProvider>
   );

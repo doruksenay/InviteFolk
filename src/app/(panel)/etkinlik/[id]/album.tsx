@@ -248,9 +248,10 @@ export default function AlbumScreen() {
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>{items.map((p) => tile(p, 'album'))}</View>
         ))}
 
+
       {current === 'pending' &&
         (pending.length === 0 ? (
-          <EmptyState title={t('tools.album.pendingEmptyTitle')} body={s.album?.moderate ? t('tools.album.pendingEmpty') : t('tools.album.moderateOff')} />
+          <EmptyState title={t('tools.album.pendingEmptyTitle')} body={(s.album?.moderate ?? true) ? t('tools.album.pendingEmpty') : t('tools.album.moderateOff')} />
         ) : (
           <View style={{ gap: 12 }}>
             <View style={{ flexDirection: 'row' }}>

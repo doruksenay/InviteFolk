@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
 
         const { data: inv } = await db
           .from('invitations')
-          .select('id, contacts!inner(phone, max_party), events!inner(settings, status)')
+          .select('id, status, party_size, menu, note, contacts!inner(phone, max_party), events!inner(settings, status)')
           .eq('token', token)
           .maybeSingle();
         if (!inv) continue;
@@ -123,20 +123,25 @@ Deno.serve(async (req) => {
         }
         if (ev.status === 'archived') continue;
         const tx = text(langOf(ev.settings));
+        // Davetlinin web sayfasında verdiği menü ve not, WhatsApp butonuyla cevap verince silinmesin.
+        // deno-lint-ignore no-explicit-any
+        const prev = inv as any as { status: string; party_size: number | null; menu: string | null; note: string | null };
+        const keep = { p_menu: prev.menu, p_note: prev.note };
+        const prevParty = prev.status === 'yes' && (prev.party_size ?? 0) > 0 ? prev.party_size! : 1;
 
         if (kind === 'rsvp' && (a === 'yes' || a === 'no')) {
           if (a === 'yes') {
-            await db.rpc('respond_invitation', { p_token: token, p_status: 'yes', p_party_size: 1 });
+            await db.rpc('respond_invitation', { p_token: token, p_status: 'yes', p_party_size: prevParty, ...keep });
             if (contact.max_party > 1) await sendPartySizeQuestion(from, token, contact.max_party, langOf(ev.settings));
             else await sendText(from, tx.thanksYes);
           } else {
-            await db.rpc('respond_invitation', { p_token: token, p_status: 'no' });
+            await db.rpc('respond_invitation', { p_token: token, p_status: 'no', ...keep });
             await sendText(from, tx.thanksNo);
           }
         } else if (kind === 'party') {
           const size = Math.trunc(Number(a));
           if (!Number.isFinite(size) || size < 1 || size > 20) continue;
-          await db.rpc('respond_invitation', { p_token: token, p_status: 'yes', p_party_size: size });
+          await db.rpc('respond_invitation', { p_token: token, p_status: 'yes', p_party_size: size, ...keep });
           await sendText(from, tx.thanksParty(Math.min(size, contact.max_party)));
         }
       }

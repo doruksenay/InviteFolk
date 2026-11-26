@@ -1,5 +1,6 @@
 // Etkinlik ve davetli yönetimi: içe aktarma, rehber, düzenleme, gönderim kanalları.
 // Tümü kullanıcının kendi oturumuyla çalışır; yetki, kolon izinleri ve kotalar veritabanında zorlanır.
+import { cleanGroupLabel, groupKey } from '@/core/groups';
 import type { Contact, EventRow, EventSettings, EventSummary, Invitation, RsvpStatus, Side } from '@/core/types';
 
 import { type EventWithSummary, friendlyError, must, supabase } from './api';
@@ -101,6 +102,21 @@ export async function listContactsNotIn(eventId: string): Promise<Contact[]> {
   ]);
   const taken = new Set(((must(inv) as { contact_id: string }[]) ?? []).map((r) => r.contact_id));
   return all.filter((c) => !taken.has(c.id));
+}
+
+/** Rehberdeki grup adları (kalabalıktan aza), öneri ve filtre için. */
+export async function listGroupLabels(): Promise<string[]> {
+  const rows = must(await supabase.from('contacts').select('group_label').not('group_label', 'is', null).limit(5000)) as { group_label: string | null }[];
+  const counts = new Map<string, { label: string; n: number }>();
+  for (const r of rows) {
+    const label = cleanGroupLabel(r.group_label);
+    if (!label) continue;
+    const k = groupKey(label);
+    const c = counts.get(k);
+    if (c) c.n++;
+    else counts.set(k, { label, n: 1 });
+  }
+  return [...counts.values()].sort((a, b) => b.n - a.n || a.label.localeCompare(b.label)).map((c) => c.label);
 }
 
 export type ContactPatch = Partial<Pick<Contact, 'name' | 'phone' | 'email' | 'side' | 'group_label' | 'max_party' | 'notes' | 'skill' | 'position'>>;

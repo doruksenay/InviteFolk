@@ -2,7 +2,7 @@
 // Doğrulama: RevenueCat panelinde tanımlanan Authorization başlığı = REVENUECAT_WEBHOOK_SECRET (sabit zamanlı karşılaştırma).
 // NON_RENEWING_PURCHASE / INITIAL_PURCHASE → grant_purchase; CANCELLATION (iade dahil) → refund_purchase.
 // Aynı işlem iki kez işlenmez (provider_ref = transaction_id).
-// Ortam: REVENUECAT_WEBHOOK_SECRET, REVENUECAT_ALLOW_SANDBOX ("true" ise sandbox satın almaları da paket verir; App Review için gerekli)
+// Ortam: REVENUECAT_WEBHOOK_SECRET, REVENUECAT_SANDBOX_USERS (sandbox satın almasıyla paket alabilecek test hesapları), REVENUECAT_ALLOW_SANDBOX (yalnızca geliştirme)
 
 import { adminClient, readBody, UUID } from '../_shared/supabase.ts';
 
@@ -49,9 +49,6 @@ Deno.serve(async (req) => {
   }
   if (!event || typeof event.type !== 'string') return ok();
 
-  const allowSandbox = (Deno.env.get('REVENUECAT_ALLOW_SANDBOX') ?? 'true') === 'true';
-  if (event.environment === 'SANDBOX' && !allowSandbox) return ok();
-
   const provider = STORE[event.store];
   const pkg = PRODUCT_TO_PACKAGE[event.product_id];
   const ref = typeof event.transaction_id === 'string' ? event.transaction_id.slice(0, 200) : '';
@@ -60,6 +57,15 @@ Deno.serve(async (req) => {
   // Uygulama RevenueCat'e Supabase kullanıcı kimliğiyle giriş yapar; takma adlarda da arar.
   const candidates = [event.app_user_id, event.original_app_user_id, ...(Array.isArray(event.aliases) ? event.aliases : [])];
   const userId = candidates.find((x) => typeof x === 'string' && UUID.test(x));
+
+  // Sandbox (TestFlight, App Review, Play lisans testi) satın almaları varsayılan olarak paket VERMEZ.
+  // İzinli test hesapları: REVENUECAT_SANDBOX_USERS (Supabase kullanıcı kimlikleri, virgülle) — App Review'a verilen
+  // demo hesabı buraya yazılır. REVENUECAT_ALLOW_SANDBOX=true herkese açar (yalnızca geliştirme ortamında).
+  if (event.environment === 'SANDBOX') {
+    const allowAll = (Deno.env.get('REVENUECAT_ALLOW_SANDBOX') ?? 'false') === 'true';
+    const testers = (Deno.env.get('REVENUECAT_SANDBOX_USERS') ?? '').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
+    if (!allowAll && !(userId && testers.includes(userId.toLowerCase()))) return ok();
+  }
   const db = adminClient();
 
   if (event.type === 'NON_RENEWING_PURCHASE' || event.type === 'INITIAL_PURCHASE') {

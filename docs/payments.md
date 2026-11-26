@@ -31,7 +31,11 @@ Web fiyatları `public.plan_prices` ve `public.addon_prices` tablolarından, yü
 - İadelerde (`refund_purchase`) başka geçerli satın alma yoksa hesap ücretsize döner.
 - Tüm satın alma ve iadeler `private.audit_log`'a yazılır.
 
-## 1. Web: iyzico
+## 1. Web: iyzico (şimdilik kapalı)
+
+> Şirket kurulana kadar web ödemesi kapalıdır: `iyzico-checkout` ve `iyzico-callback`, `WEB_PAYMENTS=true` sırrı yoksa çalışmaz;
+> web `/paketler` sayfası kullanıcıyı uygulamaya yönlendirir (`EXPO_PUBLIC_WEB_PAYMENTS`). Açmak için ikisini de `true` yapın.
+
 
 1. iyzico üye işyeri başvurusu (şahıs veya limited şirket, vergi levhası gerekir). Test için <https://sandbox-merchant.iyzipay.com> üzerinden sandbox hesabı açın.
 2. Sunucu fonksiyonlarını yayınlayın:
@@ -44,8 +48,8 @@ Web fiyatları `public.plan_prices` ve `public.addon_prices` tablolarından, yü
    IYZICO_API_KEY=sandbox-...
    IYZICO_SECRET_KEY=sandbox-...
    IYZICO_BASE_URL=https://sandbox-api.iyzipay.com     # canlıda https://api.iyzipay.com
-   APP_WEB_URL=https://invitefolk.app                       # ödeme sonrası dönülecek web adresi
-   ALLOWED_ORIGINS=https://invitefolk.app
+   APP_WEB_URL=https://invitefolk.com                       # ödeme sonrası dönülecek web adresi
+   ALLOWED_ORIGINS=https://invitefolk.com
    ```
 4. Akış:
    - Kullanıcı `/paketler` sayfasında paket seçer → `iyzico-checkout` paketi doğrular, fiyatı tablodan alır, `checkout_sessions` kaydı açar ve iyzico Checkout Form'u başlatır. Kullanıcı iyzico'nun güvenli ödeme sayfasına gider.
@@ -99,6 +103,14 @@ Web fiyatları `public.plan_prices` ve `public.addon_prices` tablolarından, yü
 | Supabase sırrı | `APP_WEB_URL` | Ödeme sonrası dönülecek web adresi |
 | Supabase sırrı | `REVENUECAT_WEBHOOK_SECRET` | RevenueCat webhook Authorization değeri (**gizli**) |
 | Supabase sırrı | `REVENUECAT_ALLOW_SANDBOX` | `true` / `false` |
+
+## 3a. Kötüye kullanım korumaları (canlıya çıkış denetimi, 26 Kasım 2026)
+
+- **Etkinlik hakkı** dönem başına azalmayan bir sayaçta tutulur (`private.event_slots`). Davetli eklenmiş etkinliği silmek hakkı geri vermez; hiç davetlisi olmayan etkinlik silinirse hak iade edilir.
+- **Yükseltme ürünü** (`invitefolk_up_<eski>_<yeni>`) yalnızca kullanıcı o an `<eski>` paketindeyse fark ödemeli yükseltme olarak işlenir. Uymuyorsa ve ödenen tutar yeni paketin tam fiyatını karşılamıyorsa paket verilmez, satın alma `status = 'review'` olarak kaydedilir (`admin_review_purchases()`), iade edilir ya da elle paket verilir.
+- **Süre** etkinliğe ilk girilen tarihe göre bir kez hesaplanır (`events.first_starts_at`, istemci yazamaz). Paket satın almadan en fazla 2 yıl, albüm 2,5 yıl.
+- **Sandbox** satın almaları yalnızca `REVENUECAT_SANDBOX_USERS` listesindeki hesaplara paket verir.
+- Testler: `supabase/tests/fiyat.mjs`.
 
 ## 4. Elle paket verme
 

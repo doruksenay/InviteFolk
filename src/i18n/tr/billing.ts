@@ -73,13 +73,15 @@ export const billing = {
   cancelled: 'Satın alma iptal edildi.',
   pending: 'Ödemen alındı; paketin birkaç dakika içinde tanımlanacak. Sayfayı sonra yenileyebilirsin.',
   checkoutFailed: 'Ödeme sayfası açılamadı. Biraz sonra tekrar dene.',
+  webUseApp: 'Paketler Invitefolk uygulamasından (App Store / Google Play) alınır. Uygulamada aynı hesapla satın aldığın paket burada da hemen açılır.',
   loadFailed: 'Paketler yüklenemedi.',
   faqTitle: 'Sık sorulanlar',
   faq: [
     { q: 'Abonelik mi?', a: 'Hayır. Bir kez ödersin; paket en az bir yıl, etkinliğin daha ileri bir tarihteyse etkinlikten 6 ay sonrasına kadar geçerli. Otomatik yenileme yoktur.' },
-    { q: 'Etkinliğimin tarihi değişirse?', a: 'Tarihi değiştirdiğinde süre yeniden hesaplanır ve etkinlikten 6 ay sonrasına kadar uzar (satın almadan en fazla 3 yıl). Süre hiçbir zaman kısalmaz.' },
-    { q: 'Süre bitince ne olur?', a: 'Hesabın ücretsiz pakete döner. Etkinliklerin, listelerin ve oturma planların silinmez.' },
+    { q: 'Etkinliğimin tarihi değişirse?', a: 'Paket süresi, etkinliğine ilk girdiğin tarihe göre bir kez hesaplanır (satın almadan en fazla 2 yıl). Tarihi sonradan değiştirebilirsin; süren kısalmaz ama uzamaz da.' },
+    { q: 'Etkinliği silersem hakkım geri gelir mi?', a: 'Davetli eklemeden sildiğin etkinliğin hakkı geri gelir. Davetli eklenmiş bir etkinliği silmek paketteki etkinlik hakkını geri vermez.' },
+    { q: 'Süre bitince ne olur?', a: 'Hesabın ücretsiz pakete döner; etkinliklerin hemen silinmez. Kişisel verileri gereğinden uzun tutmamak için etkinlik, tarihinden 13 ay sonra arşivlenir, 2 yıl sonra davetli listesi, cevaplar ve albümüyle birlikte silinir. Rehberindeki kişiler sen silene kadar kalır.' },
     { q: 'Paket yükseltebilir miyim?', a: 'Evet. Üst pakete geçerken yalnızca aradaki farkı ödersin; yeni sınırlar hemen geçerli olur, süren ve etkinliklerin aynı kalır.' },
-    { q: 'Fatura alabilir miyim?', a: 'Web ödemelerinde e-arşiv fatura e-posta adresine gönderilir. Mağaza ödemelerinde faturayı Apple ya da Google keser.' },
+    { q: 'Fatura alabilir miyim?', a: 'Satın alma App Store ya da Google Play üzerinden yapılır; makbuzu Apple ya da Google gönderir.' },
   ],
 };

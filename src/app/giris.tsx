@@ -11,10 +11,11 @@ import { Screen } from '@/ui/Screen';
 import { Icon } from '@/ui/Icon';
 import { color, font } from '@/ui/tokens';
 import { setPendingRedirect } from '@/lib/pending';
+import { Captcha, CAPTCHA_SITE_KEY } from '@/ui/Captcha';
 
 /** E-postaya gelen 6 haneli kodla giriş: derin bağlantı gerektirmez, iOS/Android/web'de aynı çalışır. */
 export default function SignIn() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   // Tanıtım sayfasında bir paket seçildiyse girişten sonra o paketin sayfası açılır.
   const { plan } = useLocalSearchParams<{ plan?: string }>();
   useEffect(() => {
@@ -25,6 +26,9 @@ export default function SignIn() {
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Kayıt/giriş koruması (Turnstile) açıksa kod istemeden önce doğrulama gerekir.
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   const sendCode = async () => {
     const e = email.trim().toLowerCase();
@@ -32,13 +36,26 @@ export default function SignIn() {
       setError(t('auth.invalidEmail'));
       return;
     }
+    if (CAPTCHA_SITE_KEY && !captcha) {
+      setError(t('auth.captchaRequired'));
+      return;
+    }
     setBusy(true);
     setError(null);
     const { error: err } = await supabase.auth.signInWithOtp({
       email: e,
-      options: { shouldCreateUser: true, ...(Platform.OS === 'web' && typeof window !== 'undefined' ? { emailRedirectTo: window.location.origin } : {}) },
+      options: {
+        shouldCreateUser: true,
+        ...(captcha ? { captchaToken: captcha } : {}),
+        ...(Platform.OS === 'web' && typeof window !== 'undefined' ? { emailRedirectTo: window.location.origin } : {}),
+      },
     });
     setBusy(false);
+    // Turnstile token'ı tek kullanımlıktır: her denemeden sonra yenilenir.
+    if (CAPTCHA_SITE_KEY) {
+      setCaptcha(null);
+      setCaptchaKey((k) => k + 1);
+    }
     if (err) setError(t('auth.sendFailed'));
     else setStep('code');
   };
@@ -90,6 +107,7 @@ export default function SignIn() {
                 }}
                 onSubmitEditing={sendCode}
               />
+              {CAPTCHA_SITE_KEY ? <Captcha key={captchaKey} lang={lang} onToken={setCaptcha} /> : null}
               {error && <Notice tone="error" text={error} />}
               <Button label={t('auth.sendCode')} size="lg" iconRight="arrowRight" loading={busy} onPress={sendCode} />
               <Caption>{t('auth.newAccountHint')}</Caption>

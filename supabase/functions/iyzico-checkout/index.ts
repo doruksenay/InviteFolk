@@ -24,6 +24,8 @@ const ITEM_NAMES: Record<Pkg, string> = {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) });
   if (req.method !== 'POST') return json(req, { error: 'method_not_allowed' }, 405);
+  // Web ödemesi şirket kurulana kadar kapalı (paketler mağazadan satılır). WEB_PAYMENTS=true ile açılır.
+  if (Deno.env.get('WEB_PAYMENTS') !== 'true') return json(req, { error: 'web_payments_disabled' }, 404);
 
   const raw = await readBody(req, 4 * 1024);
   if (raw === null) return json(req, { error: 'payload_too_large' }, 413);

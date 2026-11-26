@@ -12,8 +12,8 @@ Karakter sınırları App Store'a göre verilmiştir (Google Play kısa açıkla
 | Kategori | Yaşam Tarzı (ikincil: Verimlilik) | Lifestyle (secondary: Productivity) |
 | Yaş derecelendirmesi | 4+ / Herkes | 4+ / Everyone |
 | Bundle / Paket kimliği | `com.invitefolk.app` | |
-| Destek URL'si | https://invitefolk.app/yasal/kosullar (iletişim bölümü) | |
-| Gizlilik politikası URL'si | https://invitefolk.app/yasal/gizlilik | |
+| Destek URL'si | https://invitefolk.com/yasal/kosullar (iletişim bölümü) | |
+| Gizlilik politikası URL'si | https://invitefolk.com/yasal/gizlilik | |
 
 ## Tanıtım metni (170)
 

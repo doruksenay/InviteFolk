@@ -65,3 +65,11 @@ verify_jwt = false
 # Davetlilerin fotoğraf albümü (girişsiz; herkese açık etkinlik bağlantısı doğrulanır)
 [functions.album-upload]
 verify_jwt = false
+
+# Hesap silme (giriş yapmış kullanıcı; önce dosyalar, sonra hesap)
+[functions.delete-account]
+verify_jwt = true
+
+# Sağlık kontrolü (girişsiz; yalnızca zamanlayıcının son çalışma zamanını ve veritabanı erişimini söyler)
+[functions.health]
+verify_jwt = false

@@ -7,6 +7,7 @@ export const auth = {
   invalidEmail: 'Geçerli bir e-posta adresi yaz.',
   sendCode: 'E-postayla devam et',
   home: 'Ana sayfa',
+  captchaRequired: 'Devam etmeden önce robot olmadığını doğrula.',
   sendFailed: 'Kod gönderilemedi. Biraz sonra tekrar dene.',
   newAccountHint: 'Hesabın yoksa ilk girişte otomatik oluşturulur.',
   codeSent: '{email} adresine bir giriş e-postası gönderdik. İçindeki 6 haneli kodu buraya yaz ya da e-postadaki bağlantıya bu tarayıcıda dokun.',

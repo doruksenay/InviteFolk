@@ -165,6 +165,8 @@ export const tools = {
       album: 'Canlı albüm',
       albumHint: 'Davetliler masadaki karekodla fotoğraf, video ve sesli mesaj yüklesin; salon ekranında canlı aksın.',
       albumPublic: 'Albümü davetliler de görsün',
+      albumFace: 'Davetliler fotoğraflarını selfie ile bulsun',
+      albumFaceHint: 'Yüz tanıma yalnızca açık rıza veren davetlinin kendi telefonunda, kendi selfie\'siyle çalışır; yüz verisi sunucuya gönderilmez, sen de göremezsin ve cihazda en fazla 30 gün kalır. Kapatınca özellik hemen durur.',
       albumModerate: 'Önce ben onaylayayım',
       albumModerateHint: 'Yüklenenler sen onaylayınca albüme ve salon ekranına düşer.',
       guestbook: 'Anı defteri',

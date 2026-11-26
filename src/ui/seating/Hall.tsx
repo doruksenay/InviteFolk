@@ -17,6 +17,7 @@ type Props = {
   editable: boolean;
   preview: boolean;
   highlightFor: (item: SeatingItem) => Highlight;
+  colorBy?: 'side' | 'group';
   onPressItem: (id: string) => void;
   onMoveItem: (id: string, x: number, y: number) => void;
   onBackgroundPress: () => void;
@@ -24,7 +25,7 @@ type Props = {
 };
 
 /** Salon tuvali: noktalı zemin (düzenleme) ya da sıcak parke tonu (önizleme) üzerinde öğeler. */
-export function Hall({ items, loads, hallH, scale, selectedId, editable, preview, highlightFor, onPressItem, onMoveItem, onBackgroundPress, onDragState }: Props) {
+export function Hall({ items, loads, hallH, scale, selectedId, editable, preview, highlightFor, colorBy, onPressItem, onMoveItem, onBackgroundPress, onDragState }: Props) {
   const { t } = useI18n();
   const w = HALL_W * scale;
   const h = hallH * scale;
@@ -58,6 +59,7 @@ export function Hall({ items, loads, hallH, scale, selectedId, editable, preview
           selected={selectedId === it.id}
           editable={editable}
           highlight={highlightFor(it)}
+          colorBy={colorBy}
           onPress={onPressItem}
           onMove={onMoveItem}
           onDragState={onDragState}

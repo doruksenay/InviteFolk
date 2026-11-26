@@ -1,6 +1,7 @@
 # Canlıya alma (ücretsiz, otomatik)
 
-Uygulamayı birkaç kişiyle (aynı anda 5–10 kişi) denemek için **tamamen ücretsiz** katmanlarla çalışır.
+Uygulamayı birkaç kişiyle (aynı anda 5–10 kişi) denemek için **tamamen ücretsiz** katmanlarla çalışır (staging).
+Canlıya çıkış için aşağıdaki **Canlı ortam için zorunlu ayarlar** bölümüne bak.
 GitHub'a dört secret girildikten sonra her şeyi "Yayınla" iş akışı kendisi yapar; panellerde elle ayar gerekmez.
 
 ```
@@ -23,6 +24,71 @@ main'e push (ya da Actions → Yayınla → Run workflow)
 | Android uygulaması (isteğe bağlı) | EAS Free | Ayda 15 Android derlemesi (kuyruk uzun olabilir) |
 
 > Supabase'in ücretsiz projesi **7 gün hiç kullanılmazsa durdurulur**. "Yayınla" bir sonraki çalışmada projeyi kendisi uyandırır (ya da panelden *Restore*); veriler silinmez.
+
+## Ortamlar: staging ve production
+
+Yayın iki ortama ayrıldı. Her ortamın **kendi Supabase projesi ve kendi Cloudflare Pages projesi** vardır.
+
+| Ne yaparsan | Nereye gider |
+|---|---|
+| `main`'e push | **staging** (`invitefolk-staging` Supabase projesi, `invitefolk-staging-<kullanıcı>.pages.dev`) |
+| `v1.0.0` gibi bir etiket (`git tag v1.0.0 && git push origin v1.0.0`) | **production** (`invitefolk` projesi, `WEB_URL` = https://invitefolk.com) |
+| Actions → Yayınla → Run workflow | seçtiğin ortam |
+
+GitHub → *Settings → Environments* altında `staging` ve `production` ortamları ilk yayında kendiliğinden açılır.
+**production** ortamına girip *Required reviewers* kutusuna kendini ekle: canlıya her yayın senin onayını bekler.
+Depo düzeyindeki secret'lar iki ortamda da geçerlidir; ortama özel değer gerekiyorsa (ör. canlı WhatsApp token'ı) aynı adla
+o ortamın altına yaz, ortamdaki değer önce gelir.
+
+Canlıya çıkmadan önce iş özeti, uygulanacak migration'ları listeler (`supabase db push --dry-run`).
+
+**Geri alma:** bir önceki etiketi Actions → Yayınla ile production'a yeniden yayınla; web ve sunucu fonksiyonları geri döner.
+Migration'lar geri alınmaz: hatalı bir migration yeni bir migration ile düzeltilir; veri kaybı varsa Supabase →
+*Database → Backups*'tan geri yüklenir. Bu yüzden riskli migration'ları önce staging'de dene.
+
+## Canlı ortam için zorunlu ayarlar (production)
+
+1. **Supabase Pro** (aylık ~25 $): Free projede yedek yok, depolama 1 GB ve 7 gün kullanılmayan proje durur.
+   Dashboard → *Organization → Billing* → Pro. Sonra *Database → Backups*'ta günlük yedeği gör; bir kez geri yükleme denemesi yap
+   (staging'e). İstersen *Point in Time Recovery* eklentisini aç.
+2. **E-posta servisi ve alan adı doğrulaması.** Gmail canlı için uygun değil (günde ~500 e-posta, alan adın için SPF/DKIM yok).
+   Resend → *Domains* → `invitefolk.com` ekle, verdiği DNS kayıtlarını (SPF, DKIM, DMARC) Cloudflare'e gir. Sonra:
+   - Secret `SMTP_USER` = `resend`, `SMTP_PASSWORD` = Resend API anahtarı, `RESEND_API_KEY` = aynı anahtar
+   - Variable `SMTP_HOST` = `smtp.resend.com`, `SMTP_PORT` = `465`, `SMTP_FROM` = `giris@invitefolk.com`,
+     `EMAIL_FROM` = `Invitefolk <hello@invitefolk.com>`
+   - Saatlik e-posta sınırı varsayılan 200'dür (`EMAIL_RATE_LIMIT` ile değişir). Eskiden 30'du; yayın günü giriş kodları gelmezdi.
+   - Yönetici adresi artık `SMTP_USER`'dan çıkamaz: secret `ADMIN_EMAIL` = kendi e-postan.
+3. **Alan adı:** variable `WEB_URL` = `https://invitefolk.com` (yalnızca production'da kullanılır; staging için istersen `STAGING_WEB_URL`).
+   `info@`, `destek@`, `support@` adreslerinin mail aldığını doğrula (Cloudflare Email Routing ücretsiz).
+4. **Uygulama içi satın alma:** secret `REVENUECAT_WEBHOOK_SECRET` (RevenueCat → Integrations → Webhooks → Authorization değeri).
+   Sandbox satın almaları artık varsayılan olarak paket **vermez**. App Review'a vereceğin demo hesabın Supabase kullanıcı
+   kimliğini variable `REVENUECAT_SANDBOX_USERS`'a yaz (virgülle birden fazla). `REVENUECAT_ALLOW_SANDBOX=true` yalnızca staging'de.
+5. **Web ödemesi kapalı:** şirket kurulana kadar paketler yalnızca mağazadan satılır; web paneli "uygulamadan al" der.
+   Şirketle birlikte iyzico açılacaksa variable `WEB_PAYMENTS` = `true` ve iyzico anahtarları.
+6. **İzleme:**
+   - Sağlık kontrolü: `https://<proje>.supabase.co/functions/v1/health`. UptimeRobot / Better Stack'te 5 dakikalık bir HTTP
+     izleme aç; 503 dönerse veritabanına ulaşılamıyor ya da zamanlanmış iş 30 dakikadır çalışmıyor demektir.
+   - Hata takibi (isteğe bağlı, önerilir): sentry.io'da React Native projesi aç. Variable `SENTRY_DSN` (web derlemesi),
+     EAS ortam değişkeni `EXPO_PUBLIC_SENTRY_DSN` (uygulama). Kaynak haritaları için EAS'ta `SENTRY_ORG`, `SENTRY_PROJECT`,
+     `SENTRY_AUTH_TOKEN`. Davet anahtarları, e-posta ve telefonlar gönderilmeden ayıklanır.
+7. **Kayıt koruması (isteğe bağlı, önerilir):** Cloudflare → Turnstile → site ekle (`invitefolk.com`). Secret
+   `TURNSTILE_SECRET_KEY` (Supabase'e yazılır), variable `TURNSTILE_SITE_KEY` (web) ve EAS'ta `EXPO_PUBLIC_TURNSTILE_SITE_KEY`
+   (uygulama). İkisi birlikte verilmeli: gizli anahtar varken site anahtarı olmayan derlemede giriş kodu istenemez.
+8. **Yasal metinler:** `src/i18n/tr/legal.ts` ve `src/i18n/en/legal.ts` içindeki `[Ad Soyad]` / `[Yazışma adresi]` alanlarını doldur,
+   avukata kontrol ettir.
+9. **Mağaza gönderimi:** `eas.json` → `submit.production` içindeki Apple kimlikleri ve `secrets/google-play-service-account.json`.
+
+### Saklama süresi (otomatik)
+
+Zamanlanmış iş, etkinlik tarihinden 13 ay sonra etkinliği arşivler, 2 yıl sonra (tarihsiz etkinliklerde 30 ay) etkinliği davetli
+verisi ve bütün dosyalarıyla siler. Organizatörün rehberindeki kişiler silinmez. Süreler `retention_sweep` fonksiyonundadır
+(`supabase/migrations/20261126010000_launch_fixes.sql`); değiştirirsen yasal metinleri de güncelle.
+
+### Satın alma incelemesi
+
+Bir yükseltme ürünü kullanıcının o anki paketine uymuyorsa (ör. ücretsiz kullanıcı "Düğün → Düğün Tam" ürününü aldıysa) paket
+verilmez, satın alma `review` durumunda kaydedilir. Admin panelinden ya da SQL ile `select * from public.admin_review_purchases()`
+(MFA gerekli) listeyi gör; mağazadan iade et ya da `admin_set_plan` ile elle paket ver.
 
 ## Senin yapacakların (yaklaşık 10 dakika, bir kez)
 
@@ -61,7 +127,7 @@ Boş bırakılan özellik kapalı kalır, uygulamanın geri kalanı çalışır.
 | E-postayla davetiye (Resend; alan adı doğrulaması gerekir) | `RESEND_API_KEY` | `EMAIL_FROM` |
 | …ya da Brevo ile (e-posta davetiyesi ve organizatöre günlük özet) | `BREVO_API_KEY` | `EMAIL_FROM` (ör. `Invitefolk <destek@invitefolk.com>`), `EMAIL_REPLY_TO` |
 | SMS (Netgsm; ücretli) | `NETGSM_USERCODE`, `NETGSM_PASSWORD` | `NETGSM_HEADER` |
-| Web ödemesi (iyzico sandbox ücretsiz) | `IYZICO_API_KEY`, `IYZICO_SECRET_KEY` | `IYZICO_BASE_URL` = `https://sandbox-api.iyzipay.com` |
+| Web ödemesi (iyzico; şirket gerekir, varsayılan kapalı) | `IYZICO_API_KEY`, `IYZICO_SECRET_KEY` | `WEB_PAYMENTS` = `true`, `IYZICO_BASE_URL` |
 | Android APK | `EXPO_TOKEN` (expo.dev → Account settings → Access tokens) | |
 | Farklı yönetici adresi | `ADMIN_EMAIL` | |
 | Gmail yerine başka e-posta servisi (ör. Brevo: `smtp-relay.brevo.com`, 587) | `SMTP_USER`, `SMTP_PASSWORD` (servisin SMTP bilgileri) | `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM` (serviste doğrulanmış gönderen adresi) |

@@ -72,6 +72,8 @@ ok((await as(U2, `select public.email_quota_left() n`)).rows[0].n === 0, 'askıd
 await as(ADM, `select public.admin_set_suspended('${U2}', false)`, 'aal2');
 
 console.log('4) Kotalar:');
+// Admin'in verdiği Düğün Tam (satın alma kaydı yok): 3 etkinlik, arşivde olmayanlar sayılır.
+await db.exec(`update public.profiles set plan='tam' where id='${U1}'`);
 const a2 = await mkEvent(U1, 'E2'); const a3 = await mkEvent(U1, 'E3');
 await as(U1, `update public.events set status='archived' where id='${a3}'`);
 await mkEvent(U1, 'E4');
@@ -79,8 +81,8 @@ const uq = await denied(U1, `update public.events set status='active' where id='
 ok(uq && uq.includes('quota_exceeded'), 'arşivden geri alarak etkinlik kotası aşılamaz');
 await as(U1, `insert into public.seating_tables (event_id, label, capacity) values ('${e1}', 'Masa 1', 10)`);
 ok(await denied(U1, `update public.seating_tables set event_id='${a2}' where event_id='${e1}'`), 'salon öğesi başka etkinliğe taşınamaz');
-// mesaj sayacı silmeyle sıfırlanmaz
-await db.exec(`update public.profiles set plan='temel' where id='${U1}'`);
+// mesaj sayacı silmeyle sıfırlanmaz (otomatik WhatsApp daveti yalnızca işletme paketinde; sınır testte 300'e çekilir)
+await db.exec(`update public.profiles set plan='b2b' where id='${U1}'; update public.plan_limits set whatsapp_per_day = 300 where plan = 'b2b';`);
 await as(U1, `select public.import_guests('${e1}', '[{"name":"X","phone":"+905300000099"}]'::jsonb)`);
 const invX = (await as(U1, `select id from public.invitations where event_id='${e1}'`)).rows[0].id;
 await svc(`insert into public.messages (invitation_id, channel, kind, status) select '${invX}', 'whatsapp', 'invite', 'sent' from generate_series(1, 300)`);
@@ -90,14 +92,14 @@ ok((await as(U1, `select public.whatsapp_quota_left() n`)).rows[0].n === 0, 'dav
 await db.exec(`update public.profiles set plan='free' where id='${U1}'`);
 
 console.log('5) Satın alma istismarı:');
-await svc(`select public.grant_purchase('${U2}', 'tam', 1000, 'iyzico', 'p-tam')`);
+await svc(`select public.grant_purchase('${U2}', 'tam', 1749, 'iyzico', 'p-tam')`);
 const expTam = (await db.query(`select plan_expires_at from public.profiles where id='${U2}'`)).rows[0].plan_expires_at;
-await svc(`select public.grant_purchase('${U2}', 'temel', 500, 'iyzico', 'p-temel')`);
+await svc(`select public.grant_purchase('${U2}', 'temel', 499, 'iyzico', 'p-temel')`);
 const after = (await db.query(`select plan, plan_expires_at from public.profiles where id='${U2}'`)).rows[0];
 ok(after.plan === 'tam' && new Date(after.plan_expires_at).getTime() === new Date(expTam).getTime(), 'düşük paket üst paketin süresini uzatmaz');
 await svc(`select public.refund_purchase('iyzico', 'p-tam')`);
 ok((await db.query(`select plan from public.profiles where id='${U2}'`)).rows[0].plan === 'temel', 'üst paket iade edilince kalan geçerli pakete düşer (tam kalmaz)');
-await svc(`select public.grant_purchase('${U2}', 'temel', 500, 'iyzico', 'p-temel2')`);
+await svc(`select public.grant_purchase('${U2}', 'temel', 499, 'iyzico', 'p-temel2')`);
 const ren = (await db.query(`select plan, plan_expires_at from public.profiles where id='${U2}'`)).rows[0];
 ok(ren.plan === 'temel' && new Date(ren.plan_expires_at) > new Date(Date.now() + 700 * 864e5), 'aynı paketi yenilemek süreyi uzatır');
 
