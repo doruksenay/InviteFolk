@@ -18,7 +18,8 @@
         "simulator": false
       },
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "development"
+        "EXPO_PUBLIC_APP_ENV": "development",
+        "EXPO_PUBLIC_WEB_URL": "https://invitefolk.com"
       }
     },
     "preview": {
@@ -29,7 +30,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "staging"
+        "EXPO_PUBLIC_APP_ENV": "staging",
+        "EXPO_PUBLIC_WEB_URL": "https://invitefolk.com"
       }
     },
     "production": {
@@ -37,7 +39,8 @@
       "environment": "production",
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "production"
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_WEB_URL": "https://invitefolk.com"
       }
     }
   },
