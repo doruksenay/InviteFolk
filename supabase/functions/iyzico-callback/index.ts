@@ -15,6 +15,7 @@ function redirect(ok: boolean, pkg?: string) {
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('method not allowed', { status: 405 });
+  if (Deno.env.get('WEB_PAYMENTS') !== 'true') return redirect(false);
 
   const raw = await readBody(req, 8 * 1024);
   if (raw === null) return redirect(false);

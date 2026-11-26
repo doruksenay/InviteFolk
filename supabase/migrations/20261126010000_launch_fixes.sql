@@ -738,6 +738,40 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
+-- 7b. İzleme: zamanlanmış işlerin son çalışması (health fonksiyonu okur)
+-- ---------------------------------------------------------------------------
+create table private.job_runs (
+  job text primary key check (char_length(job) <= 40),
+  ok_at timestamptz,
+  fail_at timestamptz,
+  detail jsonb not null default '{}'::jsonb
+);
+
+create or replace function public.job_mark(p_job text, p_ok boolean, p_detail jsonb default '{}'::jsonb)
+returns void
+language sql
+security definer set search_path = ''
+as $$
+  insert into private.job_runs (job, ok_at, fail_at, detail)
+  values (left(p_job, 40), case when p_ok then now() end, case when not p_ok then now() end, coalesce(p_detail, '{}'::jsonb))
+  on conflict (job) do update
+    set ok_at = case when p_ok then now() else private.job_runs.ok_at end,
+        fail_at = case when not p_ok then now() else private.job_runs.fail_at end,
+        detail = coalesce(p_detail, '{}'::jsonb);
+$$;
+
+create or replace function public.health_status()
+returns json
+language sql
+stable
+security definer set search_path = ''
+as $$
+  select json_build_object(
+    'db_time', now(),
+    'jobs', coalesce((select json_object_agg(job, json_build_object('ok_at', ok_at, 'fail_at', fail_at)) from private.job_runs), '{}'::json));
+$$;
+
+-- ---------------------------------------------------------------------------
 -- 8. Index'ler
 -- ---------------------------------------------------------------------------
 create index if not exists invitations_contact_idx on public.invitations (contact_id);
@@ -756,15 +790,15 @@ revoke execute on function private.jbool(jsonb, boolean), private.jint(jsonb, in
   private.events_first_starts_at(), private.refresh_validity(uuid), private.check_event_settings_safe(),
   private.guestbook_add(uuid, uuid, text, text)
   from public, anon, authenticated;
-revoke all on private.event_slots from public, anon, authenticated;
+revoke all on private.event_slots, private.job_runs from public, anon, authenticated;
 
 revoke execute on function public.grant_purchase(uuid, text, numeric, text, text, text), public.refund_purchase(text, text),
   public.due_reminders(int), public.roll_weekly_events(), public.album_confirm(uuid),
-  public.audit_account_deleted(uuid), public.retention_sweep(int)
+  public.audit_account_deleted(uuid), public.retention_sweep(int), public.job_mark(text, boolean, jsonb), public.health_status()
   from public, anon, authenticated;
 grant execute on function public.grant_purchase(uuid, text, numeric, text, text, text), public.refund_purchase(text, text),
   public.due_reminders(int), public.roll_weekly_events(), public.album_confirm(uuid),
-  public.audit_account_deleted(uuid), public.retention_sweep(int)
+  public.audit_account_deleted(uuid), public.retention_sweep(int), public.job_mark(text, boolean, jsonb), public.health_status()
   to service_role;
 
 revoke execute on function public.admin_review_purchases() from public, anon;

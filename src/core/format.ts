@@ -67,22 +67,30 @@ export function normalizePhone(input: string): string | null {
   return null;
 }
 
-/** Davetlinin LCV sayfası adresi. EXPO_PUBLIC_WEB_URL web dağıtımının kök adresidir. */
+/**
+ * Web dağıtımının kök adresi (EXPO_PUBLIC_WEB_URL). Geliştirmede tanımsızsa yerel sunucu kullanılır; üretim
+ * derlemesinde tanımsızsa davet linkleri localhost'a gitmesin diye alan adı varsayılanı kullanılır
+ * (derleme betikleri de değişken yoksa durur: scripts/web-headers.mjs, eas.json).
+ */
+export function webBase(): string {
+  const v = process.env.EXPO_PUBLIC_WEB_URL;
+  if (v) return v.replace(/\/$/, '');
+  return typeof __DEV__ !== 'undefined' && __DEV__ ? 'http://localhost:8081' : 'https://invitefolk.com';
+}
+
+/** Davetlinin LCV sayfası adresi. */
 export function rsvpUrl(token: string): string {
-  const base = process.env.EXPO_PUBLIC_WEB_URL ?? 'http://localhost:8081';
-  return `${base.replace(/\/$/, '')}/r/${token}`;
+  return `${webBase()}/r/${token}`;
 }
 
 /** Herkese açık etkinlik sayfaları: a = fotoğraf albümü, h = hediye bilgisi, k = bilgi toplama formu. */
 export function publicUrl(kind: 'a' | 'h' | 'k', slug: string): string {
-  const base = process.env.EXPO_PUBLIC_WEB_URL ?? 'http://localhost:8081';
-  return `${base.replace(/\/$/, '')}/${kind}/${slug}`;
+  return `${webBase()}/${kind}/${slug}`;
 }
 
 /** Ortak yönetici davet linki. */
 export function joinUrl(token: string): string {
-  const base = process.env.EXPO_PUBLIC_WEB_URL ?? 'http://localhost:8081';
-  return `${base.replace(/\/$/, '')}/katil/${token}`;
+  return `${webBase()}/katil/${token}`;
 }
 
 /** Ücretsiz katman: WhatsApp'ı hazır mesajla açan link (kullanıcı "gönder"e kendisi basar). */

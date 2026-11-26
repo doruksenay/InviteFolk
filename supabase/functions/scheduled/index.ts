@@ -7,6 +7,8 @@
 //   c) Organizatör bildirim kuyruğunu telefonlara (Expo Push) iletir.
 //   d) Fotoğraf albümünde yarıda kalmış (yüklenmemiş) ayırmaları ve dosyalarını temizler.
 //   e) Sabah 09.00'dan sonra (İstanbul) organizatörlere günlük özet e-postası (hareket varsa, günde bir kez).
+//   f) Saklama süresi: 13 aydan eski etkinlik arşivlenir, 24 aydan eski etkinlik dosyalarıyla birlikte silinir.
+// Sonunda job_mark ile sağlık kaydı yazılır (health fonksiyonu 30 dakikadan eskiyse alarm verir).
 // Her adım kotaya uyar, ~50 saniyede durur; yarım kalan iş bir sonraki çalıştırmada devam eder.
 //
 // Ortam: CRON_SECRET, (WhatsApp/e-posta/push için send-invitations, send-email ve EXPO_ACCESS_TOKEN ile aynı değişkenler)
@@ -17,6 +19,7 @@ import { canEmail, canWhatsApp, deliverEmail, type DeliveryEvent, type DeliveryT
 import { appWebUrl, type DigestEvent, renderDigest, sendEmail } from '../_shared/email.ts';
 import { type Lang, langOf } from '../_shared/messages.ts';
 import { type PushMessage, pushText, type QueueRow, sendPush } from '../_shared/push.ts';
+import { removeEventFiles } from '../_shared/storage.ts';
 import { adminClient } from '../_shared/supabase.ts';
 
 const BUDGET_MS = 50_000;
@@ -250,7 +253,35 @@ Deno.serve(async (req) => {
     console.error('digest failed', e instanceof Error ? e.message : e);
   }
 
-  return new Response(JSON.stringify({ ok: true, ms: Date.now() - started, ...summary, digest }), {
+  // f) Saklama süresi: eski etkinlikler arşivlenir/silinir, silinenlerin dosyaları depolamadan kaldırılır.
+  const retention = { deleted: 0, files: 0 };
+  try {
+    if (timeLeft() > 6_000) {
+      const { data: gone, error } = await db.rpc('retention_sweep', { p_limit: 50 });
+      if (error) throw error;
+      for (const g of (gone ?? []) as { event_id: string; owner_id: string }[]) {
+        retention.deleted++;
+        if (timeLeft() < 3_000) {
+          // Kalan dosyalar sahibin klasöründe yetim kalır; hesap silinince ya da bir sonraki temizlikte gider.
+          summary.stopped_early = true;
+          continue;
+        }
+        retention.files += await removeEventFiles(db, g.owner_id, g.event_id).catch((e) => {
+          console.error('retention files', e instanceof Error ? e.message : e);
+          return 0;
+        });
+      }
+    }
+  } catch (e) {
+    console.error('retention failed', e instanceof Error ? e.message : e);
+  }
+
+  // Sağlık kaydı: health fonksiyonu son başarılı çalışmayı okur.
+  await db.rpc('job_mark', { p_job: 'scheduled', p_ok: true, p_detail: { ms: Date.now() - started, stopped_early: summary.stopped_early } }).then(
+    ({ error }) => error && console.error('job_mark', error.message),
+  );
+
+  return new Response(JSON.stringify({ ok: true, ms: Date.now() - started, ...summary, digest, retention }), {
     status: 200,
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   });

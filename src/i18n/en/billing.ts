@@ -75,13 +75,15 @@ export const billing: typeof TR = {
   cancelled: 'Purchase cancelled.',
   pending: 'Payment received; your plan will be active within a few minutes. You can refresh later.',
   checkoutFailed: 'Could not open the payment page. Please try again shortly.',
+  webUseApp: 'Plans are bought in the Invitefolk app (App Store / Google Play). A plan you buy in the app with the same account is unlocked here straight away.',
   loadFailed: 'Could not load plans.',
   faqTitle: 'Questions',
   faq: [
     { q: 'Is it a subscription?', a: 'No. You pay once; the plan lasts at least a year, or until 6 months after your event if it’s further away. Nothing renews automatically.' },
-    { q: 'What if my event date changes?', a: 'When you change the date, your plan is recalculated to last until 6 months after the event (at most 3 years from purchase). It never gets shorter.' },
-    { q: 'What happens when it ends?', a: 'Your account returns to Free. Your events, lists and seating plans are kept.' },
+    { q: 'What if my event date changes?', a: 'Your plan length is worked out once, from the first date you give your event (at most 2 years from purchase). You can change the date later; your plan won’t get shorter, but it won’t get longer either.' },
+    { q: 'If I delete an event, do I get the slot back?', a: 'Yes if you delete it before adding any guests. Deleting an event that already has guests doesn’t give the event slot back.' },
+    { q: 'What happens when it ends?', a: 'Your account returns to Free; your events aren’t deleted straight away. To avoid keeping personal data longer than needed, an event is archived 13 months after its date and deleted, with its guest list, replies and album, after 2 years. Contacts in your address book stay until you delete them.' },
     { q: 'Can I upgrade?', a: 'Yes. You only pay the difference; the new limits apply immediately and your dates and events stay as they are.' },
-    { q: 'Can I get an invoice?', a: 'For web payments an e-invoice is emailed to you. For store purchases Apple or Google issues the receipt.' },
+    { q: 'Can I get an invoice?', a: 'Purchases are made through the App Store or Google Play; Apple or Google sends the receipt.' },
   ],
 };

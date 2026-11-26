@@ -42,14 +42,25 @@ export function removeKeys(keys: string[]): void {
 export const selfieKey = (slug: string) => `davet:face:${slug}`;
 export const rejectedKey = (slug: string) => `davet:face-no:${slug}`;
 
+/** Selfie vektörleri bu cihazda en fazla 30 gün tutulur; süresi geçen ya da zaman damgasız (eski sürüm) kayıt silinir. */
+export const SELFIE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
 export function loadSelfies(slug: string): Embedding[] {
-  const v = loadJson<unknown>(selfieKey(slug), []);
-  if (!Array.isArray(v)) return [];
-  return v.filter((e): e is number[] => Array.isArray(e) && e.length > 0 && e.every((n) => typeof n === 'number')).slice(0, 3);
+  const v = loadJson<unknown>(selfieKey(slug), null);
+  const rec = v && typeof v === 'object' && !Array.isArray(v) ? (v as { at?: unknown; list?: unknown }) : null;
+  if (!rec || typeof rec.at !== 'number' || Date.now() - rec.at >= SELFIE_TTL_MS || !Array.isArray(rec.list)) {
+    if (v !== null) removeKeys([selfieKey(slug), rejectedKey(slug)]);
+    return [];
+  }
+  return rec.list.filter((e): e is number[] => Array.isArray(e) && e.length > 0 && e.every((n) => typeof n === 'number')).slice(0, 3);
 }
 
 export function saveSelfies(slug: string, embeddings: Embedding[]): void {
-  saveJson(selfieKey(slug), embeddings);
+  if (!embeddings.length) {
+    removeKeys([selfieKey(slug)]);
+    return;
+  }
+  saveJson(selfieKey(slug), { at: Date.now(), list: embeddings });
 }
 
 /** "Bu ben değilim" diye elenen fotoğrafların anahtarları (yüz verisi değil, yalnızca fotoğraf kimliği). */

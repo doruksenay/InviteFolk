@@ -236,6 +236,7 @@ const canvasArea = (w: number, hgt: number, scale: number) => w * scale * hgt * 
 
 /** Motoru bir kez yükler (kütüphane + modeller yaklaşık 9 MB; yalnızca özellik kullanılınca indirilir). */
 export function loadFaceEngine(slug?: string): Promise<FaceEngine> {
+  void sweepFaceCache();
   enginePromise ??= createEngine().catch((e) => {
     enginePromise = null;
     throw e;
@@ -306,7 +307,10 @@ function openDb(): Promise<IDBDatabase | null> {
 
 const dbKey = (slug: string, key: string) => `${slug}|${CACHE_V}|${key}`;
 
-type Stored = { v: 2; aspect: number; faces: { e: Float32Array; b: [number, number, number, number] }[] };
+type Stored = { v: 2; t?: number; aspect: number; faces: { e: Float32Array; b: [number, number, number, number] }[] };
+/** Fotoğraf yüz vektörleri bu cihazda en fazla 30 gün tutulur; eskileri okunmaz ve motor her yüklenişte silinir. */
+export const FACE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const fresh = (t?: number) => typeof t === 'number' && Date.now() - t < FACE_TTL_MS;
 
 /** Önbellekten okur; yoksa null. */
 export async function cacheGet(slug: string, key: string): Promise<CacheEntry | null> {
@@ -318,7 +322,7 @@ export async function cacheGet(slug: string, key: string): Promise<CacheEntry | 
       req.onsuccess = () => {
         const v = req.result as Stored | undefined;
         db.close();
-        resolve(v && v.v === 2 && Array.isArray(v.faces) ? { aspect: v.aspect, faces: v.faces.map((f) => ({ embedding: Array.from(f.e), box: f.b })) } : null);
+        resolve(v && v.v === 2 && fresh(v.t) && Array.isArray(v.faces) ? { aspect: v.aspect, faces: v.faces.map((f) => ({ embedding: Array.from(f.e), box: f.b })) } : null);
       };
       req.onerror = () => {
         db.close();
@@ -333,7 +337,7 @@ export async function cacheGet(slug: string, key: string): Promise<CacheEntry | 
 async function cachePut(slug: string, key: string, entry: CacheEntry): Promise<void> {
   const db = await openDb();
   if (!db) return;
-  const value: Stored = { v: 2, aspect: entry.aspect, faces: entry.faces.map((f) => ({ e: Float32Array.from(f.embedding), b: f.box })) };
+  const value: Stored = { v: 2, t: Date.now(), aspect: entry.aspect, faces: entry.faces.map((f) => ({ e: Float32Array.from(f.embedding), b: f.box })) };
   await new Promise<void>((resolve) => {
     try {
       const tx = db.transaction(STORE, 'readwrite');
@@ -368,6 +372,35 @@ export async function clearFaceData(slug: string): Promise<void> {
         const c = cursorReq.result;
         if (!c) return;
         if (String(c.key).startsWith(prefix)) c.delete();
+        c.continue();
+      };
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+      tx.onerror = () => {
+        db.close();
+        resolve();
+      };
+    } catch {
+      db.close();
+      resolve();
+    }
+  });
+}
+
+/** 30 günden eski (ya da zaman damgasız eski sürüm) fotoğraf vektörlerini bütün etkinlikler için siler. */
+export async function sweepFaceCache(): Promise<void> {
+  const db = await openDb();
+  if (!db) return;
+  await new Promise<void>((resolve) => {
+    try {
+      const tx = db.transaction(STORE, 'readwrite');
+      const cursorReq = tx.objectStore(STORE).openCursor();
+      cursorReq.onsuccess = () => {
+        const c = cursorReq.result;
+        if (!c) return;
+        if (!fresh((c.value as Stored | undefined)?.t)) c.delete();
         c.continue();
       };
       tx.oncomplete = () => {

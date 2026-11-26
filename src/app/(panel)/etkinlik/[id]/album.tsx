@@ -7,10 +7,9 @@ import { publicUrl } from '@/core/format';
 import { getTheme } from '@/core/themes';
 import type { EventSettings, GuestbookEntry } from '@/core/types';
 import { useI18n } from '@/i18n';
-import { getEvent, useQuery } from '@/lib/api';
+import { useQuery } from '@/lib/api';
 import { getEventRow } from '@/lib/api-guests';
 import { type AlbumItem, albumDownloadUrl, deleteAlbumPhoto, deleteGuestbookEntry, getEventLimits, listAlbum, listGuestbook, setAlbumApproved, setAlbumHidden, setGuestbookFlags } from '@/lib/api-tools';
-import { PEOPLE_SUPPORTED, PeoplePanel } from '@/ui/album/PeoplePanel';
 import { Icon } from '@/ui/Icon';
 import { ToolError, ToolHeader, ToolLoading } from '@/ui/event/ToolScreen';
 import { Button, Caption, EmptyState, Notice, Surface } from '@/ui/primitives';
@@ -21,7 +20,7 @@ import { Screen } from '@/ui/Screen';
 import { printHtml } from '@/ui/seating/printCards';
 import { color, font, radius } from '@/ui/tokens';
 
-type Tab = 'album' | 'pending' | 'guestbook' | 'people';
+type Tab = 'album' | 'pending' | 'guestbook';
 
 function Tabs({ value, onChange, items }: { value: Tab; onChange: (t: Tab) => void; items: { k: Tab; label: string; badge?: number }[] }) {
   return (
@@ -67,7 +66,6 @@ export default function AlbumScreen() {
   const [msg, setMsg] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const gb = useQuery(() => listGuestbook(id).catch(() => [] as GuestbookEntry[]), [id]);
-  const guestList = useQuery(() => getEvent(id).then((r) => r.invitations.map((i) => i.contacts.name)).catch(() => [] as string[]), [id]);
   const [tab, setTab] = useState<Tab | null>(null);
   const [zip, setZip] = useState<ZipProgress | null>(null);
 
@@ -173,7 +171,6 @@ export default function AlbumScreen() {
 
   const tabs: { k: Tab; label: string; badge?: number }[] = [];
   if (albumOn) tabs.push({ k: 'album', label: t('tools.album.tabAlbum') }, { k: 'pending', label: t('tools.album.tabPending'), badge: pending.length });
-  if (albumOn && s.album?.face && PEOPLE_SUPPORTED) tabs.push({ k: 'people', label: t('tools.album.tabPeople') });
   if (gbOn) tabs.push({ k: 'guestbook', label: t('tools.album.tabGuestbook'), badge: gbPending });
 
   return (
@@ -251,11 +248,10 @@ export default function AlbumScreen() {
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>{items.map((p) => tile(p, 'album'))}</View>
         ))}
 
-      {current === 'people' && <PeoplePanel eventId={event.id} photos={items.filter((p) => p.kind === 'photo').map((p) => ({ id: p.id, url: p.url }))} guestNames={guestList.data ?? []} />}
 
       {current === 'pending' &&
         (pending.length === 0 ? (
-          <EmptyState title={t('tools.album.pendingEmptyTitle')} body={s.album?.moderate ? t('tools.album.pendingEmpty') : t('tools.album.moderateOff')} />
+          <EmptyState title={t('tools.album.pendingEmptyTitle')} body={(s.album?.moderate ?? true) ? t('tools.album.pendingEmpty') : t('tools.album.moderateOff')} />
         ) : (
           <View style={{ gap: 12 }}>
             <View style={{ flexDirection: 'row' }}>

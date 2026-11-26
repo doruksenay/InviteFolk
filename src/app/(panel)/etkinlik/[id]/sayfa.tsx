@@ -111,11 +111,11 @@ function Editor({ event, invitations, limits, reload }: { event: EventRow; invit
   const [collector, setCollector] = useState(!!s0.collector);
   const [albumOn, setAlbumOn] = useState(!!s0.album?.enabled);
   const [albumPublic, setAlbumPublic] = useState(!!s0.album?.public);
-  const [albumModerate, setAlbumModerate] = useState(!!s0.album?.moderate);
+  const [albumModerate, setAlbumModerate] = useState(s0.album?.moderate ?? true);
   const [albumFace, setAlbumFace] = useState(!!s0.album?.face);
   const [gbOn, setGbOn] = useState(!!s0.guestbook?.enabled);
   const [gbPublic, setGbPublic] = useState(s0.guestbook ? !!s0.guestbook.public : true);
-  const [gbModerate, setGbModerate] = useState(!!s0.guestbook?.moderate);
+  const [gbModerate, setGbModerate] = useState(s0.guestbook?.moderate ?? true);
   const [smsFallback, setSmsFallback] = useState(!!s0.sms_fallback);
 
   const [saving, setSaving] = useState(false);

@@ -223,9 +223,13 @@ export async function setProfileLocale(userId: string, locale: Lang) {
   must(await supabase.from('profiles').update({ locale }).eq('id', userId).select('id'));
 }
 
-/** Hesabı ve tüm verisini kalıcı olarak siler (veritabanında zincirleme), ardından oturumu kapatır. */
+/**
+ * Hesabı ve tüm verisini kalıcı olarak siler: sunucu önce depolamadaki bütün dosyaları (tasarım, medya, albüm),
+ * sonra hesabı siler (veritabanında zincirleme). Ardından oturum kapatılır.
+ */
 export async function deleteMyAccount() {
-  must(await supabase.rpc('delete_my_account'));
+  const { data, error } = await supabase.functions.invoke('delete-account', { body: {} });
+  if (error || !(data as { ok?: boolean } | null)?.ok) throw new Error('delete_failed');
   await supabase.auth.signOut({ scope: 'local' });
 }
 
