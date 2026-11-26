@@ -1,5 +1,5 @@
 // Invitefolk e-postaları (Resend HTTP API) ve şablonları.
-// Ortam: RESEND_API_KEY, EMAIL_FROM ("Invitefolk <hello@invitefolk.app>"), EMAIL_REPLY_TO (isteğe bağlı), APP_WEB_URL
+// Ortam: RESEND_API_KEY, EMAIL_FROM ("Invitefolk <hello@invitefolk.com>"), EMAIL_REPLY_TO (isteğe bağlı), APP_WEB_URL
 //
 // Güvenlik: e-postaya giren HER değer escapeHtml'den geçer (etkinlik başlığı, davetli adı, mekân, organizatör adı).
 // Link yalnızca APP_WEB_URL + doğrulanmış 32 haneli davet anahtarından oluşur.

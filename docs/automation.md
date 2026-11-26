@@ -55,9 +55,9 @@ POST { event_id, invitation_ids?: uuid[], kind?: 'invite' | 'reminder' | 'table'
 | `NETGSM_URL` | hayır | Varsayılan `https://api.netgsm.com.tr/sms/rest/v2/send` |
 | `WHATSAPP_TEMPLATE_LANG` / `WHATSAPP_TEMPLATE_LANG_EN` | hayır | Varsayılan `tr` / `en` |
 | `RESEND_API_KEY` | e-posta için | resend.com → API Keys (yalnızca "Sending access") |
-| `EMAIL_FROM` | e-posta için | `Invitefolk <hello@invitefolk.app>`; alan adı Resend'de doğrulanmış olmalı (SPF, DKIM) |
+| `EMAIL_FROM` | e-posta için | `Invitefolk <hello@invitefolk.com>`; alan adı Resend'de doğrulanmış olmalı (SPF, DKIM) |
 | `EMAIL_REPLY_TO` | hayır | Davetlilerin cevap yazacağı adres |
-| `APP_WEB_URL` | e-posta için | Davetli sayfasının kök adresi, ör. `https://invitefolk.app`. Yalnızca https kabul edilir |
+| `APP_WEB_URL` | e-posta için | Davetli sayfasının kök adresi, ör. `https://invitefolk.com`. Yalnızca https kabul edilir |
 | `CRON_SECRET` | `scheduled` için | En az 32 karakterlik rastgele dize: `openssl rand -hex 32` |
 | `EXPO_ACCESS_TOKEN` | hayır | Expo hesabında "Enhanced push security" açıksa gerekir |
 | `ALLOWED_ORIGINS` | web için | Web panelinin adresi (CORS) |

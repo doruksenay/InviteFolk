@@ -13,6 +13,10 @@ on:
         description: Proje yoksa oluştur ve ayarları yaz
         type: boolean
         default: true
+      target:
+        description: GitHub ortamı (staging | production); secret ve variable'lar bu ortamdan okunur
+        type: string
+        default: staging
     outputs:
       ref:
         value: ${{ jobs.ortam.outputs.ref }}
@@ -33,6 +37,7 @@ jobs:
     name: Ortam
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    environment: ${{ inputs.target }}
     outputs:
       ref: ${{ steps.supa.outputs.ref }}
       publishable_key: ${{ steps.key.outputs.key }}
@@ -42,8 +47,9 @@ jobs:
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      PROJECT_NAME: ${{ vars.SUPABASE_PROJECT_NAME || 'invitefolk' }}
-      PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT || format('invitefolk-{0}', github.repository_owner) }}
+      # Ortam başına ayrı proje: staging için ör. invitefolk-staging, production için invitefolk.
+      PROJECT_NAME: ${{ vars.SUPABASE_PROJECT_NAME || (inputs.target == 'production' && 'invitefolk') || 'invitefolk-staging' }}
+      PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT || (inputs.target == 'production' && format('invitefolk-{0}', github.repository_owner)) || format('invitefolk-staging-{0}', github.repository_owner) }}
       API: https://api.supabase.com/v1
     steps:
       - name: Anahtarlar tamam mı?
@@ -124,7 +130,8 @@ jobs:
         id: pages
         env:
           ACCOUNT_OVERRIDE: ${{ vars.CLOUDFLARE_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
-          WEB_URL_OVERRIDE: ${{ vars.WEB_URL }}
+          # Kendi alan adı yalnızca canlıda (WEB_URL, ör. https://invitefolk.com); staging için ayrı STAGING_WEB_URL.
+          WEB_URL_OVERRIDE: ${{ inputs.target == 'production' && vars.WEB_URL || vars.STAGING_WEB_URL }}
         run: |
           set -euo pipefail
           cf=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json")
@@ -165,6 +172,10 @@ jobs:
           SMTP_PORT: ${{ vars.SMTP_PORT || '465' }}
           # Gmail dışı servislerde (ör. Brevo) giriş adı gönderen adresi değildir; gönderen ayrıca verilir.
           SMTP_FROM: ${{ vars.SMTP_FROM }}
+          # Proje genelinde saatlik e-posta sınırı (giriş kodları dahil). Kendi SMTP'n varken Supabase yükseltmeye izin verir.
+          EMAIL_RATE_LIMIT: ${{ vars.EMAIL_RATE_LIMIT || '200' }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          TARGET: ${{ inputs.target }}
         run: |
           set -euo pipefail
           read -r -d '' BODY_TR <<'HTML' || true
@@ -188,9 +199,16 @@ jobs:
               --arg body "$BODY_TR" \
               '. + {mailer_subjects_magic_link: "Invitefolk giriş kodun: {{ .Token }}", mailer_templates_magic_link_content: $body,
                     mailer_subjects_confirmation: "Invitefolk giriş kodun: {{ .Token }}", mailer_templates_confirmation_content: $body,
-                    smtp_admin_email: $f, smtp_user: $u, smtp_pass: $p, smtp_host: $h, smtp_port: $port, smtp_sender_name: "Invitefolk", smtp_max_frequency: 30, rate_limit_email_sent: 30}')
+                    smtp_admin_email: $f, smtp_user: $u, smtp_pass: $p, smtp_host: $h, smtp_port: $port, smtp_sender_name: "Invitefolk", smtp_max_frequency: 30, rate_limit_email_sent: ($ENV.EMAIL_RATE_LIMIT | tonumber)}')
+            if [ "$TARGET" = "production" ] && [[ "$SMTP_HOST" == *gmail.com ]]; then
+              echo "::warning::Canlıda Gmail SMTP kullanılıyor: günde ~500 e-posta sınırı var ve alan adın için SPF/DKIM olmadığı için kodlar spama düşebilir. Resend/Brevo + alan adı doğrulaması önerilir (docs/canliya-alma.md)."
+            fi
           else
             echo "::warning::SMTP_USER/SMTP_PASSWORD yok: giriş e-postaları Supabase'in varsayılan şablonuyla (giriş linki), yalnızca Supabase ekibindeki adreslere ve saatte 2 tane gider."
+          fi
+          # Kayıt/giriş koruması: Turnstile gizli anahtarı verildiyse açılır (site anahtarı web/uygulama derlemesinde).
+          if [ -n "$TURNSTILE_SECRET_KEY" ]; then
+            cfg=$(echo "$cfg" | jq --arg s "$TURNSTILE_SECRET_KEY" '. + {security_captcha_enabled: true, security_captcha_provider: "turnstile", security_captcha_secret: $s}')
           fi
           resp=$(curl -sS -w '\n%{http_code}' -X PATCH -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
             "$API/projects/$REF/config/auth" -d "$cfg")

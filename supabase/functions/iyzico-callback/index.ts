@@ -2,7 +2,7 @@
 // Bu adrese gelen veriye güvenilmez: ödeme sonucu token ile iyzico'dan SUNUCU TARAFINDA sorgulanır,
 // tutar ve sepet kimliği ödeme oturumuyla karşılaştırılır, ancak ondan sonra paket verilir.
 // Aynı ödeme iki kez işlenmez (grant_purchase provider_ref = paymentId ile idempotent).
-// Ortam: IYZICO_API_KEY, IYZICO_SECRET_KEY, IYZICO_BASE_URL, APP_WEB_URL (ör. https://invitefolk.app)
+// Ortam: IYZICO_API_KEY, IYZICO_SECRET_KEY, IYZICO_BASE_URL, APP_WEB_URL (ör. https://invitefolk.com)
 
 import { adminClient, readBody } from '../_shared/supabase.ts';
 import { CF_DETAIL, iyzicoPost } from '../iyzico-checkout/iyzico.ts';

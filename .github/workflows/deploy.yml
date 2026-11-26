@@ -1,37 +1,66 @@
-# main'e her push'ta (ya da Actions sekmesinden elle):
-#   kontrol → ortam (Supabase projesi + giriş ayarları + Cloudflare Pages; yoksa oluşturur)
-#           → Supabase (migration'lar, sırlar, fonksiyonlar, zamanlayıcı, yönetici) → web (Cloudflare Pages)
-# Tamamen ücretsiz katmanlarla çalışır. Gereken tek şey dört secret: docs/canliya-alma.md
+# İki ortam: staging (deneme) ve production (canlı). Her ortamın kendi Supabase projesi ve Cloudflare Pages projesi
+# vardır; değerler GitHub → Settings → Environments → staging / production altındaki secret ve variable'lardan gelir.
+#
+#   main'e push           → staging'e yayın (kontrol → ortam → Supabase → web)
+#   v* etiketi (v1.2.0)   → production'a yayın. "production" ortamında "Required reviewers" açıksa onay bekler.
+#   Actions → Yayınla     → elle; hedef seçilir
+#
+# Canlıya çıkmadan önce bekleyen migration'lar özet sayfasına yazılır (supabase db push --dry-run).
+# Geri alma: bir önceki etiketi yeniden yayınlamak kodu ve fonksiyonları geri alır; migration geri alınmaz
+# (yalnızca ileriye dönük yeni migration ya da Supabase yedeğinden geri yükleme). Bkz. docs/canliya-alma.md.
 name: Yayınla
 
 on:
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
+    inputs:
+      target:
+        description: Hedef ortam
+        type: choice
+        options: [staging, production]
+        default: staging
 
 permissions:
   contents: read
 
-# Aynı anda tek yayın; yenisi gelirse sıradaki beklenir (yarım kalan yayın olmaz).
+# Aynı ortama aynı anda tek yayın; yenisi gelirse sıradaki beklenir (yarım kalan yayın olmaz).
 concurrency:
-  group: yayin
+  group: yayin-${{ github.event.inputs.target || (startsWith(github.ref, 'refs/tags/v') && 'production') || 'staging' }}
   cancel-in-progress: false
 
 jobs:
   kontrol:
     uses: ./.github/workflows/ci.yml
 
+  hedef:
+    name: Hedef
+    runs-on: ubuntu-latest
+    outputs:
+      target: ${{ steps.t.outputs.target }}
+    steps:
+      - id: t
+        run: |
+          if [ -n "${{ github.event.inputs.target }}" ]; then t="${{ github.event.inputs.target }}"
+          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then t=production
+          else t=staging; fi
+          echo "target=$t" >> "$GITHUB_OUTPUT"
+          echo "### Hedef: $t" >> "$GITHUB_STEP_SUMMARY"
+
   ortam:
-    needs: kontrol
+    needs: [kontrol, hedef]
     uses: ./.github/workflows/ortam.yml
     secrets: inherit
     with:
       create: true
+      target: ${{ needs.hedef.outputs.target }}
 
   supabase:
     name: Supabase
-    needs: ortam
+    needs: [hedef, ortam]
     runs-on: ubuntu-latest
+    environment: ${{ needs.hedef.outputs.target }}
     timeout-minutes: 25
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -49,6 +78,16 @@ jobs:
 
       - name: Projeye bağlan
         run: supabase link --project-ref "$REF"
+
+      - name: Bekleyen migration'lar
+        run: |
+          set -o pipefail
+          {
+            echo "### Bekleyen migration'lar"
+            echo '```'
+            supabase db push --dry-run 2>&1 | tail -n 40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Veritabanı (migration'lar)
         run: |
@@ -76,16 +115,23 @@ jobs:
           IYZICO_API_KEY: ${{ secrets.IYZICO_API_KEY }}
           IYZICO_SECRET_KEY: ${{ secrets.IYZICO_SECRET_KEY }}
           IYZICO_BASE_URL: ${{ vars.IYZICO_BASE_URL }}
+          WEB_PAYMENTS: ${{ vars.WEB_PAYMENTS }}
+          REVENUECAT_WEBHOOK_SECRET: ${{ secrets.REVENUECAT_WEBHOOK_SECRET }}
+          REVENUECAT_SANDBOX_USERS: ${{ vars.REVENUECAT_SANDBOX_USERS }}
+          REVENUECAT_ALLOW_SANDBOX: ${{ vars.REVENUECAT_ALLOW_SANDBOX }}
         run: |
           set -e
           umask 077
           f=$(mktemp)
           put() { if [ -n "$2" ]; then printf '%s=%s\n' "$1" "$2" >> "$f"; fi; }
           put APP_WEB_URL "$WEB_URL"
-          put ALLOWED_ORIGINS "$WEB_URL"
+          # Kök alan adı ve www birlikte (https://invitefolk.com, https://www.invitefolk.com).
+          host=$(printf '%s' "$WEB_URL" | sed -E 's#^https?://##; s#/.*$##'); apex=${host#www.}
+          if [ "$host" = "$apex" ] && [[ "$apex" != *.pages.dev ]]; then put ALLOWED_ORIGINS "$WEB_URL,https://www.$apex"; else put ALLOWED_ORIGINS "$WEB_URL"; fi
           for k in RESEND_API_KEY BREVO_API_KEY EMAIL_REPLY_TO EMAIL_FROM WHATSAPP_TOKEN WHATSAPP_PHONE_NUMBER_ID WHATSAPP_APP_SECRET \
                    WHATSAPP_VERIFY_TOKEN NETGSM_USERCODE NETGSM_PASSWORD NETGSM_HEADER \
-                   IYZICO_API_KEY IYZICO_SECRET_KEY IYZICO_BASE_URL; do
+                   IYZICO_API_KEY IYZICO_SECRET_KEY IYZICO_BASE_URL WEB_PAYMENTS \
+                   REVENUECAT_WEBHOOK_SECRET REVENUECAT_SANDBOX_USERS REVENUECAT_ALLOW_SANDBOX; do
             put "$k" "${!k}"
           done
           supabase secrets set --project-ref "$REF" --env-file "$f"
@@ -136,8 +182,9 @@ jobs:
 
   web:
     name: Web (Cloudflare Pages)
-    needs: [ortam, supabase]
+    needs: [hedef, ortam, supabase]
     runs-on: ubuntu-latest
+    environment: ${{ needs.hedef.outputs.target }}
     timeout-minutes: 20
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -147,6 +194,10 @@ jobs:
       EXPO_PUBLIC_SUPABASE_URL: https://${{ needs.ortam.outputs.ref }}.supabase.co
       EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ needs.ortam.outputs.publishable_key }}
       EXPO_PUBLIC_WEB_URL: ${{ needs.ortam.outputs.web_url }}
+      EXPO_PUBLIC_APP_ENV: ${{ needs.hedef.outputs.target }}
+      EXPO_PUBLIC_SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+      EXPO_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
+      EXPO_PUBLIC_WEB_PAYMENTS: ${{ vars.WEB_PAYMENTS }}
     steps:
       - uses: actions/checkout@v6
 
@@ -166,7 +217,7 @@ jobs:
       - name: Kendi alan adı (WEB_URL verildiyse)
         # Alan adı Cloudflare'de olmalı (Cloudflare'den alınmış ya da ad sunucuları Cloudflare'e taşınmış).
         # Pages'e alan adı ve www eklenir; token'da "Zone · DNS · Edit" izni varsa DNS kayıtları da kendiliğinden açılır.
-        if: vars.WEB_URL != ''
+        if: needs.hedef.outputs.target == 'production' && vars.WEB_URL != ''
         env:
           WEB_URL: ${{ vars.WEB_URL }}
         run: |
