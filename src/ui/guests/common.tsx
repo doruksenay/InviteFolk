@@ -102,27 +102,45 @@ export function SideOrGroup({
   onSide,
   group,
   onGroup,
+  groupSuggestions = [],
 }: {
   type: string;
   side: Side | null;
   onSide: (s: Side | null) => void;
   group: string;
   onGroup: (g: string) => void;
+  /** Daha önce kullanılmış grup adları; dokununca alana yazılır. */
+  groupSuggestions?: string[];
 }) {
   const { t } = useI18n();
-  if (usesSides(type)) {
-    return (
-      <View style={{ gap: 8 }}>
-        <Label>{t('guests.adder.side')}</Label>
-        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-          {(['gelin', 'damat', 'ortak'] as Side[]).map((s) => (
-            <OptionChip key={s} label={t(`status.side.${s}`)} on={side === s} onPress={() => onSide(side === s ? null : s)} />
+  const groupField = (
+    <View style={{ gap: 8 }}>
+      <Field label={t('guests.adder.group')} placeholder={t('guests.adder.groupPlaceholder')} value={group} onChangeText={onGroup} maxLength={40} hint={t('guests.adder.groupHint')} />
+      {groupSuggestions.length > 0 && (
+        <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+          {groupSuggestions.slice(0, 12).map((g) => (
+            <OptionChip key={g} small label={g} on={group.trim().toLocaleLowerCase() === g.toLocaleLowerCase()} onPress={() => onGroup(group.trim().toLocaleLowerCase() === g.toLocaleLowerCase() ? '' : g)} />
           ))}
         </View>
+      )}
+    </View>
+  );
+  if (usesSides(type)) {
+    return (
+      <View style={{ gap: 16 }}>
+        <View style={{ gap: 8 }}>
+          <Label>{t('guests.adder.side')}</Label>
+          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+            {(['gelin', 'damat', 'ortak'] as Side[]).map((s) => (
+              <OptionChip key={s} label={t(`status.side.${s}`)} on={side === s} onPress={() => onSide(side === s ? null : s)} />
+            ))}
+          </View>
+        </View>
+        {groupField}
       </View>
     );
   }
-  return <Field label={t('guests.adder.group')} placeholder={t('guests.adder.groupPlaceholder')} value={group} onChangeText={onGroup} maxLength={40} hint={t('guests.adder.groupHint')} />;
+  return groupField;
 }
 
 /** "−  3  +" küçük sayı seçici. */

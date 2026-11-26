@@ -3,11 +3,12 @@ import { sportOf } from '@/core/event-types';
 import { Text, View } from 'react-native';
 
 import { normalizePhone } from '@/core/format';
+import { cleanGroupLabel } from '@/core/groups';
 import { EMAIL_RE } from '@/core/importer';
 import type { Contact, EventSettings, InvitationWithContact, PlayerPosition, RsvpStatus, Side } from '@/core/types';
 import { type TKey, useI18n } from '@/i18n';
 import { must, removeInvitation, supabase, useQuery } from '@/lib/api';
-import { deleteContact, updateContact, updateInvitation } from '@/lib/api-guests';
+import { deleteContact, listGroupLabels, updateContact, updateInvitation } from '@/lib/api-guests';
 import { useSession } from '@/lib/session';
 import { Button, Caption, Field, Label, Notice, Skeleton, ToggleRow } from '@/ui/primitives';
 import { Sheet } from '@/ui/Sheet';
@@ -79,6 +80,7 @@ function Form({
   const [email, setEmail] = useState(contact.email ?? '');
   const [side, setSide] = useState<Side | null>(contact.side);
   const [group, setGroup] = useState(contact.group_label ?? '');
+  const groupLabels = useQuery(() => listGroupLabels().catch(() => [] as string[]), []);
   const [maxParty, setMaxParty] = useState(contact.max_party);
   const [notes, setNotes] = useState(contact.notes ?? '');
 
@@ -116,7 +118,7 @@ function Form({
         phone: normalized,
         email: mail || null,
         side: event ? (type === 'dugun' || type === 'nisan' || type === 'kina' ? side : contact.side) : side,
-        group_label: group.trim().slice(0, 40) || null,
+        group_label: cleanGroupLabel(group),
         max_party: Math.min(20, Math.max(1, maxParty)),
         notes: notes.trim().slice(0, 1000) || null,
         ...(sport ? { skill, position } : {}),
@@ -186,7 +188,7 @@ function Form({
         <Field label={t('guests.adder.name')} value={name} onChangeText={setName} maxLength={120} editable={ownsContact} />
         <Field label={t('guests.adder.phone')} editable={ownsContact} keyboardType="phone-pad" value={phone} onChangeText={setPhone} placeholder={t('guests.adder.phonePlaceholder')} />
         <Field label={t('guests.adder.email')} editable={ownsContact} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} value={email} onChangeText={setEmail} placeholder={t('guests.adder.emailPlaceholder')} />
-        <SideOrGroup type={type} side={side} onSide={setSide} group={group} onGroup={setGroup} />
+        <SideOrGroup type={type} side={side} onSide={setSide} group={group} onGroup={setGroup} groupSuggestions={groupLabels.data ?? []} />
         <View style={{ gap: 8 }}>
           <Label>{t('guests.adder.maxParty')}</Label>
           <NumberStepper label={t('guests.adder.maxParty')} value={maxParty} min={1} max={20} onChange={setMaxParty} />

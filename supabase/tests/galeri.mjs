@@ -117,6 +117,16 @@ const gi = (await one(null, `select public.get_invitation('${tok}') j`)).j;
 ok(gi.event.settings.effect === 'petals' && gi.event.settings.guestbook?.enabled === true && !('moderate' in gi.event.settings.guestbook), 'davetli sayfası hareketi ve anı defterini bilir');
 const pe = (await one(null, `select public.get_public_event('${ev.public_slug}') j`)).j;
 ok(pe.guestbook === true && pe.album_moderate === true && typeof pe.guestbook_public === 'boolean', 'albüm sayfası anı defterini ve onayı bilir');
+// Yüz önerisi: ayar albüm herkese açıkken geçerlidir; bozuk değer hata vermez, özellik sessizce kapalı sayılır.
+const face = async () => (await one(null, `select public.get_public_event('${ev.public_slug}') j`)).j.album_face;
+ok((await face()) === false, 'yüz önerisi varsayılan kapalı');
+await as(OWN, `update public.events set settings = jsonb_set(settings, '{album,face}', 'true'::jsonb) where id='${ev.id}'`);
+ok((await face()) === true, 'organizatör açınca davetli sayfası yüz önerisini bilir');
+await as(OWN, `update public.events set settings = jsonb_set(settings, '{album,public}', 'false'::jsonb) where id='${ev.id}'`);
+ok((await face()) === false, 'albüm herkese açık değilse yüz önerisi kapalı sayılır');
+await as(OWN, `update public.events set settings = jsonb_set(settings, '{album}', '{"enabled":true,"public":true,"face":"evet"}'::jsonb) where id='${ev.id}'`);
+ok((await face()) === false, 'bozuk yüz ayarı hata vermez, kapalı sayılır');
+await as(OWN, `update public.events set settings = jsonb_set(settings, '{album}', '{"enabled":true,"public":true,"moderate":true}'::jsonb) where id='${ev.id}'`);
 await as(OWN, `update public.events set settings = (settings - 'album') || '{"guestbook":{"enabled":true}}'::jsonb where id='${ev.id}'`);
 const pe2 = (await one(null, `select public.get_public_event('${ev.public_slug}') j`)).j;
 ok(pe2 && pe2.album === false && pe2.guestbook === true, 'yalnızca anı defteri açıkken de sayfa açılır');

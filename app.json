@@ -58,8 +58,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Kendi davetiye tasarımını yüklemek için fotoğraflarına erişmek istiyoruz. / We use your photos only to upload your invitation design.",
-          "cameraPermission": "Kapıda davetlilerin giriş karekodunu okutmak için kameraya erişmek istiyoruz. / We use the camera only to scan guests' check-in QR codes at the door.",
+          "photosPermission": "Davetiye tasarımını, albüm fotoğraflarını ya da yüz araması için bir selfie'yi seçebilmen için fotoğraflarına erişmek istiyoruz. / We use your photos to upload your invitation design, album photos, or a selfie for face search.",
+          "cameraPermission": "Kapıda davetlilerin giriş karekodunu okutmak ve albümde kendi fotoğraflarını bulman için selfie çekmek amacıyla kameraya erişmek istiyoruz; selfie yalnızca telefonunda işlenir. / We use the camera to scan guests' check-in QR codes at the door and to take a selfie that finds your photos in the album; the selfie is processed only on your phone.",
           "microphonePermission": false
         }
       ],
@@ -72,7 +72,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Kapıda davetlilerin giriş karekodunu okutmak için kameraya erişmek istiyoruz. / We use the camera only to scan guests' check-in QR codes at the door.",
+          "cameraPermission": "Kapıda davetlilerin giriş karekodunu okutmak ve albümde kendi fotoğraflarını bulman için selfie çekmek amacıyla kameraya erişmek istiyoruz; selfie yalnızca telefonunda işlenir. / We use the camera to scan guests' check-in QR codes at the door and to take a selfie that finds your photos in the album; the selfie is processed only on your phone.",
           "microphonePermission": false,
           "recordAudioAndroid": false,
           "barcodeScannerEnabled": true

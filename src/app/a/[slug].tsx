@@ -8,6 +8,7 @@ import { useQuery } from '@/lib/api';
 import { getPublicEvent, listPublicAlbum, uploadAlbumItem } from '@/lib/api-guest';
 import { pickAlbumMedia } from '@/lib/media-pick';
 import { hairline } from '@/ui/guest/colors';
+import { FaceFinder } from '@/ui/guest/FaceFinder';
 import { GuestbookCard } from '@/ui/guest/Guestbook';
 import { PublicLoading, PublicNotFound, PublicPanel, PublicShell } from '@/ui/guest/PublicShell';
 import { VOICE_SUPPORTED, VoiceRecorder } from '@/ui/guest/VoiceRecorder';
@@ -85,6 +86,7 @@ export default function AlbumPage() {
 
   const tile = Math.floor((Math.min(440, width - 40) - 16) / 3);
   const items = itemsQ.data ?? [];
+  const photoUrls = items.filter((p) => p.kind === 'photo').map((p) => p.url);
 
   return (
     <PublicShell themeKey={ev.theme} kicker={ev.album ? t('pub.album.kicker') : t('guest.guestbook.kicker')} title={ev.title} subtitle={ev.album ? t('pub.album.body') : t('guest.guestbook.body')}>
@@ -133,6 +135,7 @@ export default function AlbumPage() {
           <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: theme.soft }}>{ev.album_moderate ? t('pub.album.privacyModerated') : t('pub.album.privacy')}</Text>
         </PublicPanel>
       )}
+      <FaceFinder theme={theme} t={t} slug={slug} enabled={!!ev.album && isPublic && !!ev.album_face} photos={photoUrls} tile={tile} />
       {ev.guestbook && <GuestbookCard theme={theme} t={t} locale={locale} source={{ slug }} isPublic={!!ev.guestbook_public} />}
       {isPublic && items.length > 0 && (
         <View style={{ gap: 10 }}>
