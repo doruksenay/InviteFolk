@@ -9,6 +9,7 @@ export const auth: typeof TR = {
   invalidEmail: 'Please enter a valid email address.',
   sendCode: 'Continue with email',
   home: 'Home',
+  captchaRequired: 'Please complete the check to show you’re not a robot.',
   sendFailed: "We couldn't send the code. Please try again in a moment.",
   newAccountHint: "New here? We'll create your account the first time you sign in.",
   codeSent: 'We sent a sign-in email to {email}. Enter the 6-digit code here, or tap the link in the email in this browser.',

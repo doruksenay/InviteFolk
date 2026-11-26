@@ -8,6 +8,7 @@
     "@expo-google-fonts/nunito": "^0.4.2",
     "@expo-google-fonts/playfair-display": "^0.4.2",
     "@expo/ui": "~58.0.22",
+    "@sentry/react-native": "~8.28.0",
     "@supabase/supabase-js": "^2.118.0",
     "barcode-detector": "3.2.3",
     "expo": "~58.0.17",

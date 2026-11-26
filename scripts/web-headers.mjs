@@ -24,6 +24,21 @@ if (!supa || !/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(supa)) {
   process.exit(1);
 }
 const origin = new URL(supa).origin;
+const web = process.env.EXPO_PUBLIC_WEB_URL;
+if (!web || !/^https:\/\/[a-z0-9.-]+\/?$/.test(web)) {
+  console.error('EXPO_PUBLIC_WEB_URL https://<alan adı> biçiminde olmalı (davet linkleri bu adresi kullanır)');
+  process.exit(1);
+}
+// Hata takibi (isteğe bağlı): Sentry DSN'inin alındığı adres CSP'ye eklenir.
+let sentryOrigin = '';
+try {
+  if (process.env.EXPO_PUBLIC_SENTRY_DSN) sentryOrigin = new URL(process.env.EXPO_PUBLIC_SENTRY_DSN).origin;
+} catch {
+  console.error('EXPO_PUBLIC_SENTRY_DSN geçerli bir adres değil');
+  process.exit(1);
+}
+// Kayıt koruması (isteğe bağlı): Cloudflare Turnstile.
+const turnstile = process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY ? 'https://challenges.cloudflare.com' : '';
 
 // Cloudflare Pages, adında "node_modules" geçen klasörleri yüklemez; Expo ise yazı tiplerini ve bazı görselleri
 // dist/assets/node_modules altına koyar. Klasör "vendor" olarak yeniden adlandırılır ve paketlerdeki yollar güncellenir.
@@ -71,15 +86,15 @@ const wss = origin.replace('https://', 'wss://');
 const csp = [
   "default-src 'self'",
   // wasm-unsafe-eval: tarayıcıda karekod okuyucunun kendi alan adımızdan yüklenen WASM'ı derlemesi için (JS eval'e izin vermez).
-  "script-src 'self' 'wasm-unsafe-eval'",
+  `script-src 'self' 'wasm-unsafe-eval'${turnstile ? ` ${turnstile}` : ''}`,
   // react-native-web stilleri çalışma anında <style> etiketiyle ekler.
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${origin}`,
   // Davetiye müziği ve video davetiye: Supabase'in kısa süreli imzalı linkleri.
   `media-src 'self' blob: ${origin}`,
   "font-src 'self' data:",
-  `connect-src 'self' ${origin} ${wss}`,
-  "frame-src 'none'",
+  `connect-src 'self' ${origin} ${wss}${sentryOrigin ? ` ${sentryOrigin}` : ''}${turnstile ? ` ${turnstile}` : ''}`,
+  turnstile ? `frame-src ${turnstile}` : "frame-src 'none'",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
@@ -144,6 +159,7 @@ if (existsSync(indexFile)) {
     `<meta property="og:title" content="${title}">`,
     `<meta property="og:description" content="${desc}">`,
     ...(site ? [`<meta property="og:url" content="${site}/">`, `<link rel="canonical" href="${site}/">`] : []),
+    ...(site ? [`<meta property="og:image" content="${site}/og.jpg">`] : []),
     `<meta name="twitter:card" content="summary">`,
   ].join('');
   let html = readFileSync(indexFile, 'utf8');
@@ -151,5 +167,10 @@ if (existsSync(indexFile)) {
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`).replace(/<html lang="[^"]*"/, '<html lang="tr"');
   writeFileSync(indexFile, html);
 }
+
+// Paylaşım önizlemesi (functions/r/[token].js) için Supabase adresi ve herkese açık anahtar. Gizli değildir:
+// aynı değerler uygulama paketinde de vardır.
+const key = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? '';
+writeFileSync(join(out, 'og-config.json'), JSON.stringify({ url: origin, key }));
 
 console.log(`_headers ve _redirects yazıldı → ${out}/ (Supabase: ${origin})`);
